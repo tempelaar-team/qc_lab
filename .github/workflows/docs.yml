@@ -7,7 +7,8 @@ on:
 permissions:
   id-token: write
   contents: write # Optionally, if your deployment needs to push changes
-  
+  pages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
