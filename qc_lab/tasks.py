@@ -103,12 +103,12 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
         for s, seed_s in enumerate(burn_in_seeds):
             last_sample = np.copy(sample)
             last_z = np.diag(last_sample)
-            last_e = model.h_c(constants, parameters, z=last_z)
+            last_e = model.h_c(constants, parameters, z=last_z, batch_size = len(last_z))
             proposed_sample, rand = _gen_sample_gaussian(
                 constants, z0=last_sample, seed=seed_s, separable=True
             )
             new_z = np.diag(proposed_sample)
-            new_e = model.h_c(constants, parameters, z=new_z)
+            new_e = model.h_c(constants, parameters, z=new_z, batch_size = len(new_z))
             thresh = np.minimum(
                 np.ones(constants.num_classical_coordinates),
                 np.exp(-(new_e - last_e) / constants.temp),
@@ -117,12 +117,12 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
         for s, seed_s in enumerate(sample_seeds):
             last_sample = np.copy(sample)
             last_z = np.diag(last_sample)
-            last_e = model.h_c(constants, parameters, z=last_z)
+            last_e = model.h_c(constants, parameters, z=last_z, batch_size = len(last_z))
             proposed_sample, rand = _gen_sample_gaussian(
                 constants, z0=last_sample, seed=seed_s, separable=True
             )
             new_z = np.diag(proposed_sample)
-            new_e = model.h_c(constants, parameters, z=new_z)
+            new_e = model.h_c(constants, parameters, z=new_z, batch_size = len(new_z))
             thresh = np.minimum(
                 np.ones(constants.num_classical_coordinates),
                 np.exp(-(new_e - last_e) / constants.temp),
@@ -133,21 +133,21 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
 
     for s, seed_s in enumerate(burn_in_seeds):
         last_sample = np.copy(sample)
-        last_e = model.h_c(constants, parameters, z=last_sample)
+        last_e = model.h_c(constants, parameters, z=last_sample, batch_size = len(last_sample))
         proposed_sample, rand = _gen_sample_gaussian(
             constants, z0=last_sample, seed=seed_s, separable=False
         )
-        new_e = model.h_c(constants, parameters, z=proposed_sample)
+        new_e = model.h_c(constants, parameters, z=proposed_sample, batch_size = len(proposed_sample))
         thresh = min(1, np.exp(-(new_e - last_e) / constants.temp))
         if rand < thresh:
             sample = proposed_sample
     for s, seed_s in enumerate(sample_seeds):
         last_sample = np.copy(sample)
-        last_e = model.h_c(constants, parameters, z=last_sample)
+        last_e = model.h_c(constants, parameters, z=last_sample, batch_size = len(last_sample))
         proposed_sample, rand = _gen_sample_gaussian(
             constants, z0=last_sample, seed=seed_s, separable=False
         )
-        new_e = model.h_c(constants, parameters, z=proposed_sample)
+        new_e = model.h_c(constants, parameters, z=proposed_sample, batch_size = len(proposed_sample))
         thresh = min(1, np.exp(-(new_e - last_e) / constants.temp))
         if rand < thresh:
             sample = proposed_sample
@@ -197,7 +197,7 @@ def dh_c_dzc_finite_differences(model, constants, parameters, **kwargs):
         - num_classical_coordinates (int): Number of classical coordinates. Default: None.
     """
     z = kwargs["z"]
-    delta_z = 1e-6
+    delta_z = constants.get("dh_c_dzc_finite_difference_delta", 1e-6)
     batch_size = len(parameters.seed)
     num_classical_coordinates = model.constants.num_classical_coordinates
     offset_z_re = (
@@ -218,7 +218,7 @@ def dh_c_dzc_finite_differences(model, constants, parameters, **kwargs):
             num_classical_coordinates,
         )
     )
-    h_c_0 = model.h_c(constants, parameters, z=z)
+    h_c_0 = model.h_c(constants, parameters, z=z, batch_size = len(z))
     h_c_offset_re = model.h_c(
         constants,
         parameters,
@@ -247,7 +247,7 @@ def dh_qc_dzc_finite_differences(model, constants, parameters, **kwargs):
         - finite_difference_dz (float): Step size for finite differences. Default: 1e-6.
     """
     z = kwargs["z"]
-    delta_z = constants.get("finite_difference_dz", 1e-6)
+    delta_z = constants.get("dh_qc_dzc_finite_difference_delta", 1e-6)
     batch_size = len(parameters.seed)
     num_classical_coordinates = model.constants.num_classical_coordinates
     num_quantum_states = model.constants.num_quantum_states
@@ -533,7 +533,7 @@ def update_classical_energy(sim, parameters, state, **kwargs):
     """
     z = kwargs["z"]
     state.classical_energy = np.real(
-        sim.model.h_c(sim.model.constants, parameters, z=z)
+        sim.model.h_c(sim.model.constants, parameters, z=z, batch_size = len(z))
     )
     return parameters, state
 
@@ -568,14 +568,14 @@ def update_classical_energy_fssh(sim, parameters, state, **kwargs):
                 * branch_weights[:, branch_ind][:, np.newaxis]
             )
             state.classical_energy = state.classical_energy + sim.model.h_c(
-                sim.model.constants, parameters, z=z_branch
+                sim.model.constants, parameters, z=z_branch, batch_size = len(z_branch)
             )
     else:
         state.classical_energy = 0
         for branch_ind in range(num_branches):
             z_branch = z[state.branch_ind == branch_ind]
             state.classical_energy = state.classical_energy + sim.model.h_c(
-                sim.model.constants, parameters, z=z_branch
+                sim.model.constants, parameters, z=z_branch, batch_size = len(z_branch)
             )
         state.classical_energy = state.classical_energy / num_branches
     state.classical_energy = np.real(state.classical_energy)
@@ -1109,11 +1109,14 @@ def numerical_fssh_hop(model, constants, parameters, **kwargs):
     delta_z = kwargs["delta_z"]
     ev_diff = kwargs["ev_diff"]
     gamma_range = constants.get("numerical_fssh_hop_gamma_range", 5)
-    num_iter = constants.get("numerical_fssh_hop_num_iter", 10)
+    max_iter = constants.get("numerical_fssh_hop_max_iter", 20)
     num_points = constants.get("numerical_fssh_hop_num_points", 10)
+    thresh = constants.get("numerical_fssh_hop_threshold", 1e-6)
     init_energy = model.h_c(constants, parameters, z=np.array([z]), batch_size=1)[0]
     min_gamma = 0
-    for _ in range(num_iter):
+    num_iter = 0
+    min_energy = 1
+    while min_energy > thresh and num_iter < max_iter:
         gamma_list = np.linspace(
             min_gamma - gamma_range, min_gamma + gamma_range, num_points
         )
@@ -1135,7 +1138,8 @@ def numerical_fssh_hop(model, constants, parameters, **kwargs):
         min_gamma = gamma_list[np.argmin(new_energies)]
         min_energy = np.min(new_energies)
         gamma_range = gamma_range / 2
-    if min_energy > 1 / num_points:
+        num_iter += 1
+    if min_energy > thresh:
         return z, False
     return z - 1.0j * min_gamma * delta_z, True
 
