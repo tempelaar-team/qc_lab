@@ -36,7 +36,7 @@ html_theme = 'pydata_sphinx_theme' #'bizstyle'#
 html_static_path = ['_static']
 html_theme_options = {
     'body_max_width': '100%',  # Remove maximum width constraint
-    "github_url": "https://github.com/tempelaar-team/qclab",
+    "github_url": "https://github.com/tempelaar-team/qc_lab",
     "collapse_navigation": True,
     "show_nav_level":2,
     "secondary_sidebar_items": ["page-toc", "sourcelink"],
