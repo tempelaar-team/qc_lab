@@ -11,10 +11,10 @@ All of the constants below can be set by adjusting their value in the `model.con
 
 .. code-block:: python
 
-    sim.model.constants.default_value = ## fix the value of the constant 'default_value'
+    sim.model.constants.default_value = # fix the value of the constant 'default_value'
 
 
-Initialization of classical coordinates 
+Initialization of classical coordinates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -155,3 +155,4 @@ accepted, if it is greater then the hop is rejected.
    * - `numerical_fssh_hop_max_iter`
      - The maximum number of iterations before a search for gamma is halted. 
      - 20
+
