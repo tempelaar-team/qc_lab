@@ -16,7 +16,7 @@ setup(
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     packages=find_packages(),
-    install_requires=['numpy', 'tqdm','h5py','numba'],
+    install_requires=['numpy<2.1,>=1.22', 'tqdm','h5py','numba'],
     keywords=['surface hopping', 'mixed quantum-classical dynamics',
               'theoretical chemistry', 'ehrenfest', 'python', 'quantum-classical'],
     classifiers=[
