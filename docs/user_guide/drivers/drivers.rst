@@ -9,7 +9,6 @@ objects needed for the dynamics core to operate and handle the assignment of ran
 
 .. toctree::
     :maxdepth: 1
-    :caption: Dynamics Drivers
 
     serial_driver
     parallel_driver_multiprocessing

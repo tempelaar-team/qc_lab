@@ -9,7 +9,6 @@ algorithm.
 
 .. toctree::
     :maxdepth: 1
-    :caption: Algorithms
 
     mf_algorithm
     fssh_algorithm

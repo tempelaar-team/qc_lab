@@ -9,7 +9,6 @@ has a set of constants that can be accessed by the user when the model is instan
 
 .. toctree::
     :maxdepth: 1
-    :caption: Models
 
     spin_boson_model
     holstein_model
