@@ -132,7 +132,7 @@ Surface Hopping Switching Algorithm
 
 QC Lab implements a numerical method to find the scalar factor (gamma) required to rescale classical coordinates in the surface hopping Algorithm. It works by constructing a uniform grid with 
 `numerical_fssh_hop_num_points` points 
-from [-`numerical_fss_hop_gamma_range`,+`numerical_fss_hop_gamma_range`] and determines the point at which energy is conserved the closest. It then recenters the 
+from negative to positive and determines the point at which energy is conserved the closest. It then recenters the 
 grid at that point and reduces the range by 0.5 and once again searches for the point at which energy is conserved the closest. It repeats that step for `numerical_fssh_hop_max_iter`
 iterations or until the energy difference is less than `numerical_fssh_hop_threshold`. If the energy it reaches is less than the threshold then the hop is 
 accepted, if it is greater then the hop is rejected.
