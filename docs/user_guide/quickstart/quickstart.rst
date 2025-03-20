@@ -14,7 +14,7 @@ Importing Modules
 
 First, we import the necessary modules:
 
-::
+.. code-block:: python
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -27,48 +27,48 @@ First, we import the necessary modules:
 Instantiating Simulation Object
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Next, we instantiate a simulation object. Each object has a set of default parameters which can be accessed by calling `sim.default_parameters`.
-Passing a dictionary to the simulation object when instantiating it will override the default parameters.
+Next, we instantiate a simulation object. Each object has a set of default settings which can be accessed by calling `sim.default_settings`.
+Passing a dictionary to the simulation object when instantiating it will override the default settings.
 
-::
+.. code-block:: python
 
     sim = Simulation()
-    print('default simulation parameters: ', sim.default_parameters)
-    # default simulation parameters:  {'tmax': 10, 'dt': 0.01, 'dt_output': 0.1, 'num_trajs': 10, 'batch_size': 1}
+    print('default simulation settings: ', sim.default_settings)
+    # default simulation settings:  {'tmax': 10, 'dt': 0.01, 'dt_output': 0.1, 'num_trajs': 10, 'batch_size': 1}
 
-Alternatively, you can directly modify the simulation parameters by assigning new values to the parameters attribute of the simulation object. Here we change the number
+Alternatively, you can directly modify the simulation settings by assigning new values to the settings attribute of the simulation object. Here we change the number
 of trajectories that the simulation will run, and how many trajectories are run at a time (the batch size). We also change the total time of each trajectory (tmax) and the 
 timestep used for propagation (dt). Importantly, QC Lab expects that `num_trajs` is an integer multiple of `batch_size`. If not, it will use the lower integer multiple (which could be zero!).
 
-::
+.. code-block:: python
 
-    # change parameters to customize simulation
-    sim.parameters.num_trajs = 200
-    sim.parameters.batch_size = 20 
-    sim.parameters.tmax = 30
-    sim.parameters.dt = 0.001
+    # change settings to customize simulation
+    sim.settings.num_trajs = 200
+    sim.settings.batch_size = 50
+    sim.settings.tmax = 30
+    sim.settings.dt = 0.01
 
 Instantiating Model Object
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Next, we instantiate a model object. Like the simulation object, it has a set of default parameters. 
+Next, we instantiate a model object. Like the simulation object, it has a set of default constants. 
 
-::
+.. code-block:: python
 
     sim.model = SpinBoson()
-    print('default model parameters: ', sim.model.default_parameters)
-    # default model parameters:  {'temp': 1, 'V': 0.5, 'E': 0.5, 'A': 100, 'W': 0.1, 'l_reorg': 0.005, 'boson_mass': 1}
+    print('default model constants: ', sim.model.default_constants)
+    # default model constants:  {'temp': 1, 'V': 0.5, 'E': 0.5, 'A': 100, 'W': 0.1, 'l_reorg': 0.005, 'boson_mass': 1}
 
 Instantiating Algorithm Object
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Next, we instantiate an algorithm object. 
+Next, we instantiate an algorithm object which likewise has a set of default settings. 
 
-:: 
+.. code-block:: python
     
     sim.algorithm = MeanField()
-    print('default algorithm parameters: ', sim.algorithm.default_parameters)
-    # default algorithm parameters:  {}
+    print('default algorithm settings: ', sim.algorithm.default_settings)
+    # default algorithm settings:  {}
 
 Setting Initial State
 ~~~~~~~~~~~~~~~~~~~~~
@@ -79,7 +79,7 @@ this wavefunction should have dimension 2.
 
 The initial state is stored in `sim.state` which can be accessed as follows,
 
-::
+.. code-block:: python
 
     sim.state.wf_db= np.array([1, 0], dtype=complex)
 
@@ -88,7 +88,7 @@ Running the Simulation
 
 Finally, we run the simulation using the dynamics driver. Here, we are using the serial driver. QC Lab comes with several different types of parallel drivers which are discussed elsewhere.
 
-::
+.. code-block:: python
 
     data = serial_driver(sim)
 
@@ -98,7 +98,7 @@ Analyzing Results
 The data object returned by the dynamics driver contains the results of the simulation in a dictionary with keys corresponding
 to the names of the observables that were requested to be recorded during the simulation.
 
-:: 
+.. code-block:: python
 
     print('calculated quantities:', data.data_dic.keys())
     # calculated quantities: dict_keys(['seed', 'dm_db', 'classical_energy', 'quantum_energy'])
@@ -106,7 +106,7 @@ to the names of the observables that were requested to be recorded during the si
 Each of the calculated quantities must be normalized with respect to the number of trajectories. In mean-field dynamics this is equivalent 
 to the number of seeds.
 
-::
+.. code-block:: python
     
     num_trajs = len(data.data_dic['seed'])
     classical_energy = data.data_dic['classical_energy'] / num_trajs
@@ -115,7 +115,7 @@ to the number of seeds.
 
 The time axis can be retrieved from the simulation object through its settings
 
-::
+.. code-block:: python
 
     time = sim.settings.tdat_output 
 
@@ -124,7 +124,7 @@ Plotting Results
 
 Finally, we can plot the results of the simulation like the population dynamics:
 
-::
+.. code-block:: python
 
     plt.plot(time, populations[:, 0], label='upper state')
     plt.plot(time, populations[:, 1], label='lower state')
@@ -139,7 +139,7 @@ Finally, we can plot the results of the simulation like the population dynamics:
 
 We can verify that the total energy of the simulation was conserved by inspecting the change in energy of quantum and classical subsystems over time.
 
-::
+.. code-block:: python
 
     plt.plot(time, classical_energy - classical_energy[0], label='classical energy')
     plt.plot(time, quantum_energy - quantum_energy[0], label='quantum energy')
@@ -160,10 +160,36 @@ If you want to do a surface hopping calculation rather than a mean-field one, QC
 Simply import the relevant Algorithm class and set `sim.algorithm` to it and rerun the calculation: 
 
 
-::
+.. code-block:: python
 
     from qc_lab.algorithms import FewestSwitchesSurfaceHopping
 
     sim.algorithm = FewestSwitchesSurfaceHopping()
 
     data = serial_driver(sim)
+
+The populations can be visualized in a similar way as before. Note that the simulation settings chosen here are solely for testing
+purposes. Publication quality simulations would require checking convergence of the number of trajectories and the timestep. 
+
+.. image:: quickstart_populations_fssh.png
+    :alt: Population dynamics.
+    :align: center
+
+
+.. image:: quickstart_energies_fssh.png
+    :alt: Population dynamics.
+    :align: center
+
+
+Changing the Driver
+~~~~~~~~~~~~~~~~~~~
+
+You can likewise run the simulation using a parallel driver. Here we use the multiprocessing driver to split the trajectories 
+over four tasks. An important thing to note is that when using the parallel driver, the total number of trajectories must be 
+an integer multiple of the number of tasks times the batch size.
+
+.. code-block:: python
+
+    from qc_lab.dynamics import parallel_driver_multiprocessing
+
+    data = parallel_driver_multiprocessing(sim, num_tasks=4)
