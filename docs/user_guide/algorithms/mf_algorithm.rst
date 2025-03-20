@@ -14,6 +14,8 @@ Initial State
 
 The mean-field algorithm requires an initial diabatic wavefunction called `wf_db` which is a complex numpy array with dimension `sim.model.constants.num_quantum_states`.
 For example:
+
+
 .. code-block:: python
 
     sim.state.wf_db = np.array([1, 0], dtype=complex)
