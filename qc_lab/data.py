@@ -1,0 +1,99 @@
+"""
+Module defining the Data class.
+"""
+
+import numpy as np
+import h5py
+
+
+class Data:
+    """
+    The data object handles the collection of data from the dynamics driver.
+    """
+
+    def __init__(self):
+        self.data_dic = {"seed": np.array([], dtype=int)}
+
+    def initialize_output_total_arrays_(self, sim, state):
+        """
+        Initialize the output total arrays for data collection.
+        """
+        self.data_dic["seed"] = np.copy(state.get("seed"))
+        for key, val in state.output_dict.items():
+            self.data_dic[key] = np.zeros(
+                (len(sim.settings.tdat_output), *np.shape(val)[1:]), dtype=val.dtype
+            )
+
+    def add_to_output_total_arrays(self, sim, full_state, t_ind):
+        """
+        Add data to the output total arrays.
+        """
+        for key, val in full_state.output_dict.items():
+            if key in self.data_dic:
+                self.data_dic[key][int(t_ind / sim.settings.dt_output_n)] = np.sum(
+                    val, axis=0
+                )
+            else:
+                self.data_dic[key] = np.zeros(
+                    (len(sim.settings.tdat_output), *np.shape(val)[1:]), dtype=val.dtype
+                )
+                self.data_dic[key][int(t_ind / sim.settings.dt_output_n)] = np.sum(
+                    val, axis=0
+                )
+
+    def add_data(self, new_data):
+        """
+        Add new data to the existing data dictionary.
+        """
+        for key, val in new_data.data_dic.items():
+            if val is None:
+                print(key, val)
+            if key == "seed":
+                self.data_dic[key] = np.concatenate(
+                    (self.data_dic[key], val.flatten()), axis=0
+                )
+            else:
+                if key in self.data_dic:
+                    self.data_dic[key] += val
+                else:
+                    self.data_dic[key] = val
+
+    def save_as_h5(self, filename):
+        """
+        Save the data as an h5 archive.
+        """
+        with h5py.File(filename, "w") as h5file:
+            self._recursive_save(h5file, "/", self.data_dic)
+
+    def load_from_h5(self, filename):
+        """
+        Load a data object from an h5 archive.
+        """
+        with h5py.File(filename, "r") as h5file:
+            self._recursive_load(h5file, "/", self.data_dic)
+        return self
+
+    def _recursive_save(self, h5file, path, dic):
+        """
+        Recursively saves dictionary contents to an HDF5 group.
+        """
+        for key, item in dic.items():
+            if isinstance(item, (np.ndarray, np.int64, np.float64, str, bytes)):
+                h5file[path + key] = item
+            elif isinstance(item, dict):
+                self._recursive_save(h5file, path + key + "/", item)
+            elif isinstance(item, list):
+                h5file[path + key] = np.array(item)
+            else:
+                raise ValueError(f"Cannot save {type(item)} type")
+
+    def _recursive_load(self, h5file, path, dic):
+        """
+        Recursively loads dictionary contents from an HDF5 group.
+        """
+        for key, item in h5file[path].items():
+            if isinstance(item, h5py._hl.dataset.Dataset):
+                dic[key] = item[()]
+            elif isinstance(item, h5py._hl.group.Group):
+                dic[key] = {}
+                self._recursive_load(h5file, path + key + "/", dic[key])
