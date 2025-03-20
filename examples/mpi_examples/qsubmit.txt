@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH -A b1143
+#SBATCH -p b1143
+#SBATCH -N 2
+#SBATCH --ntasks-per-node 50
+#SBATCH --cpus-per-task 1
+#SBATCH -t 01:00:00
+#SBATCH --mem-per-cpu=1G
+
+ulimit -c 0
+ulimit -s unlimited
+
+mpirun -n 100 python mpi_example.py
