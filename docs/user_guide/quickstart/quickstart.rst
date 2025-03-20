@@ -96,7 +96,7 @@ Analyzing Results
 ~~~~~~~~~~~~~~~~~
 
 The data object returned by the dynamics driver contains the results of the simulation in a dictionary with keys corresponding
-to the names of the observables that were requested to be recorded during the simulation.
+to the names of the observables that were requested to be recorded during the simulation. 
 
 .. code-block:: python
 
@@ -193,3 +193,4 @@ an integer multiple of the number of tasks times the batch size.
     from qc_lab.dynamics import parallel_driver_multiprocessing
 
     data = parallel_driver_multiprocessing(sim, num_tasks=4)
+

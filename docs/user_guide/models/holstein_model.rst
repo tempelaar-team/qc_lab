@@ -32,12 +32,12 @@ The classical coordinates are sampled from a Boltzmann distribution:
 
 and by convention we assume that :math:`\hbar = 1`, :math:`k_{B} = 1`.
 
-Parameters
+constants
 ----------
 
-The following table lists all of the parameters required by the `HolsteinLatticeModel` class:
+The following table lists all of the constants required by the `HolsteinLatticeModel` class:
 
-.. list-table:: HolsteinLatticeModel Parameters
+.. list-table:: HolsteinLatticeModel constants
    :header-rows: 1
 
    * - Parameter (symbol)
@@ -63,7 +63,7 @@ The following table lists all of the parameters required by the `HolsteinLattice
      - 1
    * - `periodic_boundary`
      - Periodic boundary condition
-     - True
+     - `True``
 
      
 Example
@@ -87,7 +87,7 @@ Example
     sim.algorithm = MeanField()
 
     # define an initial diabatic wavefunction 
-    wf_db_0 = np.zeros((sim.model.parameters.N), dtype=np.complex128)
+    wf_db_0 = np.zeros((sim.model.constants.N), dtype=np.complex128)
     wf_db_0[0] = 1.0 + 0.0j
     sim.state.wf_db = wf_db_0
 

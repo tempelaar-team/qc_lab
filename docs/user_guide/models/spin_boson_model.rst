@@ -3,7 +3,7 @@
 Spin-Boson Model
 ~~~~~~~~~~~~~~~~
 
-We employ the same naming conventions as in `Tempelaar & Reichman 2019 <https://doi.org/10.1063/1.5000843>`_. 
+We employ the same Hamiltonian and naming conventions as in `Tempelaar & Reichman 2019 <https://doi.org/10.1063/1.5000843>`_. 
 
 The quantum-classical Hamiltonian of the spin-boson model is:
 
@@ -41,12 +41,12 @@ The classical coordinates are sampled from a Boltzmann distribution:
 
 and by convention we assume that :math:`\hbar = 1`, :math:`k_{B} = 1`.
 
-Parameters
+Constants
 ----------
 
-The following table lists all of the parameters required by the `SpinBosonModel` class:
+The following table lists all of the constants required by the `SpinBosonModel` class:
 
-.. list-table:: SpinBosonModel Parameters
+.. list-table:: SpinBosonModel constants
    :header-rows: 1
 
    * - Parameter (symbol)
