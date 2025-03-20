@@ -14,3 +14,4 @@ User Guide
     algorithms/algorithms 
     data_object
     model_dev
+    defaults
