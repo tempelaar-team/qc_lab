@@ -26,5 +26,6 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: Linux :: Linux",
+        "License :: Apache License 2.0",
     ]
 )
