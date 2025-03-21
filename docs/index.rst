@@ -8,7 +8,7 @@ QC Lab comes with a variety of already implemented models and algorithms which w
 growing library of quantum-classical dynamics tools.
 
 
-**QC Lab** is developed by the Tempelaar Group in the Chemistry Department of Northwestern University in Evanston, Illinois, USA.
+**QC Lab** is developed and maintained by the Tempelaar Group in the Chemistry Department of Northwestern University in Evanston, Illinois, USA.
 
 Capabilities
 ------------
