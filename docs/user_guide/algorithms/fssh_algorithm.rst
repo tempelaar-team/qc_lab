@@ -20,9 +20,8 @@ Settings
      - If `True` the algorithm uses a deterministic representation of the initial state by propagating all possible initial active surfaces.
      - `False`
    * - `gauge_fixing (int=0,1,2)`
-     - The level of gauge fixing to employ on the eigenvectors at each timestep. (0: adjust only the sign, 1: adjust the sign and phase using the overlap with the previous timestep, 2: adjust the sign and phase by 
-     calculating the derivative couplings.)
-
+     - The level of gauge fixing to employ on the eigenvectors at each timestep. (0: adjust only the sign, 1: adjust the sign and phase using the overlap with the previous timestep, 2: adjust the sign and phase by calculating the derivative couplings.)
+     - 0
 
 Initial State
 -------------
