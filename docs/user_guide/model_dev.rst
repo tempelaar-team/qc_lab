@@ -51,7 +51,7 @@ internal constants required by QC Lab to function and are instead drawn from the
 
 .. math::
     
-    \hat{H}_{\mathrm{q}} = \left(\begin{array}{cc} -E & V \\ V & E \end{array}\right)
+    \hat{H}_{\mathrm{q}} = \left(\begin{array}{cc} E & V \\ V & -E \end{array}\right)
 
 .. math::
 
@@ -101,7 +101,6 @@ constant needed by QC Lab (they would otherwise be specified in the initializati
     def initialize_constants_model(self):
         num_bosons = self.constants.get("A", self.default_constants.get("A"))
         char_freq = self.constants.get("W", self.default_constants.get("W"))
-        w = self.constants.get("w", self.default_constants.get("w"))
         boson_mass = self.constants.get(
             "boson_mass", self.default_constants.get("boson_mass")
         )
@@ -111,7 +110,7 @@ constant needed by QC Lab (they would otherwise be specified in the initializati
         # The following constants are required by QC Lab
         self.constants.num_classical_coordinates = num_bosons
         self.constants.num_quantum_states = 2
-        self.constants.classical_coordinate_weight = w
+        self.constants.classical_coordinate_weight = self.constants.w
         self.constants.classical_coordinate_mass = boson_mass * np.ones(num_bosons)
 
 
@@ -136,7 +135,7 @@ constants we define in the functions are dictated by the requirements of the ing
         num_bosons = self.constants.get("A", self.default_constants.get("A"))
         w = self.constants.get("w", self.default_constants.get("w"))
         l_reorg = self.constants.get("l_reorg", self.default_constants.get("l_reorg"))
-        self.constants.g = w * np.sqrt(2 * l_reorg / num_bosons)
+        self.constants.spin_boson_coupling = w * np.sqrt(2 * l_reorg / num_bosons)
 
     def initialize_constants_h_q(self):
         """
@@ -162,9 +161,9 @@ the coupling strengths are updated appropriately:
 
     model = MinimalSpinBoson()
     model.constants.A = 10
-    print('coupling strengths: ', model.constants.g)  # should be a list of length 10
+    print('coupling strengths: ', model.constants.spin_boson_coupling)  # should be a list of length 10
     model.constants.A = 5
-    print('coupling strengths: ', model.constants.g)  # should be a list of length 5
+    print('coupling strengths: ', model.constants.spin_boson_coupling)  # should be a list of length 5
 
 
 Ingredients
@@ -193,13 +192,10 @@ at the cost of some performance (it is strongly recommended to write vectorized 
     import qc_lab.ingredients as ingredients
 
     @ingredients.vectorize_ingredient
-    def h_q(model, constants, parameters, **kwargs):
-        """
-        Calculates the quantum Hamiltonian
-        """
-        E = self.constants.E
-        V = self.constants.V
-        return np.array([[-E, V], [V, E]], dtype=complex)
+    def h_q(self, constants, parameters, **kwargs):
+        E = constants.E
+        V = constants.V
+        return np.array([[E, V], [V, -E]], dtype=complex)
 
 The rest of the model ingredients can likewise be written:
 
@@ -207,26 +203,26 @@ The rest of the model ingredients can likewise be written:
 
     @ingredients.vectorize_ingredient
     def h_q(self, constants, parameters, **kwargs):
-        E = self.constants.E
-        V = self.constants.V
-        return np.array([[-E, V], [V, E]], dtype=complex)
+        E = constants.E
+        V = constants.V
+        return np.array([[E, V], [V, -E]], dtype=complex)
 
     @ingredients.vectorize_ingredient
     def h_qc(self, constants, parameters, **kwargs):
-        z_coord = kwargs['z_coord']
-        g = self.constants.g
-        m = self.constants.mass
-        h = self.constants.pq_weight
+        z = kwargs['z']
+        g = constants.spin_boson_coupling
+        m = constants.classical_coordinate_mass
+        h = constants.classical_coordinate_weight
         h_qc = np.zeros((2, 2), dtype=complex)
-        h_qc[0, 0] = np.sum((g * np.sqrt(1 / (2 * m * h))) * (z_coord + np.conj(z_coord)))
+        h_qc[0, 0] = np.sum((g * np.sqrt(1 / (2 * m * h))) * (z + np.conj(z)))
         h_qc[1, 1] = -h_qc[0, 0]
         return h_qc
 
     @ingredients.vectorize_ingredient
     def h_c(self, constants, parameters, **kwargs):
-        z_coord = kwargs['z_coord']
-        w = self.constants.w
-        return np.sum(w * np.conj(z_coord) * z_coord)
+        z = kwargs['z']
+        w = constants.harmonic_oscillator_frequency
+        return np.sum(w * np.conj(z) * z)
 
 
 Now you have a working model class which you can instantiate and use following the instructions in the Quickstart Guide! 
@@ -256,17 +252,16 @@ The full minimal model looks like this:
         def initialize_constants_model(self):
             num_bosons = self.constants.get("A", self.default_constants.get("A"))
             char_freq = self.constants.get("W", self.default_constants.get("W"))
-            w = self.constants.get("w", self.default_constants.get("w"))
             boson_mass = self.constants.get(
                 "boson_mass", self.default_constants.get("boson_mass")
             )
             self.constants.w = char_freq * np.tan(
                 ((np.arange(num_bosons) + 1) - 0.5) * np.pi / (2 * num_bosons)
             )
-            # The following constants are required by QC Lab.
+            # The following constants are required by QC Lab
             self.constants.num_classical_coordinates = num_bosons
             self.constants.num_quantum_states = 2
-            self.constants.classical_coordinate_weight = w
+            self.constants.classical_coordinate_weight = self.constants.w
             self.constants.classical_coordinate_mass = boson_mass * np.ones(num_bosons)
 
         def initialize_constants_h_c(self):
@@ -284,7 +279,7 @@ The full minimal model looks like this:
             num_bosons = self.constants.get("A", self.default_constants.get("A"))
             w = self.constants.get("w", self.default_constants.get("w"))
             l_reorg = self.constants.get("l_reorg", self.default_constants.get("l_reorg"))
-            self.constants.g = w * np.sqrt(2 * l_reorg / num_bosons)
+            self.constants.spin_boson_coupling = w * np.sqrt(2 * l_reorg / num_bosons)
 
         def initialize_constants_h_q(self):
             """
@@ -300,26 +295,27 @@ The full minimal model looks like this:
 
         @ingredients.vectorize_ingredient
         def h_q(self, constants, parameters, **kwargs):
-            E = self.constants.E
-            V = self.constants.V
-            return np.array([[-E, V], [V, E]], dtype=complex)
+            E = constants.E
+            V = constants.V
+            return np.array([[E, V], [V, -E]], dtype=complex)
 
         @ingredients.vectorize_ingredient
         def h_qc(self, constants, parameters, **kwargs):
-            z_coord = kwargs['z_coord']
-            g = self.constants.g
-            m = self.constants.classical_coordinate_mass
-            h = self.constants.classical_coordinate_weight
+            z = kwargs['z']
+            g = constants.spin_boson_coupling
+            m = constants.classical_coordinate_mass
+            h = constants.classical_coordinate_weight
             h_qc = np.zeros((2, 2), dtype=complex)
-            h_qc[0, 0] = np.sum((g * np.sqrt(1 / (2 * m * h))) * (z_coord + np.conj(z_coord)))
+            h_qc[0, 0] = np.sum((g * np.sqrt(1 / (2 * m * h))) * (z + np.conj(z)))
             h_qc[1, 1] = -h_qc[0, 0]
             return h_qc
 
         @ingredients.vectorize_ingredient
         def h_c(self, constants, parameters, **kwargs):
-            z_coord = kwargs['z_coord']
-            w = self.constants.harmonic_oscillator_frequency
-            return np.sum(w * np.conj(z_coord) * z_coord)
+            z = kwargs['z']
+            w = constants.harmonic_oscillator_frequency
+            return np.sum(w * np.conj(z) * z)
+
 
 Upgrading the Model Class
 -------------------------
@@ -344,25 +340,24 @@ provided, the `batch_size` is compared to the number of seeds in the simulation.
             batch_size = kwargs.get("batch_size")
         else:
             batch_size = len(parameters.seed)
-        E = self.constants.E
-        V = self.constants.V
+        E = constants.E
+        V = constants.V
         h_q = np.zeros((batch_size, 2, 2), dtype=complex)
-        h_q[:, 0, 0] = -E
-        h_q[:, 1, 1] = E
+        h_q[:, 0, 0] = E
+        h_q[:, 1, 1] = -E
         h_q[:, 0, 1] = V
         h_q[:, 1, 0] = V
         return h_q
 
 
     def h_qc(self, constants, parameters, **kwargs):
-        z = kwargs.get("z_coord")
+        z = kwargs.get("z")
         if kwargs.get("batch_size") is not None:
             batch_size = kwargs.get("batch_size")
             assert len(z) == batch_size
         else:
             batch_size = len(z)
-
-        g = constants.g
+        g = constants.spin_boson_coupling
         m = constants.classical_coordinate_mass
         h = constants.classical_coordinate_weight
         h_qc = np.zeros((batch_size, 2, 2), dtype=complex)
@@ -373,7 +368,7 @@ provided, the `batch_size` is compared to the number of seeds in the simulation.
         return h_qc
 
     def h_c(self, constants, parameters, **kwargs):
-        z = kwargs.get("z_coord")
+        z = kwargs.get("z")
         if kwargs.get("batch_size") is not None:
             batch_size = kwargs.get("batch_size")
             assert len(z) == batch_size
@@ -407,7 +402,7 @@ which can be implemented in a vectorized fashion as:
 .. code-block:: python
 
     def dh_c_dzc(self, constants, parameters, **kwargs):
-        z = kwargs.get("z_coord")
+        z = kwargs.get("z")
         if kwargs.get("batch_size") is not None:
             batch_size = kwargs.get("batch_size")
             assert len(z) == batch_size
@@ -437,39 +432,41 @@ Which can be implemented as:
 .. code-block:: python
 
     def dh_qc_dzc(self, constants, parameters, **kwargs):
-        z = kwargs["z"]
-        # Determine how many trajectories are being calculated.
+        z = kwargs.get("z")
         if kwargs.get("batch_size") is not None:
             batch_size = kwargs.get("batch_size")
+            assert len(z) == batch_size
         else:
-            batch_size = len(parameters.seed)
-        # Determine if we need to update the matrix elements.
+            batch_size = len(z)
+
         recalculate = False
-        if model.dh_qc_dzc_shape is not None:
-            if model.dh_qc_dzc_shape[0] != batch_size:
+        if self.dh_qc_dzc_shape is not None:
+            if self.dh_qc_dzc_shape[0] != batch_size:
                 recalculate = True
+
         if (
-            model.dh_qc_dzc_inds is None
-            or model.dh_qc_dzc_mels is None
-            or model.dh_qc_dzc_shape is None
+            self.dh_qc_dzc_inds is None
+            or self.dh_qc_dzc_mels is None
+            or self.dh_qc_dzc_shape is None
             or recalculate
         ):
-            return model.dh_qc_dzc_inds, model.dh_qc_dzc_mels, model.dh_qc_dzc_shape
-        # If we need to update the matrix elements, do so.
-        num_sites = constants.num_quantum_states
-        w = constants.holstein_coupling_oscillator_frequency
-        g = constants.holstein_coupling_dimensionless_coupling
-        h = constants.classical_coordinate_weight
-        dh_qc_dzc = np.zeros((batch_size, num_sites, num_sites, num_sites), dtype=complex)
-        np.einsum("tiii->ti", dh_qc_dzc, optimize="greedy")[...] = (g * w * np.sqrt(w / h))[
-            ..., :
-        ] * (np.ones_like(z, dtype=complex))
-        inds = np.where(dh_qc_dzc != 0)
-        mels = dh_qc_dzc[inds]
-        shape = np.shape(dh_qc_dzc)
-        model.dh_qc_dzc_inds = inds
-        model.dh_qc_dzc_mels = dh_qc_dzc[inds]
-        model.dh_qc_dzc_shape = shape
+
+            m = constants.classical_coordinate_mass
+            g = constants.spin_boson_coupling
+            h = constants.classical_coordinate_weight
+            dh_qc_dzc = np.zeros((batch_size, constants.A, 2, 2), dtype=complex)
+            dh_qc_dzc[:, :, 0, 0] = (g * np.sqrt(1 / (2 * m * h)))[..., :]
+            dh_qc_dzc[:, :, 1, 1] = -dh_qc_dzc[..., :, 0, 0]
+            inds = np.where(dh_qc_dzc != 0)
+            mels = dh_qc_dzc[inds]
+            shape = np.shape(dh_qc_dzc)
+            self.dh_qc_dzc_inds = inds
+            self.dh_qc_dzc_mels = dh_qc_dzc[inds]
+            self.dh_qc_dzc_shape = shape
+        else:
+            inds = self.dh_qc_dzc_inds
+            mels = self.dh_qc_dzc_mels
+            shape = self.dh_qc_dzc_shape
         return inds, mels, shape
 
 An important feature of the above implementation is that it checks if the gradient has already been calculated, this is convenient because the gradient is a constant
@@ -486,7 +483,7 @@ and so does not need to be recalculated every time the ingredient is called. As 
 
 
 Note that a flag can be included to prevent the RK4 solver in QC Lab from recalculating the quantum-classical forces (ie the expectation value of `dh_qc_dzc`):
-`sim.model.linear_h_qc = True`
+`sim.model.linear_h_qc = True`.
 
 
 
@@ -501,33 +498,381 @@ one another in the classical Hamiltonian.
 
 This is accomplished by defining an ingredient called `init_classical` which has the following form:
 
-::
+.. code-block:: python
 
     def init_classical(model, constants, parameters, **kwargs):
-    del model, parameters
-    seed = kwargs.get("seed", None)
-    kbt = constants.temp
-    h = constants.classical_coordinate_weight
-    w = constants.harmonic_oscillator_frequency
-    m = constants.classical_coordinate_mass
-    out = np.zeros((len(seed), constants.num_classical_coordinates), dtype=complex)
-    for s, seed_value in enumerate(seed):
-        np.random.seed(seed_value)
-        # Calculate the standard deviations for q and p.
-        std_q = np.sqrt(kbt / (m * (w**2)))
-        std_p = np.sqrt(m * kbt)
-        # Generate random q and p values.
-        q = np.random.normal(
-            loc=0, scale=std_q, size=constants.num_classical_coordinates
+        del model, parameters
+        seed = kwargs.get("seed", None)
+        kbt = constants.temp
+        h = constants.classical_coordinate_weight
+        w = constants.harmonic_oscillator_frequency
+        m = constants.classical_coordinate_mass
+        out = np.zeros((len(seed), constants.num_classical_coordinates), dtype=complex)
+        for s, seed_value in enumerate(seed):
+            np.random.seed(seed_value)
+            # Calculate the standard deviations for q and p.
+            std_q = np.sqrt(kbt / (m * (w**2)))
+            std_p = np.sqrt(m * kbt)
+            # Generate random q and p values.
+            q = np.random.normal(
+                loc=0, scale=std_q, size=constants.num_classical_coordinates
+            )
+            p = np.random.normal(
+                loc=0, scale=std_p, size=constants.num_classical_coordinates
+            )
+            # Calculate the complex classical coordinate.
+            z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
+            out[s] = z
+        return out
+
+
+
+.. note::
+    The upgraded model still relies on numerical hopping for FSSH simulations. Below we will see how to use the analytic hopping ingredient for the harmonic oscillator.
+
+The full code for the upgraded model is:
+
+.. code-block:: python
+
+    class UpgradedSpinBoson(Model):
+        def __init__(self, constants=None):
+            if constants is None:
+                constants = {}
+            self.default_constants = {
+                'temp': 1, 'V': 0.5, 'E': 0.5, 'A': 100, 'W': 0.1,
+                'l_reorg': 0.02 / 4, 'boson_mass': 1
+            }
+            self.dh_qc_dzc_inds = None
+            self.dh_qc_dzc_mels = None
+            self.dh_qc_dzc_shape = None
+            self.linear_h_qc = True
+            super().__init__(self.default_constants, constants)
+
+        def initialize_constants_model(self):
+            num_bosons = self.constants.get("A", self.default_constants.get("A"))
+            char_freq = self.constants.get("W", self.default_constants.get("W"))
+            boson_mass = self.constants.get(
+                "boson_mass", self.default_constants.get("boson_mass")
+            )
+            self.constants.w = char_freq * np.tan(
+                ((np.arange(num_bosons) + 1) - 0.5) * np.pi / (2 * num_bosons)
+            )
+            # The following constants are required by QC Lab
+            self.constants.num_classical_coordinates = num_bosons
+            self.constants.num_quantum_states = 2
+            self.constants.classical_coordinate_weight = self.constants.w
+            self.constants.classical_coordinate_mass = boson_mass * np.ones(num_bosons)
+
+        def initialize_constants_h_c(self):
+            """
+            Initialize the constants for the classical Hamiltonian.
+            """
+            w = self.constants.get("w", self.default_constants.get("w"))
+            self.constants.harmonic_oscillator_frequency = w
+
+
+        def initialize_constants_h_qc(self):
+            """
+            Initialize the constants for the quantum-classical coupling Hamiltonian.
+            """
+            num_bosons = self.constants.get("A", self.default_constants.get("A"))
+            w = self.constants.get("w", self.default_constants.get("w"))
+            l_reorg = self.constants.get("l_reorg", self.default_constants.get("l_reorg"))
+            self.constants.g = w * np.sqrt(2 * l_reorg / num_bosons)
+
+        def initialize_constants_h_q(self):
+            """
+            Initialize the constants for the quantum Hamiltonian. None are required in this case.
+            """
+
+        initialization_functions = [
+            initialize_constants_model,
+            initialize_constants_h_c,
+            initialize_constants_h_qc,
+            initialize_constants_h_q,
+        ]
+
+        def h_q(self, constants, parameters, **kwargs):
+            if kwargs.get("batch_size") is not None:
+                batch_size = kwargs.get("batch_size")
+            else:
+                batch_size = len(parameters.seed)
+            E = constants.E
+            V = constants.V
+            h_q = np.zeros((batch_size, 2, 2), dtype=complex)
+            h_q[:, 0, 0] = E
+            h_q[:, 1, 1] = -E
+            h_q[:, 0, 1] = V
+            h_q[:, 1, 0] = V
+            return h_q
+
+
+        def h_qc(self, constants, parameters, **kwargs):
+            z = kwargs.get("z")
+            if kwargs.get("batch_size") is not None:
+                batch_size = kwargs.get("batch_size")
+                assert len(z) == batch_size
+            else:
+                batch_size = len(z)
+            g = constants.spin_boson_coupling
+            m = constants.classical_coordinate_mass
+            h = constants.classical_coordinate_weight
+            h_qc = np.zeros((batch_size, 2, 2), dtype=complex)
+            h_qc[:, 0, 0] = np.sum(
+                g * np.sqrt(1 / (2 * m * h))[np.newaxis, :] * (z + np.conj(z)), axis=-1
+            )
+            h_qc[:, 1, 1] = -h_qc[:, 0, 0]
+            return h_qc
+
+        def h_c(self, constants, parameters, **kwargs):
+            z = kwargs.get("z")
+            if kwargs.get("batch_size") is not None:
+                batch_size = kwargs.get("batch_size")
+                assert len(z) == batch_size
+            else:
+                batch_size = len(z)
+
+            h = constants.classical_coordinate_weight[np.newaxis, :]
+            w = constants.harmonic_oscillator_frequency[np.newaxis, :]
+            m = constants.classical_coordinate_mass[np.newaxis, :]
+            q = np.sqrt(2 / (m * h)) * np.real(z)
+            p = np.sqrt(2 * m * h) * np.imag(z)
+            h_c = np.sum((1 / 2) * (((p**2) / m) + m * (w**2) * (q**2)), axis=-1)
+            return h_c
+        
+        def dh_c_dzc(self, constants, parameters, **kwargs):
+            z = kwargs.get("z")
+            if kwargs.get("batch_size") is not None:
+                batch_size = kwargs.get("batch_size")
+                assert len(z) == batch_size
+            else:
+                batch_size = len(z)
+            h = constants.classical_coordinate_weight
+            w = constants.harmonic_oscillator_frequency
+            a = (1 / 4) * (
+                ((w**2) / h) - h
+            )
+            b = (1 / 4) * (
+                ((w**2) / h) + h
+            )
+            dh_c_dzc = 2 * b[..., :] * z + 2 *a[..., :] * np.conj(z)
+            return dh_c_dzc
+        
+        def dh_qc_dzc(self, constants, parameters, **kwargs):
+            z = kwargs.get("z")
+            if kwargs.get("batch_size") is not None:
+                batch_size = kwargs.get("batch_size")
+                assert len(z) == batch_size
+            else:
+                batch_size = len(z)
+
+            recalculate = False
+            if self.dh_qc_dzc_shape is not None:
+                if self.dh_qc_dzc_shape[0] != batch_size:
+                    recalculate = True
+
+            if (
+                self.dh_qc_dzc_inds is None
+                or self.dh_qc_dzc_mels is None
+                or self.dh_qc_dzc_shape is None
+                or recalculate
+            ):
+
+                m = constants.classical_coordinate_mass
+                g = constants.spin_boson_coupling
+                h = constants.classical_coordinate_weight
+                dh_qc_dzc = np.zeros((batch_size, constants.A, 2, 2), dtype=complex)
+                dh_qc_dzc[:, :, 0, 0] = (g * np.sqrt(1 / (2 * m * h)))[..., :]
+                dh_qc_dzc[:, :, 1, 1] = -dh_qc_dzc[..., :, 0, 0]
+                inds = np.where(dh_qc_dzc != 0)
+                mels = dh_qc_dzc[inds]
+                shape = np.shape(dh_qc_dzc)
+                self.dh_qc_dzc_inds = inds
+                self.dh_qc_dzc_mels = dh_qc_dzc[inds]
+                self.dh_qc_dzc_shape = shape
+            else:
+                inds = self.dh_qc_dzc_inds
+                mels = self.dh_qc_dzc_mels
+                shape = self.dh_qc_dzc_shape
+            return inds, mels, shape
+        
+        def init_classical(model, constants, parameters, **kwargs):
+            del model, parameters
+            seed = kwargs.get("seed", None)
+            kbt = constants.temp
+            h = constants.classical_coordinate_weight
+            w = constants.harmonic_oscillator_frequency
+            m = constants.classical_coordinate_mass
+            out = np.zeros((len(seed), constants.num_classical_coordinates), dtype=complex)
+            for s, seed_value in enumerate(seed):
+                np.random.seed(seed_value)
+                # Calculate the standard deviations for q and p.
+                std_q = np.sqrt(kbt / (m * (w**2)))
+                std_p = np.sqrt(m * kbt)
+                # Generate random q and p values.
+                q = np.random.normal(
+                    loc=0, scale=std_q, size=constants.num_classical_coordinates
+                )
+                p = np.random.normal(
+                    loc=0, scale=std_p, size=constants.num_classical_coordinates
+                )
+                # Calculate the complex classical coordinate.
+                z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
+                out[s] = z
+            return out
+
+
+Using Built-in Ingredients
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+QC Lab comes with a number of built-in ingredients that can be used to construct a model rather than writing ingredients from scratch like above. These ingredients can be imported 
+from `qc_lab.ingredients` and are documented in the :ref:`ingredients` section.
+
+For the present example, we can avoid writing our own optimized ingredients and simply add the available built-in ingredients to the model. 
+
+First let's load the quantum Hamiltonian as the built-in two-level system Hamiltonian:
+
+.. code-block:: python
+
+    import qc_lab.ingredients as ingredients
+    model = MinimalSpinBoson 
+
+    model.h_q = ingredients.two_level_system_h_q
+
+We will also need a new initialization function to interface with the constants used by the built-in ingredient:
+
+.. code-block:: python
+
+    def initialize_constants_h_q(model):
+        """
+        Initialize the constants for the quantum Hamiltonian.
+        """
+        model.constants.two_level_system_a = model.constants.get(
+            "E", model.default_constants.get("E")
         )
-        p = np.random.normal(
-            loc=0, scale=std_p, size=constants.num_classical_coordinates
+        model.constants.two_level_system_b = -model.constants.get(
+            "E", model.default_constants.get("E")
         )
-        # Calculate the complex classical coordinate.
-        z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
-        out[s] = z
-    return out
+        model.constants.two_level_system_c = model.constants.get(
+            "V", model.default_constants.get("V")
+        )
+        model.constants.two_level_system_d = 0
+
+Let's then add the ingredient and initialization function to the model class
+
+.. code-block:: python
+
+    model.h_q = ingredients.two_level_system_h_q
+    model.initialize_constants_h_q = initialize_constants_h_q
+    # also update the list of initialization functions
+    model.initialization_functions[3] = initialize_constants_h_q
 
 
+Next we can load the classical Hamiltonian as the built-in harmonic oscillator Hamiltonian and update the initialization function like before:
 
+.. code-block:: python
+
+
+    def initialize_constants_h_c(model):
+        """
+        Initialize the constants for the classical Hamiltonian.
+        """
+        w = model.constants.get("w", model.default_constants.get("w"))
+        model.constants.harmonic_oscillator_frequency = w
+
+    model.h_c = ingredients.harmonic_oscillator_h_c
+    model.initialize_constants_h_c = initialize_constants_h_c
+    model.initialization_functions[1] = initialize_constants_h_c
     
+We can also load analytic gradients for the classical Hamiltonian (which relies
+on the same constants has the classical Hamiltonian).
+
+.. code-block:: python
+
+    model.dh_c_dzc = ingredients.harmonic_oscillator_dh_c_dzc
+
+Next we can load the quantum-classical Hamiltonian and its gradient, no additional initialization is needed.
+
+.. code-block:: python
+
+    model.h_qc = ingredients.spin_boson_h_qc
+    model.dh_qc_dzc = ingredients.spin_boson_dh_qc_dzc
+    model.dh_qc_dzc_inds = None
+    model.dh_qc_dzc_mels = None
+    model.dh_qc_dzc_shape = None
+
+
+Then we can load in the built-in classical initialization ingredient which samples the Boltzmann distribution for the harmonic oscillator Hamiltonian.
+
+.. code-block:: python
+
+    model.init_classical = ingredients.harmonic_oscillator_init_classical
+
+Next, we can load an ingredient that executes the hopping procedure of the FSSH algorithm according to a harmonic oscillator. This will improve the 
+performance of the FSSH algorithm. 
+
+.. code-block:: python
+
+    model.hop_function = ingredients.harmonic_oscillator_boltzmann_init_classical
+
+Lastly, we can add a flag to the model class that enables the RK4 solver in QC Lab to avoid recalculating gradients of the quantum-classical Hamiltonian 
+(which is a constant if the quantum-classical Hamiltonian is linear in z).
+
+.. code-block:: python
+
+    model.linear_h_qc = True
+
+
+The resulting model class is now fully upgraded and can be used to simulate the spin-boson model with significantly improved performance.
+
+The full code for upgrading the `MinimalSpinBoson` using built-in ingredients is:
+
+.. code-block:: python 
+
+    model = MinimalSpinBoson
+
+    model.h_q = ingredients.two_level_system_h_q
+
+    def initialize_constants_h_q(model):
+        """
+        Initialize the constants for the quantum Hamiltonian.
+        """
+        model.constants.two_level_system_a = model.constants.get(
+            "E", model.default_constants.get("E")
+        )
+        model.constants.two_level_system_b = -model.constants.get(
+            "E", model.default_constants.get("E")
+        )
+        model.constants.two_level_system_c = model.constants.get(
+            "V", model.default_constants.get("V")
+        )
+        model.constants.two_level_system_d = 0
+
+    model.initialize_constants_h_q = initialize_constants_h_q
+    # also update the list of initialization functions
+    model.initialization_functions[3] = initialize_constants_h_q
+
+    def initialize_constants_h_c(model):
+        """
+        Initialize the constants for the classical Hamiltonian.
+        """
+        w = model.constants.get("w", model.default_constants.get("w"))
+        model.constants.harmonic_oscillator_frequency = w
+
+    model.h_c = ingredients.harmonic_oscillator_h_c
+    model.initialize_constants_h_c = initialize_constants_h_c
+    model.initialization_functions[1] = initialize_constants_h_c
+
+    model.dh_c_dzc = ingredients.harmonic_oscillator_dh_c_dzc
+
+    model.h_qc = ingredients.spin_boson_h_qc
+    model.dh_qc_dzc = ingredients.spin_boson_dh_qc_dzc
+    model.dh_qc_dzc_inds = None
+    model.dh_qc_dzc_mels = None
+    model.dh_qc_dzc_shape = None
+
+    model.init_classical = ingredients.harmonic_oscillator_boltzmann_init_classical
+
+    model.hop_function = ingredients.harmonic_oscillator_hop_function
+
+    model.linear_h_qc = True
