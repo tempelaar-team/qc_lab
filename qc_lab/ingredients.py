@@ -219,6 +219,10 @@ def diagonal_linear_h_qc(model, constants, parameters, **kwargs):
     """
     Diagonal linear quantum-classical coupling Hamiltonian.
 
+    Diagonal elements are given by
+
+    :math:`H_{ii} = \sum_{j} gamma_{ij} (z_{j} + z_{j}^*)`
+
     Required Constants:
         - num_quantum_states: Number of quantum states (sites).
         - num_classical_coordinates: Number of classical coordinates.
