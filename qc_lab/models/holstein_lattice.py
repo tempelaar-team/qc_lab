@@ -14,10 +14,10 @@ class HolsteinLattice(Model):
     single optical mode.
     """
 
-    def __init__(self, parameters=None):
-        if parameters is None:
-            parameters = {}
-        self.default_parameters = {
+    def __init__(self, constants=None):
+        if constants is None:
+            constants = {}
+        self.default_constants = {
             "temp": 1,
             "g": 0.5,
             "w": 0.5,
@@ -26,16 +26,16 @@ class HolsteinLattice(Model):
             "phonon_mass": 1,
             "periodic_boundary": True,
         }
-        super().__init__(self.default_parameters, parameters)
+        super().__init__(self.default_constants, constants)
         self.dh_qc_dzc_inds = None
         self.dh_qc_dzc_mels = None
         self.dh_qc_dzc_shape = None
 
     def initialize_constants_model(self):
-        num_sites = self.constants.get("N", self.default_parameters.get("N"))
-        w = self.constants.get("w", self.default_parameters.get("w"))
+        num_sites = self.constants.get("N", self.default_constants.get("N"))
+        w = self.constants.get("w", self.default_constants.get("w"))
         phonon_mass = self.constants.get(
-            "phonon_mass", self.default_parameters.get("phonon_mass")
+            "phonon_mass", self.default_constants.get("phonon_mass")
         )
         self.constants.num_quantum_states = num_sites
         self.constants.num_classical_coordinates = num_sites
@@ -43,23 +43,23 @@ class HolsteinLattice(Model):
         self.constants.classical_coordinate_mass = phonon_mass * np.ones(num_sites)
 
     def initialize_constants_h_q(self):
-        j = self.constants.get("j", self.default_parameters.get("j"))
+        j = self.constants.get("j", self.default_constants.get("j"))
         periodic_boundary = self.constants.get(
-            "periodic_boundary", self.default_parameters.get("periodic_boundary")
+            "periodic_boundary", self.default_constants.get("periodic_boundary")
         )
         self.constants.nearest_neighbor_lattice_hopping_energy = j
         self.constants.nearest_neighbor_lattice_periodic_boundary = periodic_boundary
 
     def initialize_constants_h_qc(self):
-        num_sites = self.constants.get("N", self.default_parameters.get("N"))
-        w = self.constants.get("w", self.default_parameters.get("w"))
-        g = self.constants.get("g", self.default_parameters.get("g"))
+        num_sites = self.constants.get("N", self.default_constants.get("N"))
+        w = self.constants.get("w", self.default_constants.get("w"))
+        g = self.constants.get("g", self.default_constants.get("g"))
         self.constants.holstein_coupling_oscillator_frequency = w * np.ones(num_sites)
         self.constants.holstein_coupling_dimensionless_coupling = g * np.ones(num_sites)
 
     def initialize_constants_h_c(self):
-        num_sites = self.constants.get("N", self.default_parameters.get("N"))
-        w = self.constants.get("w", self.default_parameters.get("w"))
+        num_sites = self.constants.get("N", self.default_constants.get("N"))
+        w = self.constants.get("w", self.default_constants.get("w"))
         self.constants.harmonic_oscillator_frequency = w * np.ones(num_sites)
 
     h_q = ingredients.nearest_neighbor_lattice_h_q
