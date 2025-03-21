@@ -4,8 +4,7 @@ QC Lab: A package for quantum-classical modeling
 
 **QC Lab** is a Python package designed for implementing and executing quantum-classical (QC) dynamics simulations.
 It offers an environment for developing physical models and QC algorithms which enables algorithms and models to be combined arbitrarily.
-QC Lab comes with a variety of already implemented models and algorithms which we hope encourage new researchers to explore the field of q
-uantum-classical dynamics. Users that implement their own models and algorithms will have the opportunity to contribute them to QC Lab to form a 
+QC Lab comes with a variety of already implemented models and algorithms which we hope encourage new researchers to explore the field of quantum-classical dynamics. Users that implement their own models and algorithms will have the opportunity to contribute them to QC Lab to form a 
 growing library of quantum-classical dynamics tools.
 
 
