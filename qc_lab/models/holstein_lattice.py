@@ -54,8 +54,10 @@ class HolsteinLattice(Model):
         num_sites = self.constants.get("N", self.default_constants.get("N"))
         w = self.constants.get("w", self.default_constants.get("w"))
         g = self.constants.get("g", self.default_constants.get("g"))
-        self.constants.holstein_coupling_oscillator_frequency = w * np.ones(num_sites)
-        self.constants.holstein_coupling_dimensionless_coupling = g * np.ones(num_sites)
+        h = self.constants.classical_coordinate_weight
+        self.constants.diagonal_linear_coupling = np.diag(
+            g * w * np.sqrt(h / w) * np.ones(num_sites)
+        )
 
     def initialize_constants_h_c(self):
         num_sites = self.constants.get("N", self.default_constants.get("N"))
@@ -65,8 +67,8 @@ class HolsteinLattice(Model):
     h_q = ingredients.nearest_neighbor_lattice_h_q
     dh_c_dzc = ingredients.harmonic_oscillator_dh_c_dzc
     h_c = ingredients.harmonic_oscillator_h_c
-    h_qc = ingredients.holstein_coupling_h_qc
-    dh_qc_dzc = ingredients.holstein_coupling_dh_qc_dzc
+    h_qc = ingredients.diagonal_linear_h_qc
+    dh_qc_dzc = ingredients.diagonal_linear_dh_qc_dzc
     init_classical = ingredients.harmonic_oscillator_boltzmann_init_classical
     hop_function = ingredients.harmonic_oscillator_hop_function
     linear_h_qc = True

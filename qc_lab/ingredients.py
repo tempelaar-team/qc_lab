@@ -199,28 +199,30 @@ def nearest_neighbor_lattice_h_q(model, constants, parameters, **kwargs):
 
 
 @njit()
-def holstein_coupling_h_qc_jit(batch_size, num_sites, z, g, w, h):
+def diagonal_linear_h_qc_jit(
+    batch_size, num_sites, num_classical_coordinates, z, gamma
+):
     """
-    Low level function to generate the Holstein coupling Hamiltonian.
+    Low level function to generate the diagonal linear quantum-classical coupling Hamiltonian.
     """
     h_qc = np.zeros((batch_size, num_sites, num_sites)) + 0.0j
     for b in range(batch_size):
         for i in range(num_sites):
-            h_qc[b, i, i] = (g[i] * w[i] * np.sqrt(w[i] / h[i])) * (
-                z[b, i] + np.conj(z[b, i])
-            )
+            for j in range(num_classical_coordinates):
+                h_qc[b, i, i] = h_qc[b, i, i] + gamma[i, j] * (
+                    z[b, j] + np.conj(z[b, j])
+                )
     return h_qc
 
 
-def holstein_coupling_h_qc(model, constants, parameters, **kwargs):
+def diagonal_linear_h_qc(model, constants, parameters, **kwargs):
     """
-    Holstein coupling Hamiltonian.
+    Diagonal linear quantum-classical coupling Hamiltonian.
 
     Required Constants:
         - num_quantum_states: Number of quantum states (sites).
-        - holstein_coupling_oscillator_frequency: Array of oscillator frequencies.
-        - holstein_coupling_dimensionless_coupling: Array of dimensionless coupling constants.
-        - classical_coordinate_weight: Array of weights for classical coordinates.
+        - num_classical_coordinates: Number of classical coordinates.
+        - diagonal_linear_coupling: Array of coupling constants (num_sites, num_classical_coordinates).
 
     Keyword Arguments:
         - z: Complex classical coordinates.
@@ -234,28 +236,26 @@ def holstein_coupling_h_qc(model, constants, parameters, **kwargs):
     else:
         batch_size = len(z)
     num_sites = constants.num_quantum_states
-    w = constants.holstein_coupling_oscillator_frequency
-    g = constants.holstein_coupling_dimensionless_coupling
-    h = constants.classical_coordinate_weight
-    return holstein_coupling_h_qc_jit(batch_size, num_sites, z, g, w, h)
+    num_classical_coordinates = constants.num_classical_coordinates
+    gamma = constants.diagonal_linear_coupling
+    return diagonal_linear_h_qc_jit(
+        batch_size, num_sites, num_classical_coordinates, z, gamma
+    )
 
 
-def holstein_coupling_dh_qc_dzc(model, constants, parameters, **kwargs):
+def diagonal_linear_dh_qc_dzc(model, constants, parameters, **kwargs):
     """
-    Derivative of the Holstein coupling Hamiltonian with respect to the z-coordinates.
+    Gradient of the diagonal linear quantum-classical coupling Hamiltonian.
 
     Required Constants:
         - num_quantum_states: Number of quantum states (sites).
-        - holstein_coupling_oscillator_frequency: Array of oscillator frequencies.
-        - holstein_coupling_dimensionless_coupling: Array of dimensionless coupling constants.
-        - classical_coordinate_weight: Array of weights for classical coordinates.
+        - num_classical_coordinates: Number of classical coordinates
+        - diagonal_linear_coupling: Array of coupling constants (num_sites, num_classical_coordinates).
 
     Keyword Arguments:
         - z: Complex classical coordinates.
         - batch_size: (Optional) Number of batches for vectorized computation.
     """
-    # if there is not an explicitly specified batch_size,
-    # use the length of the seed.
     z = kwargs["z"]
     if kwargs.get("batch_size") is not None:
         batch_size = kwargs.get("batch_size")
@@ -271,16 +271,20 @@ def holstein_coupling_dh_qc_dzc(model, constants, parameters, **kwargs):
         or model.dh_qc_dzc_shape is None
         or recalculate
     ):
-        num_sites = constants.num_quantum_states
-        w = constants.holstein_coupling_oscillator_frequency
-        g = constants.holstein_coupling_dimensionless_coupling
-        h = constants.classical_coordinate_weight
+
+        num_states = constants.num_quantum_states
+        num_classical_coordinates = constants.num_classical_coordinates
+        gamma = constants.diagonal_linear_coupling
         dh_qc_dzc = np.zeros(
-            (batch_size, num_sites, num_sites, num_sites), dtype=complex
+            (num_classical_coordinates, num_states, num_states), dtype=complex
         )
-        np.einsum("tiii->ti", dh_qc_dzc, optimize="greedy")[...] = (
-            g * w * np.sqrt(w / h)
-        )[..., :] * (np.ones_like(z, dtype=complex))
+        for i in range(num_states):
+            for j in range(num_classical_coordinates):
+                dh_qc_dzc[j, i, i] = gamma[i, j]
+        dh_qc_dzc = dh_qc_dzc[np.newaxis, :, :, :] + np.zeros(
+            (batch_size, num_classical_coordinates, num_states, num_states),
+            dtype=complex,
+        )
         inds = np.where(dh_qc_dzc != 0)
         mels = dh_qc_dzc[inds]
         shape = np.shape(dh_qc_dzc)
@@ -289,90 +293,6 @@ def holstein_coupling_dh_qc_dzc(model, constants, parameters, **kwargs):
         model.dh_qc_dzc_shape = shape
         return inds, mels, shape
     return model.dh_qc_dzc_inds, model.dh_qc_dzc_mels, model.dh_qc_dzc_shape
-
-
-def spin_boson_h_qc(model, constants, parameters, **kwargs):
-    """
-    Spin-boson coupling Hamiltonian.
-
-    Required Constants:
-        - spin_boson_coupling: Array of coupling constants.
-        - classical_coordinate_mass: Array of masses for classical coordinates.
-        - classical_coordinate_weight: Array of weights for classical coordinates.
-
-    Keyword Arguments:
-        - z: Complex classical coordinates.
-        - batch_size: (Optional) Number of batches for vectorized computation.
-    """
-    z = kwargs.get("z")
-    if kwargs.get("batch_size") is not None:
-        batch_size = kwargs.get("batch_size")
-        assert len(z) == batch_size
-    else:
-        batch_size = len(z)
-    g = constants.spin_boson_coupling
-    m = constants.classical_coordinate_mass
-    h = constants.classical_coordinate_weight
-    h_qc = np.zeros((batch_size, 2, 2), dtype=complex)
-    h_qc[:, 0, 0] = np.sum(
-        g * np.sqrt(1 / (2 * m * h))[np.newaxis, :] * (z + np.conj(z)), axis=-1
-    )
-    h_qc[:, 1, 1] = -h_qc[:, 0, 0]
-    return h_qc
-
-
-def spin_boson_dh_qc_dzc(model, constants, parameters, **kwargs):
-    """
-    Derivative of the spin-boson coupling Hamiltonian with respect to the z-coordinates.
-
-    Required Constants:
-        - spin_boson_coupling: Array of coupling constants.
-        - classical_coordinate_mass: Array of masses for classical coordinates.
-        - classical_coordinate_weight: Array of weights for classical coordinates.
-
-    Keyword Arguments:
-        - z: Complex classical coordinates.
-        - batch_size: (Optional) Number of batches for vectorized computation.
-    """
-    z = kwargs.get("z")
-    if kwargs.get("batch_size") is not None:
-        batch_size = kwargs.get("batch_size")
-        assert len(z) == batch_size
-    else:
-        batch_size = len(z)
-
-    recalculate = False
-    if model.dh_qc_dzc_shape is not None:
-        if model.dh_qc_dzc_shape[0] != batch_size:
-            recalculate = True
-
-    if (
-        model.dh_qc_dzc_inds is None
-        or model.dh_qc_dzc_mels is None
-        or model.dh_qc_dzc_shape is None
-        or recalculate
-    ):
-
-        m = constants.classical_coordinate_mass
-        g = constants.spin_boson_coupling
-        h = constants.classical_coordinate_weight
-        assert constants.num_quantum_states == 2
-        dh_qc_dzc = np.zeros(
-            (batch_size, constants.num_classical_coordinates, 2, 2), dtype=complex
-        )
-        dh_qc_dzc[:, :, 0, 0] = (g * np.sqrt(1 / (2 * m * h)))[..., :]
-        dh_qc_dzc[:, :, 1, 1] = -dh_qc_dzc[..., :, 0, 0]
-        inds = np.where(dh_qc_dzc != 0)
-        mels = dh_qc_dzc[inds]
-        shape = np.shape(dh_qc_dzc)
-        model.dh_qc_dzc_inds = inds
-        model.dh_qc_dzc_mels = dh_qc_dzc[inds]
-        model.dh_qc_dzc_shape = shape
-    else:
-        inds = model.dh_qc_dzc_inds
-        mels = model.dh_qc_dzc_mels
-        shape = model.dh_qc_dzc_shape
-    return inds, mels, shape
 
 
 def harmonic_oscillator_hop_function(model, constants, parameters, **kwargs):

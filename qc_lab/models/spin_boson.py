@@ -50,17 +50,26 @@ class SpinBoson(Model):
         """
         Initialize the constants for the classical Hamiltonian.
         """
-        w = self.constants.get("w", self.default_constants.get("w"))
-        self.constants.harmonic_oscillator_frequency = w
+        self.constants.harmonic_oscillator_frequency = self.constants.get("w")
 
     def initialize_constants_h_qc(self):
         """
         Initialize the constants for the quantum-classical coupling Hamiltonian.
         """
         num_bosons = self.constants.get("A", self.default_constants.get("A"))
-        w = self.constants.get("w", self.default_constants.get("w"))
         l_reorg = self.constants.get("l_reorg", self.default_constants.get("l_reorg"))
-        self.constants.spin_boson_coupling = w * np.sqrt(2 * l_reorg / num_bosons)
+        m = self.constants.get("boson_mass", self.default_constants.get("boson_mass"))
+        h = (
+            self.constants.classical_coordinate_weight
+        )  # np.sqrt(2 * l_reorg / num_bosons) * (1/np.sqrt(2*m*h))
+        w = self.constants.w
+        self.constants.diagonal_linear_coupling = np.zeros((2, num_bosons))
+        self.constants.diagonal_linear_coupling[0] = (
+            w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h))
+        )
+        self.constants.diagonal_linear_coupling[1] = (
+            -w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h))
+        )
 
     def initialize_constants_h_q(self):
         """
@@ -77,13 +86,12 @@ class SpinBoson(Model):
         )
         self.constants.two_level_system_d = 0
 
-
     init_classical = ingredients.harmonic_oscillator_boltzmann_init_classical
     hop_function = ingredients.harmonic_oscillator_hop_function
     h_c = ingredients.harmonic_oscillator_h_c
     h_q = ingredients.two_level_system_h_q
-    h_qc = ingredients.spin_boson_h_qc
-    dh_qc_dzc = ingredients.spin_boson_dh_qc_dzc
+    h_qc = ingredients.diagonal_linear_h_qc
+    dh_qc_dzc = ingredients.diagonal_linear_dh_qc_dzc
     dh_c_dzc = ingredients.harmonic_oscillator_dh_c_dzc
     linear_h_qc = True
     initialization_functions = [
