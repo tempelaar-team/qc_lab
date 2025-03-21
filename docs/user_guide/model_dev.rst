@@ -232,7 +232,7 @@ Now you have a working model class which you can instantiate and use following t
     Please be aware that the performance is going to be significantly worse than what can be achieved by implementing the 
     upgrades below. 
 
-Prior to implementing upgrades, a minimal model will be subject to a number of defaults which are discussed in the `.. default_behavior`
+Prior to implementing upgrades, a minimal model will be subject to a number of defaults which are discussed in the :ref:`defaults` section.
 
 
 The full minimal model looks like this:

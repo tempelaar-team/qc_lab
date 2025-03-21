@@ -52,15 +52,6 @@ A guide for using models and algorithms that are shipped with QC Lab.
    user_guide/index
 
 
-Developer Guide
----------------
-
-A guide for developing or modifying models and algorithms in QC Lab.
-
-.. toctree::
-   :maxdepth: 2
-   
-   developer_guide/index
 
 Software Reference 
 ------------------

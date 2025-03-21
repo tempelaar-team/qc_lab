@@ -3,7 +3,7 @@
 Models
 ------
 
-Models in QC Lab are classes that define the physical properties of the system, minimally through the quantu, classical, and quantum-classical 
+Models in QC Lab are classes that define the physical properties of the system, minimally through the quantum, classical, and quantum-classical 
 Hamiltonians. Each model in QC Lab 
 has a set of constants that can be accessed by the user when the model is instantiated.
 
