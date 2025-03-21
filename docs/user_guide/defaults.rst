@@ -1,10 +1,57 @@
 .. _defaults:
 
+Default Behavior
+================
+
+
+Default Simulation Settings
+---------------------------
+
+By default QC Lab uses the following settings in the simulation object. These settings can be adjusted by changing the values in the `sim` object.
+
+.. code-block:: python
+
+    sim = Simulation()
+    sim.settings.var = val# can change the value of a setting like this.
+
+    # or by passing the setting directly to the simulation object
+    sim = Simulation({'var': val})
+
+
+.. list-table:: Default Simulation Settings
+   :header-rows: 1
+
+   * - Variable
+     - Description
+     - Default Value
+   * - `num_trajs`
+     - The total number of trajectories to run.
+     - 10
+   * - `batch_size`
+     - The number of trajectories to run simultaneously (must be a divisor of `num_trajs`).
+     - 1
+   * - `tmax`
+     - The total time of each trajectory.
+     - 10
+   * - `dt`
+     - The timestep used for executing the update recipe (the dynamics propagation).
+     - 0.01
+   * - `dt_output`
+     - The timestep used for executing the output recipe (the calculation of observables).
+     - 0.1
+
+.. note::
+
+    QC Lab expects that `num_trajs` is an integer multiple of `batch_size`. If not, it will use the lower integer multiple (which could be zero!). 
+    It also expects that the total time of the simulation is an integer multiple of the output timestep `dt_output`, which must also be an integer multiple 
+    of the propagation timestep `dt`.
+
+ 
 Default Model Attributes
 ------------------------
 
 For minimal models where only the Hamiltonian of the system is defined in the Model class, QC Lab employs numerical methods to carry out 
-particular steps in the dynamics algorithms. This page descripes those default actions and also the constants that can be used to manipulate them. 
+particular steps in the dynamics algorithms. This page describes those default actions and also the constants that can be used to manipulate them. 
 Because they are formally treated as model ingredients they  have the same ingredient format discussed in the model development guide. 
 
 All of the constants below can be set by adjusting their value in the `model.constants` object, for example:
@@ -32,7 +79,7 @@ potentials as fine-tuning of the algorithm parameters may be required to obtain 
 The implementation utilizes with a single random walker in `sim.model.constants.num_classical_coordinates` dimensions or `sim.model.constants.num_classical_coordinates` 
 walkers each in one dimension (depending on if `mcmc_h_c_separable==True`) and evolves the walkers from the initial point `mcmc_init_z` by sampling a Gaussian distribution with
 with standard deviation `mcmc_std` for `mcmc_burn_in_size` steps. It then evolves the walkers another `mcmc_sample_size` steps to collect a distribution of initial coordinates from which 
-the required number of initial conditions are drawn uniformly. 
+the required number of initial conditions are drawn uniformly. At a minimum, one should ensure that `mcmc_sample_size` is large enough to ensure a full exploration of the phase-space.
 
 
 .. list-table::
