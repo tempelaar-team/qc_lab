@@ -24,10 +24,10 @@ keywords = [
     "surface hopping", "mixed quantum-classical dynamics",
     "theoretical chemistry", "ehrenfest", "python", "quantum-classical"
 ]
-
-[project.dependencies]
-numpy = ">=1.22,<2.1"
-tqdm = "*"
-h5py = "*"
-numba = "*"
-matplotlib = "*"
+dependencies = [
+    "numpy>=1.22,<2.1",
+    "tqdm",
+    "h5py",
+    "numba",
+    "matplotlib"
+]
