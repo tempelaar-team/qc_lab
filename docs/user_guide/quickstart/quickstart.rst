@@ -8,6 +8,8 @@ QC Lab is organized into models and algorithms which are combined into a simulat
 The simulation object fully defines a quantum-classical dynamics simulation which is then carried out by a dynamics driver. 
 This guide will walk you through the process of setting up a simulation object and running a simulation.
 
+The code in this page is implemented in the notebook `quickstart.ipynb` which can be found in the `examples` directory of the repository.
+
 
 Importing Modules
 ~~~~~~~~~~~~~~~~~
@@ -27,7 +29,7 @@ First, we import the necessary modules:
 Instantiating Simulation Object
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Next, we instantiate a simulation object. Each object has a set of default settings which can be accessed by calling `sim.default_settings`.
+Next, we instantiate a simulation object from `qc_lab.Simulation`. Each object has a set of default settings which can be accessed by calling `sim.default_settings`.
 Passing a dictionary to the simulation object when instantiating it will override the default settings.
 
 .. code-block:: python
@@ -38,7 +40,13 @@ Passing a dictionary to the simulation object when instantiating it will overrid
 
 Alternatively, you can directly modify the simulation settings by assigning new values to the settings attribute of the simulation object. Here we change the number
 of trajectories that the simulation will run, and how many trajectories are run at a time (the batch size). We also change the total time of each trajectory (tmax) and the 
-timestep used for propagation (dt). Importantly, QC Lab expects that `num_trajs` is an integer multiple of `batch_size`. If not, it will use the lower integer multiple (which could be zero!).
+timestep used for propagation (dt). 
+
+.. note::
+    
+    QC Lab expects that `num_trajs` is an integer multiple of `batch_size`. If not, it will use the lower integer multiple (which could be zero!). 
+    It also expects that the total time of the simulation is an integer multiple of the output timestep `dt_output`, which must also be an integer multiple 
+    of the propagation timestep `dt`.
 
 .. code-block:: python
 
@@ -47,6 +55,7 @@ timestep used for propagation (dt). Importantly, QC Lab expects that `num_trajs`
     sim.settings.batch_size = 50
     sim.settings.tmax = 30
     sim.settings.dt = 0.01
+    sim.settings.dt_output = 0.1
 
 Instantiating Model Object
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
