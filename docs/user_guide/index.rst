@@ -15,3 +15,4 @@ User Guide
     data_object
     model_dev
     defaults
+    algorithm_dev
