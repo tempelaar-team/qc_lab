@@ -63,6 +63,15 @@ def vectorize_ingredient(ingredient):
 def harmonic_oscillator_h_c(model, constants, parameters, **kwargs):
     """
     Harmonic oscillator classical Hamiltonian function.
+
+    Required Constants:
+        - classical_coordinate_weight: Array of weights for classical coordinates.
+        - harmonic_oscillator_frequency: Array of harmonic oscillator frequencies.
+        - classical_coordinate_mass: Array of masses for classical coordinates.
+
+    Keyword Arguments:
+        - z: Complex classical coordinates.
+        - batch_size: (Optional) Number of batches for vectorized computation.
     """
     del model, parameters
     z = kwargs.get("z")
@@ -82,8 +91,15 @@ def harmonic_oscillator_h_c(model, constants, parameters, **kwargs):
 
 def harmonic_oscillator_dh_c_dzc(model, constants, parameters, **kwargs):
     """
-    Calculate the derivative of the classical harmonic oscillator Hamiltonian
-    with respect to the z coordinate.
+    Derivative of the classical harmonic oscillator Hamiltonian with respect to the z coordinate.
+
+    Required Constants:
+        - classical_coordinate_weight: Array of weights for classical coordinates.
+        - harmonic_oscillator_frequency: Array of harmonic oscillator frequencies.
+
+    Keyword Arguments:
+        - z: Complex classical coordinates.
+        - batch_size: (Optional) Number of batches for vectorized computation.
     """
     del model, parameters
     z = kwargs.get("z")
@@ -102,7 +118,16 @@ def harmonic_oscillator_dh_c_dzc(model, constants, parameters, **kwargs):
 
 def two_level_system_h_q(model, constants, parameters, **kwargs):
     """
-    Calculate the quantum Hamiltonian for a two-level system.
+    Quantum Hamiltonian for a two-level system.
+
+    Required Constants:
+        - two_level_system_a: Energy of the first level.
+        - two_level_system_b: Energy of the second level.
+        - two_level_system_c: Real part of the coupling between levels.
+        - two_level_system_d: Imaginary part of the coupling between levels.
+
+    Keyword Arguments:
+        - batch_size: (Optional) Number of batches for vectorized computation.
     """
     del model
     if kwargs.get("batch_size") is not None:
@@ -137,7 +162,15 @@ def nearest_neighbor_lattice_h_q_jit(
 
 def nearest_neighbor_lattice_h_q(model, constants, parameters, **kwargs):
     """
-    Calculate the quantum Hamiltonian for a nearest-neighbor lattice.
+    Quantum Hamiltonian for a nearest-neighbor lattice.
+
+    Required Constants:
+        - num_quantum_states: Number of quantum states (sites).
+        - nearest_neighbor_lattice_hopping_energy: Hopping energy between sites.
+        - nearest_neighbor_lattice_periodic_boundary: Boolean indicating periodic boundary conditions.
+
+    Keyword Arguments:
+        - batch_size: (Optional) Number of batches for vectorized computation.
     """
     if kwargs.get("batch_size") is not None:
         batch_size = kwargs.get("batch_size")
@@ -181,7 +214,17 @@ def holstein_coupling_h_qc_jit(batch_size, num_sites, z, g, w, h):
 
 def holstein_coupling_h_qc(model, constants, parameters, **kwargs):
     """
-    Calculate the Holstein coupling Hamiltonian.
+    Holstein coupling Hamiltonian.
+
+    Required Constants:
+        - num_quantum_states: Number of quantum states (sites).
+        - holstein_coupling_oscillator_frequency: Array of oscillator frequencies.
+        - holstein_coupling_dimensionless_coupling: Array of dimensionless coupling constants.
+        - classical_coordinate_weight: Array of weights for classical coordinates.
+
+    Keyword Arguments:
+        - z: Complex classical coordinates.
+        - batch_size: (Optional) Number of batches for vectorized computation.
     """
     del model, parameters
     z = kwargs["z"]
@@ -199,8 +242,17 @@ def holstein_coupling_h_qc(model, constants, parameters, **kwargs):
 
 def holstein_coupling_dh_qc_dzc(model, constants, parameters, **kwargs):
     """
-    Calculate the derivative of the Holstein coupling Hamiltonian with
-    respect to the z-coordinates.
+    Derivative of the Holstein coupling Hamiltonian with respect to the z-coordinates.
+
+    Required Constants:
+        - num_quantum_states: Number of quantum states (sites).
+        - holstein_coupling_oscillator_frequency: Array of oscillator frequencies.
+        - holstein_coupling_dimensionless_coupling: Array of dimensionless coupling constants.
+        - classical_coordinate_weight: Array of weights for classical coordinates.
+
+    Keyword Arguments:
+        - z: Complex classical coordinates.
+        - batch_size: (Optional) Number of batches for vectorized computation.
     """
     # if there is not an explicitly specified batch_size,
     # use the length of the seed.
@@ -238,7 +290,20 @@ def holstein_coupling_dh_qc_dzc(model, constants, parameters, **kwargs):
         return inds, mels, shape
     return model.dh_qc_dzc_inds, model.dh_qc_dzc_mels, model.dh_qc_dzc_shape
 
+
 def spin_boson_h_qc(model, constants, parameters, **kwargs):
+    """
+    Spin-boson coupling Hamiltonian.
+
+    Required Constants:
+        - spin_boson_coupling: Array of coupling constants.
+        - classical_coordinate_mass: Array of masses for classical coordinates.
+        - classical_coordinate_weight: Array of weights for classical coordinates.
+
+    Keyword Arguments:
+        - z: Complex classical coordinates.
+        - batch_size: (Optional) Number of batches for vectorized computation.
+    """
     z = kwargs.get("z")
     if kwargs.get("batch_size") is not None:
         batch_size = kwargs.get("batch_size")
@@ -257,6 +322,18 @@ def spin_boson_h_qc(model, constants, parameters, **kwargs):
 
 
 def spin_boson_dh_qc_dzc(model, constants, parameters, **kwargs):
+    """
+    Derivative of the spin-boson coupling Hamiltonian with respect to the z-coordinates.
+
+    Required Constants:
+        - spin_boson_coupling: Array of coupling constants.
+        - classical_coordinate_mass: Array of masses for classical coordinates.
+        - classical_coordinate_weight: Array of weights for classical coordinates.
+
+    Keyword Arguments:
+        - z: Complex classical coordinates.
+        - batch_size: (Optional) Number of batches for vectorized computation.
+    """
     z = kwargs.get("z")
     if kwargs.get("batch_size") is not None:
         batch_size = kwargs.get("batch_size")
@@ -280,7 +357,9 @@ def spin_boson_dh_qc_dzc(model, constants, parameters, **kwargs):
         g = constants.spin_boson_coupling
         h = constants.classical_coordinate_weight
         assert constants.num_quantum_states == 2
-        dh_qc_dzc = np.zeros((batch_size, constants.num_classical_coordinates, 2, 2), dtype=complex)
+        dh_qc_dzc = np.zeros(
+            (batch_size, constants.num_classical_coordinates, 2, 2), dtype=complex
+        )
         dh_qc_dzc[:, :, 0, 0] = (g * np.sqrt(1 / (2 * m * h)))[..., :]
         dh_qc_dzc[:, :, 1, 1] = -dh_qc_dzc[..., :, 0, 0]
         inds = np.where(dh_qc_dzc != 0)
@@ -299,6 +378,15 @@ def spin_boson_dh_qc_dzc(model, constants, parameters, **kwargs):
 def harmonic_oscillator_hop_function(model, constants, parameters, **kwargs):
     """
     Perform a hopping operation for the harmonic oscillator.
+
+    Required Constants:
+        - harmonic_oscillator_frequency: Array of harmonic oscillator frequencies.
+        - classical_coordinate_weight: Array of weights for classical coordinates.
+
+    Keyword Arguments:
+        - z: Complex classical coordinates.
+        - delta_z: Change in classical coordinates.
+        - ev_diff: Energy difference for the hopping operation.
     """
     del model, parameters
     z = kwargs["z"]
@@ -349,7 +437,16 @@ def harmonic_oscillator_boltzmann_init_classical(
     model, constants, parameters, **kwargs
 ):
     """
-    Initialize classical coordinates according to Boltzmann statistics for the Harmonic oscillator.
+    Initialize classical coordinates according to Boltzmann statistics for the harmonic oscillator.
+
+    Required Constants:
+        - temp: Temperature of the system.
+        - classical_coordinate_weight: Array of weights for classical coordinates.
+        - harmonic_oscillator_frequency: Array of harmonic oscillator frequencies.
+        - classical_coordinate_mass: Array of masses for classical coordinates.
+
+    Keyword Arguments:
+        - seed: Array of random seeds for initialization.
     """
     del model, parameters
     seed = kwargs.get("seed", None)
@@ -378,8 +475,16 @@ def harmonic_oscillator_boltzmann_init_classical(
 
 def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kwargs):
     """
-    Initialize classical coordinates according to the Wigner distribution
-    of the ground state of a harmonic oscillator.
+    Initialize classical coordinates according to the Wigner distribution of the ground state of a harmonic oscillator.
+
+    Required Constants:
+        - temp: Temperature of the system.
+        - classical_coordinate_weight: Array of weights for classical coordinates.
+        - harmonic_oscillator_frequency: Array of harmonic oscillator frequencies.
+        - classical_coordinate_mass: Array of masses for classical coordinates.
+
+    Keyword Arguments:
+        - seed: Array of random seeds for initialization.
     """
     del model, parameters
     seed = kwargs.get("seed", None)
