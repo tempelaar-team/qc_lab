@@ -60,7 +60,7 @@ class SpinBoson(Model):
         num_bosons = self.constants.get("A", self.default_constants.get("A"))
         w = self.constants.get("w", self.default_constants.get("w"))
         l_reorg = self.constants.get("l_reorg", self.default_constants.get("l_reorg"))
-        self.constants.g = w * np.sqrt(2 * l_reorg / num_bosons)
+        self.constants.spin_boson_coupling = w * np.sqrt(2 * l_reorg / num_bosons)
 
     def initialize_constants_h_q(self):
         """
@@ -77,71 +77,13 @@ class SpinBoson(Model):
         )
         self.constants.two_level_system_d = 0
 
-    def h_qc(self, constants, parameters, **kwargs):
-        z = kwargs.get("z")
-        if kwargs.get("batch_size") is not None:
-            batch_size = kwargs.get("batch_size")
-            assert len(z) == batch_size
-        else:
-            batch_size = len(z)
-
-        g = constants.g
-        m = constants.classical_coordinate_mass
-        h = constants.classical_coordinate_weight
-        h_qc = np.zeros((batch_size, 2, 2), dtype=complex)
-        h_qc[:, 0, 0] = np.sum(
-            g * np.sqrt(1 / (2 * m * h))[np.newaxis, :] * (z + np.conj(z)), axis=-1
-        )
-        h_qc[:, 1, 1] = -h_qc[:, 0, 0]
-        return h_qc
-
-    def dh_qc_dzc(self, constants, parameters, **kwargs):
-        """
-        Calculate the derivative of the quantum-classical coupling Hamiltonian
-        with respect to the z-coordinates.
-        """
-        del parameters
-        z = kwargs.get("z")
-        if kwargs.get("batch_size") is not None:
-            batch_size = kwargs.get("batch_size")
-            assert len(z) == batch_size
-        else:
-            batch_size = len(z)
-
-        recalculate = False
-        if self.dh_qc_dzc_shape is not None:
-            if self.dh_qc_dzc_shape[0] != batch_size:
-                recalculate = True
-
-        if (
-            self.dh_qc_dzc_inds is None
-            or self.dh_qc_dzc_mels is None
-            or self.dh_qc_dzc_shape is None
-            or recalculate
-        ):
-
-            m = constants.classical_coordinate_mass
-            g = constants.g
-            h = constants.classical_coordinate_weight
-            dh_qc_dzc = np.zeros((batch_size, constants.A, 2, 2), dtype=complex)
-            dh_qc_dzc[:, :, 0, 0] = (g * np.sqrt(1 / (2 * m * h)))[..., :]
-            dh_qc_dzc[:, :, 1, 1] = -dh_qc_dzc[..., :, 0, 0]
-            inds = np.where(dh_qc_dzc != 0)
-            mels = dh_qc_dzc[inds]
-            shape = np.shape(dh_qc_dzc)
-            self.dh_qc_dzc_inds = inds
-            self.dh_qc_dzc_mels = dh_qc_dzc[inds]
-            self.dh_qc_dzc_shape = shape
-        else:
-            inds = self.dh_qc_dzc_inds
-            mels = self.dh_qc_dzc_mels
-            shape = self.dh_qc_dzc_shape
-        return inds, mels, shape
 
     init_classical = ingredients.harmonic_oscillator_boltzmann_init_classical
-    hop_function = ingredients.harmonic_oscillator_hop
+    hop_function = ingredients.harmonic_oscillator_hop_function
     h_c = ingredients.harmonic_oscillator_h_c
     h_q = ingredients.two_level_system_h_q
+    h_qc = ingredients.spin_boson_h_qc
+    dh_qc_dzc = ingredients.spin_boson_dh_qc_dzc
     dh_c_dzc = ingredients.harmonic_oscillator_dh_c_dzc
     linear_h_qc = True
     initialization_functions = [

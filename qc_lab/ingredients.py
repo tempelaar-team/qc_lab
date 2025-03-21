@@ -238,8 +238,65 @@ def holstein_coupling_dh_qc_dzc(model, constants, parameters, **kwargs):
         return inds, mels, shape
     return model.dh_qc_dzc_inds, model.dh_qc_dzc_mels, model.dh_qc_dzc_shape
 
+def spin_boson_h_qc(model, constants, parameters, **kwargs):
+    z = kwargs.get("z")
+    if kwargs.get("batch_size") is not None:
+        batch_size = kwargs.get("batch_size")
+        assert len(z) == batch_size
+    else:
+        batch_size = len(z)
+    g = constants.spin_boson_coupling
+    m = constants.classical_coordinate_mass
+    h = constants.classical_coordinate_weight
+    h_qc = np.zeros((batch_size, 2, 2), dtype=complex)
+    h_qc[:, 0, 0] = np.sum(
+        g * np.sqrt(1 / (2 * m * h))[np.newaxis, :] * (z + np.conj(z)), axis=-1
+    )
+    h_qc[:, 1, 1] = -h_qc[:, 0, 0]
+    return h_qc
 
-def harmonic_oscillator_hop(model, constants, parameters, **kwargs):
+
+def spin_boson_dh_qc_dzc(model, constants, parameters, **kwargs):
+    z = kwargs.get("z")
+    if kwargs.get("batch_size") is not None:
+        batch_size = kwargs.get("batch_size")
+        assert len(z) == batch_size
+    else:
+        batch_size = len(z)
+
+    recalculate = False
+    if model.dh_qc_dzc_shape is not None:
+        if model.dh_qc_dzc_shape[0] != batch_size:
+            recalculate = True
+
+    if (
+        model.dh_qc_dzc_inds is None
+        or model.dh_qc_dzc_mels is None
+        or model.dh_qc_dzc_shape is None
+        or recalculate
+    ):
+
+        m = constants.classical_coordinate_mass
+        g = constants.spin_boson_coupling
+        h = constants.classical_coordinate_weight
+        assert constants.num_quantum_states == 2
+        dh_qc_dzc = np.zeros((batch_size, constants.num_classical_coordinates, 2, 2), dtype=complex)
+        dh_qc_dzc[:, :, 0, 0] = (g * np.sqrt(1 / (2 * m * h)))[..., :]
+        dh_qc_dzc[:, :, 1, 1] = -dh_qc_dzc[..., :, 0, 0]
+        inds = np.where(dh_qc_dzc != 0)
+        mels = dh_qc_dzc[inds]
+        shape = np.shape(dh_qc_dzc)
+        model.dh_qc_dzc_inds = inds
+        model.dh_qc_dzc_mels = dh_qc_dzc[inds]
+        model.dh_qc_dzc_shape = shape
+    else:
+        inds = model.dh_qc_dzc_inds
+        mels = model.dh_qc_dzc_mels
+        shape = model.dh_qc_dzc_shape
+    return inds, mels, shape
+
+
+def harmonic_oscillator_hop_function(model, constants, parameters, **kwargs):
     """
     Perform a hopping operation for the harmonic oscillator.
     """
