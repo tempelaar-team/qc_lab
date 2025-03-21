@@ -1,11 +1,10 @@
-.. _holstein_model:
+.. _fmo_model:
 
-Holstein Lattice Model
-~~~~~~~~~~~~~~~~~~~~~~
+Fenna-Matthews-Olson Model
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Holstein Lattice Model is a nearest-neighbor tight-binding model combined with an idealized optical phonon that interacts via a 
-Holstein coupling. The current implementation accommodates a single electronic particle and is described in detail in `Krotz et al. 2021 <https://doi.org/10.1063/5.0053177>`_
-. The quantum-classical Hamiltonian of the Holstein model is:
+Holstein coupling. The current implementation accommodates a single electronic particle. The quantum-classical Hamiltonian of the Holstein model is:
 
 .. math::
     

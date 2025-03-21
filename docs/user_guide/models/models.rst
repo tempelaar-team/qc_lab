@@ -12,3 +12,4 @@ has a set of constants that can be accessed by the user when the model is instan
 
     spin_boson_model
     holstein_model
+    fmo_model
