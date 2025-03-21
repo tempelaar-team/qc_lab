@@ -5,7 +5,9 @@ Holstein Lattice Model
 
 The Holstein Lattice Model is a nearest-neighbor tight-binding model combined with an idealized optical phonon that interacts via a 
 Holstein coupling. The current implementation accommodates a single electronic particle and is described in detail in `Krotz et al. 2021 <https://doi.org/10.1063/5.0053177>`_
-. The quantum-classical Hamiltonian of the Holstein model is:
+. 
+
+The quantum Hamiltonian of the Holstein model is a nearest-neighbor tight-binding model
 
 .. math::
     
@@ -13,17 +15,19 @@ Holstein coupling. The current implementation accommodates a single electronic p
 
 where :math:`\langle i,j\rangle` denotes nearest-neighbor sites with or without periodic boundaries determined by the parameter `periodic_boundary=True`.
 
+The quantum-classical Hamiltonian is the Holstein coupling with dimensionless electron-phonon coupling :math:`g` and phonon frequency :math:`\omega`
+
 .. math::
 
     \hat{H}_{\mathrm{q-c}} = g\sqrt{2m\omega^{3}}\sum_{i}^{N} \hat{c}^{\dagger}_{i}\hat{c}_{i} q_{i}
+
+and the classical Hamiltonian is the harmonic oscillator
 
 .. math::
 
     H_{\mathrm{c}} = \sum_{i}^{N} \frac{p_{i}^{2}}{2m} + \frac{1}{2}m\omega^{2}q_{i}^{2}
 
-
-
-Here, :math:`g` is the dimensionless electron-phonon coupling, :math:`\omega` is the phonon frequency, and :math:`m` is the phonon mass. 
+with mass :math:`m`.
 
 The classical coordinates are sampled from a Boltzmann distribution:
 
