@@ -9,7 +9,7 @@ DESCRIPTION = 'QC Lab: a python package for quantum-classical modeling.'
 LONG_DESCRIPTION = 'QC Lab is a python package for quantum-classical modeling. It was developed in 2025 by the Tempelaar Group at Northwestern University.'
 
 setup(
-    name="QC Lab",
+    name="qc_lab",
     version=VERSION,
     author="Tempelaar Group",
     author_email="roel.tempelaar@northwestern.edu",
