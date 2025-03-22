@@ -55,7 +55,7 @@ Quantum-Classical Hamiltonian
 Ingredients that generate quantum-classical interaction terms.
 
 .. automodule:: qc_lab.ingredients
-    :members: diagonal_linear_coupling_h_qc, diagonal_linear_coupling_dh_qc_dzc
+    :members: diagonal_linear_h_qc, diagonal_linear_dh_qc_dzc
 
 Classical Hamiltonian
 ^^^^^^^^^^^^^^^^^^^^^
