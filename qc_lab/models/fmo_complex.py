@@ -18,7 +18,7 @@ class FMOComplex(Model):
             constants = {}
         self.default_constants = {
             "temp": 1,
-            "mass":1,
+            "mass": 1,
             "lambda": np.sqrt(0.05),
             "w": 117 * 0.00509506,
         }
@@ -31,10 +31,10 @@ class FMOComplex(Model):
         """
         Initialize the model-specific constants.
         """
-        mass = self.constants.get(
-            "mass", self.default_constants.get("mass")
-        )
-        self.constants.w = self.constants.get("w", self.default_constants.get("w")) * np.ones(8)
+        mass = self.constants.get("mass", self.default_constants.get("mass"))
+        self.constants.w = self.constants.get(
+            "w", self.default_constants.get("w")
+        ) * np.ones(8)
         self.constants.num_classical_coordinates = 8
         self.constants.num_quantum_states = 8
         self.constants.classical_coordinate_weight = self.constants.w
@@ -68,7 +68,7 @@ class FMOComplex(Model):
             if self.h_q_mat is not None:
                 if len(self.h_q_mat) == batch_size:
                     return self.h_q_mat
-        # these are in wavenumbers 
+        # these are in wavenumbers
         matrix_elements = np.array(
             [
                 [12505.0, 94.8, 5.5, -5.9, 7.1, -15.1, -12.2, 39.5],
@@ -82,15 +82,17 @@ class FMOComplex(Model):
             ],
             dtype=complex,
         )
-        # To convert wavenumbers to units of kBT at T=298.15K we 
+        # To convert wavenumbers to units of kBT at T=298.15K we
         # multiply by each value by 0.00509506 = (1/8065.544)[eV/cm^-1] / 0.0243342[eV]
         # where 0.0243342[eV] is the value of kBT at 298.15K
-        # note that all other constants in this model must also be assumed to be 
+        # note that all other constants in this model must also be assumed to be
         # in units of kBT at 298.15K.
         matrix_elements *= 0.00509506
 
         # to reduce numerical errors we can offset the diagonal elements by their minimum value
-        matrix_elements = matrix_elements - np.min(np.diag(matrix_elements))*np.identity(8)
+        matrix_elements = matrix_elements - np.min(
+            np.diag(matrix_elements)
+        ) * np.identity(8)
         # Finally we broadcast the array to the desired shape
         out = matrix_elements[np.newaxis, :, :] + np.zeros(
             (batch_size, 1, 1), dtype=complex
