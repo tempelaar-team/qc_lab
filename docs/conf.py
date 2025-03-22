@@ -45,6 +45,10 @@ html_theme_options = {
     "show_nav_level":2,
     "secondary_sidebar_items": ["page-toc", "sourcelink"],
     "external_links_new_tab": True,
+    "logo": {
+        "image_light": "_static/images/logo-light.png",
+        "image_dark": "_static/images/logo-dark.png",
+    }
 }
 html_css_files=['custom.css']
 
