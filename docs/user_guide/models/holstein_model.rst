@@ -37,7 +37,7 @@ The classical coordinates are sampled from a Boltzmann distribution:
 
 and by convention we assume that :math:`\hbar = 1`, :math:`k_{B} = 1`.
 
-constants
+Constants
 ----------
 
 The following table lists all of the constants required by the `HolsteinLatticeModel` class:
