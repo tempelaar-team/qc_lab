@@ -49,7 +49,101 @@ Adding output obvservables
 ---------------------------
 
 To add an additional variable to the output of an algorithm we must define a task that calculates the variable and add it to the output recipe.
-For example, let's calculate the adiabatic populations of the system as is sometimes done in scattering problems. Obviously these populations 
+
+Linear response functions
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For example, let's calculate a linear response function that can be used to calculate the absorption spectrum of a system. Mathematically we will calculate
+
+.. math::
+
+    R(t) = \langle \psi(0) \vert \psi(t)\rangle
+
+where :math:`\vert \psi(t)\rangle` is the diabatic wavefunction at time :math:`t`.
+
+.. code-block:: python
+
+    def update_response_function(sim, parameters, state, **kwargs):
+        # First get the diabatic wavefunction.
+        wf_db = state.wf_db
+        # If we are at the first timestep we can store the diabatic wavefunction in the parameters object
+        if sim.t_ind == 0:
+            parameters.wf_db_0 = np.copy(wf_db)
+        # Next calculate the response function and store it in the state object.
+        state.response_function = np.sum(np.conj(parameters.wf_db_0) * wf_db, axis=-1)
+        return parameters, state
+
+
+
+Next we can add this task to the output recipe.
+
+.. code-block:: python
+
+    MeanField.output_recipe.append(update_response_function)
+
+Finally we can add the relevant variable name to the output_variables list.
+
+.. code-block:: python
+
+    MeanField.output_variables.append('response_function')
+
+
+We can then run a simulation and calculate the corresponding spectral function,
+
+
+.. code-block:: python
+    
+    from qc_lab import Simulation 
+    from qc_lab.dynamics import parallel_driver_multiprocessing
+    from qc_lab.models import SpinBoson
+
+    # instantiate a simulation
+    sim = Simulation()
+    print('default simulation settings: ', sim.default_settings)
+
+    # change settings to customize simulation
+    sim.settings.num_trajs = 1000
+    sim.settings.batch_size = 250
+    sim.settings.tmax = 50
+    sim.settings.dt = 0.01
+
+    # instantiate a model 
+    sim.model = SpinBoson({'l_reorg': 0.2})
+    print('default model constants: ', sim.model.default_constants) # print out default constants
+
+    # instantiate an algorithm 
+    sim.algorithm = MeanField()
+    print('default algorithm settings: ', sim.algorithm.default_settings) # print out default settings
+
+
+
+    # define an initial diabatic wavefunction 
+    sim.state.wf_db = np.array([1, 0], dtype=complex)
+
+    # run the simulation
+    data = parallel_driver_multiprocessing(sim, num_tasks=4)
+
+    # plot the data.
+    print('calculated quantities:', data.data_dic.keys())
+    num_trajs = len(data.data_dic['seed'])
+    response_function = data.data_dic['response_function']/num_trajs
+    time = sim.settings.tdat_output
+    plt.plot(time, np.real(response_function), label='R(t)')
+    plt.xlabel('time')
+    plt.ylabel('response function')
+    plt.legend()
+    plt.show()
+
+    plt.plot(np.real(np.roll(np.fft.fft(response_function), len(time)//2)))
+    plt.xlabel('freq')
+    plt.ylabel('Absorbrance')
+    plt.show()
+
+
+Adiabatic populations
+~~~~~~~~~~~~~~~~~~~~~
+
+Next, let's calculate the adiabatic populations of the system as is sometimes done in scattering problems. Obviously these populations 
 will only have a well-defined meaning in regimes with no nonadiabatic coupling.
 
 .. code-block:: python
