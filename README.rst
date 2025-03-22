@@ -11,6 +11,10 @@ growing library of quantum-classical dynamics tools.
 
 **QC Lab** is developed and maintained by the Tempelaar Group in the Chemistry Department of Northwestern University in Evanston, Illinois, USA.
 
+
+The documentation for QC Lab can be found at https://tempelaar-team.github.io/qc_lab/
+
+
 Capabilities
 ------------
 
@@ -40,6 +44,8 @@ This alpha release of QC Lab can be installed from source by downloading the rep
 
 from inside its topmost directory (where the `setup.py` file is located).
 
+
+
 Bibliography
 ------------
 
@@ -49,3 +55,4 @@ Bibliography
 4. Tempelaar, R.; Reichman, D. R. Generalization of Fewest-Switches Surface Hopping for Coherences. The Journal of Chemical Physics 2018, 148 (10), 102309. https://doi.org/10.1063/1.5000843.
 5. Krotz, A.; Provazza, J.; Tempelaar, R. A Reciprocal-Space Formulation of Mixed Quantum–Classical Dynamics. J. Chem. Phys. 2021, 154 (22), 224101. https://doi.org/10.1063/5.0053177.
 6. Fenna, R. E. & Matthews, B. W. Chlorophyll arrangement in a bacteriochlorophyll protein from Chlorobium limicola. Nature 258, 573–577 (1975). https://doi.org/10.1038/258573a0.
+
