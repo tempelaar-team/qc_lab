@@ -88,6 +88,13 @@ def harmonic_oscillator_h_c(model, constants, parameters, **kwargs):
     h_c = np.sum((1 / 2) * (((p**2) / m) + m * (w**2) * (q**2)), axis=-1)
     return h_c
 
+@njit()
+def harmonic_oscillator_dh_c_dzc_jit(z, h, w):
+    a = (1 / 4) * (((w**2) / h) - h)
+    b = (1 / 4) * (((w**2) / h) + h)
+    out = 2 * b[..., :] * z + 2 * a[..., :] * np.conj(z)
+    return out
+
 
 def harmonic_oscillator_dh_c_dzc(model, constants, parameters, **kwargs):
     """
@@ -110,10 +117,7 @@ def harmonic_oscillator_dh_c_dzc(model, constants, parameters, **kwargs):
         batch_size = len(z)
     h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
-    a = (1 / 4) * (((w**2) / h) - h)
-    b = (1 / 4) * (((w**2) / h) + h)
-    dh_c_dzc = 2 * b[..., :] * z + 2 * a[..., :] * np.conj(z)
-    return dh_c_dzc
+    return harmonic_oscillator_dh_c_dzc_jit(z, h, w)
 
 
 def two_level_system_h_q(model, constants, parameters, **kwargs):
