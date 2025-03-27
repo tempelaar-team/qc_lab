@@ -92,7 +92,7 @@ Example
     sim.algorithm = MeanField()
 
     # define an initial diabatic wavefunction 
-    wf_db_0 = np.zeros((sim.model.constants.N), dtype=np.complex128)
+    wf_db_0 = np.zeros((sim.model.constants.num_quantum_states), dtype=np.complex128)
     wf_db_0[0] = 1.0 + 0.0j
     sim.state.wf_db = wf_db_0
 
