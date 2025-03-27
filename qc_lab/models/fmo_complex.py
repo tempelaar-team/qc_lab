@@ -19,8 +19,8 @@ class FMOComplex(Model):
         self.default_constants = {
             "temp": 1,
             "boson_mass": 1,
-            "l_reorg": 35 * 0.00509506, # reorganization energy
-            "W": 117 * 0.00509506, # characteristic frequency
+            "l_reorg": 35 * 0.00509506,  # reorganization energy
+            "W": 117 * 0.00509506,  # characteristic frequency
             "A": 200,
         }
         super().__init__(self.default_constants, constants)
@@ -39,12 +39,21 @@ class FMOComplex(Model):
             "boson_mass", self.default_constants.get("boson_mass")
         )
 
-        self.constants.w = (char_freq * np.tan(
-            ((np.arange(num_bosons) + 1) - 0.5) * np.pi / (2 * num_bosons)
-        )[np.newaxis,:] * np.ones((self.constants.num_quantum_states, num_bosons))).flatten()
-        self.constants.num_classical_coordinates = self.constants.num_quantum_states * self.constants.get('A',self.default_constants.get('A'))
+        self.constants.w = (
+            char_freq
+            * np.tan(((np.arange(num_bosons) + 1) - 0.5) * np.pi / (2 * num_bosons))[
+                np.newaxis, :
+            ]
+            * np.ones((self.constants.num_quantum_states, num_bosons))
+        ).flatten()
+        self.constants.num_classical_coordinates = (
+            self.constants.num_quantum_states
+            * self.constants.get("A", self.default_constants.get("A"))
+        )
         self.constants.classical_coordinate_weight = self.constants.w
-        self.constants.classical_coordinate_mass = boson_mass * np.ones(self.constants.num_classical_coordinates)
+        self.constants.classical_coordinate_mass = boson_mass * np.ones(
+            self.constants.num_classical_coordinates
+        )
 
     def initialize_constants_h_c(self):
         """
@@ -59,16 +68,21 @@ class FMOComplex(Model):
         num_bosons = self.constants.get("A", self.default_constants.get("A"))
         l_reorg = self.constants.get("l_reorg", self.default_constants.get("l_reorg"))
         m = self.constants.classical_coordinate_mass
-        h = (
-            self.constants.classical_coordinate_weight
-        )
+        h = self.constants.classical_coordinate_weight
         w = self.constants.w
-        self.constants.diagonal_linear_coupling = np.zeros((self.constants.num_quantum_states, self.constants.num_classical_coordinates))
+        self.constants.diagonal_linear_coupling = np.zeros(
+            (
+                self.constants.num_quantum_states,
+                self.constants.num_classical_coordinates,
+            )
+        )
         for n in range(self.constants.num_quantum_states):
-            self.constants.diagonal_linear_coupling[n, n*num_bosons:(n+1)*num_bosons] = (
-            w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h))
-        )[n*num_bosons:(n+1)*num_bosons]
-            
+            self.constants.diagonal_linear_coupling[
+                n, n * num_bosons : (n + 1) * num_bosons
+            ] = (w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h)))[
+                n * num_bosons : (n + 1) * num_bosons
+            ]
+
     def initialize_constants_h_q(self):
         """
         Initialize the constants for the quantum Hamiltonian.
