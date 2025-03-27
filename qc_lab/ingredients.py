@@ -88,8 +88,12 @@ def harmonic_oscillator_h_c(model, constants, parameters, **kwargs):
     h_c = np.sum((1 / 2) * (((p**2) / m) + m * (w**2) * (q**2)), axis=-1)
     return h_c
 
+
 @njit()
 def harmonic_oscillator_dh_c_dzc_jit(z, h, w):
+    """
+    Numba accelerated calculation of the gradient of the Harmonic oscillator Hamiltonian.
+    """
     a = (1 / 4) * (((w**2) / h) - h)
     b = (1 / 4) * (((w**2) / h) + h)
     out = 2 * b[..., :] * z + 2 * a[..., :] * np.conj(z)
