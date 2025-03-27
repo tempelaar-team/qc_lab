@@ -20,7 +20,7 @@ class FMOComplex(Model):
             "temp": 1,
             "boson_mass": 1,
             "l_reorg": 35 * 0.00509506,  # reorganization energy
-            "W": 117 * 0.00509506,  # characteristic frequency
+            "W": 106.14 * 0.00509506,  # characteristic frequency
             "A": 200,
         }
         super().__init__(self.default_constants, constants)
