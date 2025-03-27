@@ -18,9 +18,10 @@ class FMOComplex(Model):
             constants = {}
         self.default_constants = {
             "temp": 1,
-            "mass": 1,
-            "lambda": np.sqrt(0.05),
-            "w": 117 * 0.00509506,
+            "boson_mass": 1,
+            "l_reorg": 35 * 0.00509506,  # reorganization energy
+            "W": 106.14 * 0.00509506,  # characteristic frequency
+            "A": 200,
         }
         super().__init__(self.default_constants, constants)
         self.dh_qc_dzc_inds = None
@@ -31,28 +32,56 @@ class FMOComplex(Model):
         """
         Initialize the model-specific constants.
         """
-        mass = self.constants.get("mass", self.default_constants.get("mass"))
-        self.constants.w = self.constants.get(
-            "w", self.default_constants.get("w")
-        ) * np.ones(8)
-        self.constants.num_classical_coordinates = 8
-        self.constants.num_quantum_states = 8
+        self.constants.num_quantum_states = 7
+        num_bosons = self.constants.get("A", self.default_constants.get("A"))
+        char_freq = self.constants.get("W", self.default_constants.get("W"))
+        boson_mass = self.constants.get(
+            "boson_mass", self.default_constants.get("boson_mass")
+        )
+
+        self.constants.w = (
+            char_freq
+            * np.tan(((np.arange(num_bosons) + 1) - 0.5) * np.pi / (2 * num_bosons))[
+                np.newaxis, :
+            ]
+            * np.ones((self.constants.num_quantum_states, num_bosons))
+        ).flatten()
+        self.constants.num_classical_coordinates = (
+            self.constants.num_quantum_states
+            * self.constants.get("A", self.default_constants.get("A"))
+        )
         self.constants.classical_coordinate_weight = self.constants.w
-        self.constants.classical_coordinate_mass = mass * np.ones(8)
+        self.constants.classical_coordinate_mass = boson_mass * np.ones(
+            self.constants.num_classical_coordinates
+        )
 
     def initialize_constants_h_c(self):
         """
         Initialize the constants for the classical Hamiltonian.
         """
-        self.constants.harmonic_oscillator_frequency = self.constants.get("w")
+        self.constants.harmonic_oscillator_frequency = self.constants.w
 
     def initialize_constants_h_qc(self):
         """
         Initialize the constants for the quantum-classical coupling Hamiltonian.
         """
-        lam = self.constants.get("lambda", self.default_constants.get("lambda"))
+        num_bosons = self.constants.get("A", self.default_constants.get("A"))
+        l_reorg = self.constants.get("l_reorg", self.default_constants.get("l_reorg"))
+        m = self.constants.classical_coordinate_mass
+        h = self.constants.classical_coordinate_weight
         w = self.constants.w
-        self.constants.diagonal_linear_coupling = np.diag(w * lam)
+        self.constants.diagonal_linear_coupling = np.zeros(
+            (
+                self.constants.num_quantum_states,
+                self.constants.num_classical_coordinates,
+            )
+        )
+        for n in range(self.constants.num_quantum_states):
+            self.constants.diagonal_linear_coupling[
+                n, n * num_bosons : (n + 1) * num_bosons
+            ] = (w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h)))[
+                n * num_bosons : (n + 1) * num_bosons
+            ]
 
     def initialize_constants_h_q(self):
         """
@@ -71,17 +100,17 @@ class FMOComplex(Model):
         # these are in wavenumbers
         matrix_elements = np.array(
             [
-                [12505.0, 94.8, 5.5, -5.9, 7.1, -15.1, -12.2, 39.5],
-                [94.8, 12425.0, 29.8, 7.6, 1.6, 13.1, 5.7, 7.9],
-                [5.5, 29.8, 12195.0, -58.9, -1.2, -9.3, 3.4, 1.4],
-                [-5.9, 7.6, -58.9, 12375.0, -64.1, -17.4, -62.3, -1.6],
-                [7.1, 1.6, -1.2, -64.1, 12600.0, 89.5, -4.6, 4.4],
-                [-15.1, 13.1, -9.3, -17.4, 89.5, 12515.0, 35.1, -9.1],
-                [-12.2, 5.7, 3.4, -62.3, -4.6, 35.1, 12465.0, -11.1],
-                [39.5, 7.9, 1.4, -1.6, 4.4, -9.1, -11.1, 12700.0],
+                [12410, -87.7, 5.5, -5.9, 6.7, -13.7, -9.9],
+                [-87.7, 12530, 30.8, 8.2, 0.7, 11.8, 4.3],
+                [5.5, 30.8, 12210.0, -53.5, -2.2, -9.6, 6.0],
+                [-5.9, 8.2, -53.5, 12320, -70.7, -17.0, -63.3],
+                [6.7, 0.7, -2.2, -70.7, 12480, 81.1, -1.3],
+                [-13.7, 11.8, -9.6, -17.0, 81.1, 12630, 39.7],
+                [-9.9, 4.3, 6.0, -63.3, -1.3, 39.7, 12440],
             ],
             dtype=complex,
         )
+
         # To convert wavenumbers to units of kBT at T=298.15K we
         # multiply by each value by 0.00509506 = (1/8065.544)[eV/cm^-1] / 0.0243342[eV]
         # where 0.0243342[eV] is the value of kBT at 298.15K
@@ -92,7 +121,7 @@ class FMOComplex(Model):
         # to reduce numerical errors we can offset the diagonal elements by their minimum value
         matrix_elements = matrix_elements - np.min(
             np.diag(matrix_elements)
-        ) * np.identity(8)
+        ) * np.identity(self.constants.num_quantum_states)
         # Finally we broadcast the array to the desired shape
         out = matrix_elements[np.newaxis, :, :] + np.zeros(
             (batch_size, 1, 1), dtype=complex

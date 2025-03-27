@@ -89,6 +89,17 @@ def harmonic_oscillator_h_c(model, constants, parameters, **kwargs):
     return h_c
 
 
+@njit()
+def harmonic_oscillator_dh_c_dzc_jit(z, h, w):
+    """
+    Numba accelerated calculation of the gradient of the Harmonic oscillator Hamiltonian.
+    """
+    a = (1 / 4) * (((w**2) / h) - h)
+    b = (1 / 4) * (((w**2) / h) + h)
+    out = 2 * b[..., :] * z + 2 * a[..., :] * np.conj(z)
+    return out
+
+
 def harmonic_oscillator_dh_c_dzc(model, constants, parameters, **kwargs):
     """
     Derivative of the classical harmonic oscillator Hamiltonian with respect to the z coordinate.
@@ -110,10 +121,7 @@ def harmonic_oscillator_dh_c_dzc(model, constants, parameters, **kwargs):
         batch_size = len(z)
     h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
-    a = (1 / 4) * (((w**2) / h) - h)
-    b = (1 / 4) * (((w**2) / h) + h)
-    dh_c_dzc = 2 * b[..., :] * z + 2 * a[..., :] * np.conj(z)
-    return dh_c_dzc
+    return harmonic_oscillator_dh_c_dzc_jit(z, h, w)
 
 
 def two_level_system_h_q(model, constants, parameters, **kwargs):
