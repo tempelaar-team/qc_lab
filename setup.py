@@ -4,7 +4,7 @@ setup.py
 
 from setuptools import setup, find_packages
 
-VERSION = '0.1.0a1'
+VERSION = '0.1.0a2'
 DESCRIPTION = 'QC Lab: a python package for quantum-classical modeling.'
 LONG_DESCRIPTION = 'QC Lab is a python package for quantum-classical modeling. It was developed in 2025 by the Tempelaar Group at Northwestern University.'
 
