@@ -25,25 +25,16 @@ def initialize_branch_seeds(sim, parameters, state, **kwargs):
         batch_size % num_branches == 0
     ), "Batch size must be divisible by number of quantum states for deterministic surface hopping."
     # Next, determine the number of trajectories that have been run by assuming that
-    # the minimum seed in the current batch of seeds is the number of trajectories 
+    # the minimum seed in the current batch of seeds is the number of trajectories
     # that have been run modulo num_branches.
     orig_seeds = state.seed
-    print('orig_seeds', orig_seeds)
-    min_seed = orig_seeds.min() 
-    if min_seed != orig_seeds[0]:
-        warnings.warn(
-            "Minimum seed is not the first, this could lead to redundancies.",
-            UserWarning,
-        )
-    num_prev_trajs = min_seed# * num_branches
     # Now construct a branch index for each trajectory in the expanded batch.
     state.branch_ind = (
         np.zeros((batch_size // num_branches, num_branches), dtype=int)
         + np.arange(num_branches)[np.newaxis, :]
     ).flatten()
     # Now generate the new seeds for each trajectory in the expanded batch.
-    new_seeds = (num_prev_trajs + np.arange(len(orig_seeds))) // num_branches
-    print('new_seeds', new_seeds)
+    new_seeds = orig_seeds//num_branches
     parameters.seed = new_seeds
     state.seed = new_seeds
     return parameters, state
