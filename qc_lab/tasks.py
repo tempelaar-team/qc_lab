@@ -950,7 +950,7 @@ def initialize_random_values_fssh(sim, parameters, state, **kwargs):
     state.hopping_probs_rand_vals = np.zeros((batch_size, len(sim.settings.tdat)))
     state.stochastic_sh_rand_vals = np.zeros((batch_size, num_branches))
     for nt in range(batch_size):
-        np.random.seed(state.seed[nt])
+        np.random.seed(state.seed[int(nt*num_branches)])
         state.hopping_probs_rand_vals[nt] = np.random.rand(len(sim.settings.tdat))
         state.stochastic_sh_rand_vals[nt] = np.random.rand(num_branches)
     return parameters, state
