@@ -39,19 +39,24 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
         num_sims = sim.settings.num_trajs // sim.settings.batch_size
     else:
         num_sims = sim.settings.num_trajs // sim.settings.batch_size + 1
-    batch_seeds_list = np.zeros((num_sims * sim.settings.batch_size), dtype=int) + np.nan
+    batch_seeds_list = (
+        np.zeros((num_sims * sim.settings.batch_size), dtype=int) + np.nan
+    )
     batch_seeds_list[:num_trajs] = seeds
     batch_seeds_list = batch_seeds_list.reshape((num_sims, sim.settings.batch_size))
-    print(batch_seeds_list)
     sim.initialize_timesteps()
     input_data = [
-        (copy.deepcopy(sim), *initialize_vector_objects(sim, batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)), Data())
+        (
+            copy.deepcopy(sim),
+            *initialize_vector_objects(
+                sim, batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)
+            ),
+            Data(),
+        )
         for n in range(num_sims)
     ]
     for i in range(len(input_data)):
         input_data[i][0].settings.batch_size = len(input_data[i][2].seed)
-        print(input_data[i][0].settings.batch_size)
-    print(input_data)
     with multiprocessing.Pool(processes=size) as pool:
         results = pool.starmap(dynamics.dynamics, input_data)
     for result in results:
