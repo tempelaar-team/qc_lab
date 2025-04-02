@@ -37,55 +37,37 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
             UserWarning,
         )
         sim.settings.num_trajs = num_trajs
-    if sim.settings.num_trajs % sim.settings.batch_size != 0:
-        # The reason we enforce this is because it is possible for a simulation to generate
-        # intermediate quantities that are dependent on the batch size. To avoid an error
-        # we require that all simulations are run with the same batch size.
-        warnings.warn(
-            "The number of trajectories is not divisible by the batch size.\n \
-            Setting num_trajs to the lower multiple of batch_size.",
-            UserWarning,
-        )
-        sim.settings.num_trajs = (
-            int(sim.settings.num_trajs / sim.settings.batch_size)
-            * sim.settings.batch_size
-        )
-        seeds = seeds[: sim.settings.num_trajs]
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     if num_tasks is None:
         size = comm.Get_size()
     else:
         size = num_tasks
-    num_sims = sim.settings.num_trajs // sim.settings.batch_size
-    if num_sims % size != 0 and rank == 0:
-        warnings.warn(
-            "The number of batches to run is not divisible by the number of processors.\n \
-            Setting the number of batches to the lower multiple of size.\n"
-            + " running "
-            + str((num_sims // size) * size * sim.settings.batch_size)
-            + " trajectories.",
-            UserWarning,
-        )
-        num_sims = (num_sims // size) * size
-        seeds = seeds[: num_sims * sim.settings.batch_size]
-    if rank == 0:
-        print(
-            "running ",
-            num_sims * sim.settings.batch_size,
-            "trajectories in batches of",
-            sim.settings.batch_size,
-            "on",
-            size,
-            "tasks.",
-        )
-    batch_seeds_list = seeds.reshape((num_sims, sim.settings.batch_size))
+    if sim.settings.num_trajs % sim.settings.batch_size == 0:
+        num_sims = sim.settings.num_trajs // sim.settings.batch_size
+    else:
+        num_sims = sim.settings.num_trajs // sim.settings.batch_size + 1
+    batch_seeds_list = (
+        np.zeros((num_sims * sim.settings.batch_size), dtype=int) + np.nan
+    )
+    batch_seeds_list[:num_trajs] = seeds
+    batch_seeds_list = batch_seeds_list.reshape((num_sims, sim.settings.batch_size))
+
     chunk_size = num_sims // size
     sim.initialize_timesteps()
+    # It would be more efficient to only generate the local data.
     input_data = [
-        (sim, *initialize_vector_objects(sim, batch_seeds_list[n]), Data())
+        (
+            sim,
+            *initialize_vector_objects(
+                sim, batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)
+            ),
+            Data(),
+        )
         for n in range(num_sims)
     ]
+    for i in range(len(input_data)):
+        input_data[i][0].settings.batch_size = len(input_data[i][2].seed)
     start = rank * chunk_size
     end = (rank + 1) * chunk_size
     local_input_data = input_data[start:end]
