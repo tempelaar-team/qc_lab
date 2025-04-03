@@ -18,6 +18,7 @@ class MeanField(Algorithm):
         super().__init__(self.default_settings, settings)
 
     initialization_recipe = [
+        tasks.assign_norm_factor_mf,
         lambda sim, parameters, state: tasks.assign_to_parameters(
             sim, parameters, state, name="seed", val=state.seed
         ),
