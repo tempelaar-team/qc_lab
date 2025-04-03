@@ -12,23 +12,9 @@ class Data:
     """
 
     def __init__(self):
-        self.data_dic = {"seed": np.array([], dtype=int)}
+        self.data_dict = {"seed": np.array([], dtype=int), "norm_factor": 0}
 
-    def initialize_output_total_arrays_(self, sim, state):
-        """
-        Initialize the output total arrays for data collection.
-
-        Args:
-            sim: The simulation object containing settings and parameters.
-            state: The state object containing the current simulation state.
-        """
-        self.data_dic["seed"] = np.copy(state.get("seed"))
-        for key, val in state.output_dict.items():
-            self.data_dic[key] = np.zeros(
-                (len(sim.settings.tdat_output), *np.shape(val)[1:]), dtype=val.dtype
-            )
-
-    def add_to_output_total_arrays(self, sim, full_state, t_ind):
+    def add_to_output_total_arrays(self, sim, state, t_ind):
         """
         Add data to the output total arrays.
 
@@ -37,17 +23,24 @@ class Data:
             full_state: The full state object containing the current simulation state.
             t_ind: The current time index in the simulation.
         """
-        for key, val in full_state.output_dict.items():
-            if key in self.data_dic:
-                self.data_dic[key][int(t_ind / sim.settings.dt_output_n)] = np.sum(
-                    val, axis=0
+        # Check if the norm_factor is zero, if it is, save it from the state object.
+        if self.data_dict["norm_factor"] == 0:
+            if not(hasattr(state, "norm_factor")):
+                raise ValueError(
+                    "The state object does not have a norm_factor attribute."
+                )
+            self.data_dict["norm_factor"] = state.norm_factor
+        for key, val in state.output_dict.items():
+            if key in self.data_dict:
+                self.data_dict[key][int(t_ind / sim.settings.dt_output_n)] = (
+                    np.sum(val, axis=0) / self.data_dict["norm_factor"]
                 )
             else:
-                self.data_dic[key] = np.zeros(
+                self.data_dict[key] = np.zeros(
                     (len(sim.settings.tdat_output), *np.shape(val)[1:]), dtype=val.dtype
                 )
-                self.data_dic[key][int(t_ind / sim.settings.dt_output_n)] = np.sum(
-                    val, axis=0
+                self.data_dict[key][int(t_ind / sim.settings.dt_output_n)] = (
+                    np.sum(val, axis=0) / self.data_dict["norm_factor"]
                 )
 
     def add_data(self, new_data):
@@ -57,18 +50,25 @@ class Data:
         Args:
             new_data: A Data object containing the new data to be merged.
         """
-        for key, val in new_data.data_dic.items():
+        new_norm_factor = (
+            new_data.data_dict["norm_factor"] + self.data_dict["norm_factor"]
+        )
+        for key, val in new_data.data_dict.items():
             if val is None:
                 print(key, val)
             if key == "seed":
-                self.data_dic[key] = np.concatenate(
-                    (self.data_dic[key], val.flatten()), axis=0
+                self.data_dict[key] = np.concatenate(
+                    (self.data_dict[key], val.flatten()), axis=0
                 )
-            else:
-                if key in self.data_dic:
-                    self.data_dic[key] += val
+            elif key != "norm_factor":
+                if key in self.data_dict:
+                    self.data_dict[key] = (
+                        self.data_dict[key] * self.data_dict["norm_factor"]
+                        + val * new_data.data_dict["norm_factor"]
+                    ) / new_norm_factor
                 else:
-                    self.data_dic[key] = val
+                    self.data_dict[key] = val
+        self.data_dict["norm_factor"] = new_norm_factor
 
     def save_as_h5(self, filename):
         """
@@ -78,7 +78,7 @@ class Data:
             filename: The name of the file to save the data to.
         """
         with h5py.File(filename, "w") as h5file:
-            self._recursive_save(h5file, "/", self.data_dic)
+            self._recursive_save(h5file, "/", self.data_dict)
 
     def load_from_h5(self, filename):
         """
@@ -91,7 +91,7 @@ class Data:
             The Data object with the loaded data.
         """
         with h5py.File(filename, "r") as h5file:
-            self._recursive_load(h5file, "/", self.data_dic)
+            self._recursive_load(h5file, "/", self.data_dict)
         return self
 
     def _recursive_save(self, h5file, path, dic):

@@ -125,8 +125,8 @@ We can then run a simulation and calculate the corresponding spectral function,
 
     # plot the data.
     print('calculated quantities:', data.data_dic.keys())
-    num_trajs = len(data.data_dic['seed'])
-    response_function = data.data_dic['response_function']/num_trajs
+    num_trajs = len(data.data_dict['seed'])
+    response_function = data.data_dict['response_function']/num_trajs
     time = sim.settings.tdat_output
     plt.plot(time, np.real(response_function), label='R(t)')
     plt.xlabel('time')
@@ -210,11 +210,11 @@ We can then run a simulation and plot the populations, note that since the Spin-
 
     # plot the data.
     print('calculated quantities:', data.data_dic.keys())
-    num_trajs = len(data.data_dic['seed'])
-    classical_energy = data.data_dic['classical_energy']/num_trajs
-    quantum_energy = data.data_dic['quantum_energy']/num_trajs
-    populations = np.real(np.einsum('tii->ti', data.data_dic['dm_db']/num_trajs))
-    adiabatic_populations = np.real(data.data_dic['pops_adb']/num_trajs)
+    num_trajs = len(data.data_dict['seed'])
+    classical_energy = data.data_dict['classical_energy']/num_trajs
+    quantum_energy = data.data_dict['quantum_energy']/num_trajs
+    populations = np.real(np.einsum('tii->ti', data.data_dict['dm_db']/num_trajs))
+    adiabatic_populations = np.real(data.data_dict['pops_adb']/num_trajs)
     time = sim.settings.tdat_output
     plt.plot(time, adiabatic_populations[:,0], label='adiabatic state 0')
     plt.plot(time, adiabatic_populations[:,1], label='adiabatic state 1')

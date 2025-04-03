@@ -26,6 +26,7 @@ class FewestSwitchesSurfaceHopping(Algorithm):
         pass
 
     initialization_recipe = [
+        tasks.assign_norm_factor_fssh,
         tasks.initialize_branch_seeds,
         lambda sim, parameters, state: tasks.initialize_z(
             sim=sim, parameters=parameters, state=state, seed=state.seed

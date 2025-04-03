@@ -25,8 +25,8 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
     if seeds is None:
         offset = 0
         if data is not None:
-            if len(data.data_dic["seed"]) > 0:
-                offset = np.max(data.data_dic["seed"]) + 1
+            if len(data.data_dict["seed"]) > 0:
+                offset = np.max(data.data_dict["seed"]) + 1
         else:
             data = Data()
         seeds = offset + np.arange(sim.settings.num_trajs, dtype=int)
@@ -84,6 +84,6 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
         final_results = [item for sublist in all_results for item in sublist]
         for result in final_results:
             data.add_data(result)
-        data.data_dic["seed"] = seeds
+        data.data_dict["seed"] = seeds
 
     return data

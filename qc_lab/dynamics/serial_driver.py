@@ -16,8 +16,8 @@ def serial_driver(sim, seeds=None, data=None):
     if data is None:
         data = Data()
     if seeds is None:
-        if len(data.data_dic["seed"]) > 0:
-            offset = np.max(data.data_dic["seed"]) + 1
+        if len(data.data_dict["seed"]) > 0:
+            offset = np.max(data.data_dict["seed"]) + 1
         else:
             offset = 0
         seeds = offset + np.arange(sim.settings.num_trajs, dtype=int)
@@ -41,7 +41,7 @@ def serial_driver(sim, seeds=None, data=None):
         sim.initialize_timesteps()
         parameters, state = initialize_vector_objects(sim, batch_seeds)
         new_data = Data()
-        new_data.data_dic["seed"] = state.seed
+        new_data.data_dict["seed"] = state.seed
         new_data = dynamics.dynamics(sim, parameters, state, new_data)
         data.add_data(new_data)
     return data
