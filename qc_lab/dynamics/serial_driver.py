@@ -29,21 +29,7 @@ def serial_driver(sim, seeds=None, data=None):
             UserWarning,
         )
         sim.settings.num_trajs = num_trajs
-    if sim.settings.num_trajs % sim.settings.batch_size != 0:
-        # The reason we enforce this is because it is possible for a simulation to generate
-        # intermediate quantities that are dependent on the batch size. To avoid an error
-        # we require that all simulations are run with the same batch size.
-        warnings.warn(
-            "The number of trajectories is not divisible by the batch size.\n \
-            Setting num_trajs to the lower multiple of batch_size.",
-            UserWarning,
-        )
-        sim.settings.num_trajs = (
-            int(sim.settings.num_trajs / sim.settings.batch_size)
-            * sim.settings.batch_size
-        )
-        seeds = seeds[: sim.settings.num_trajs]
-
+    # determine the number of simulations required to execute the total number of trajectories.
     num_sims = int(num_trajs / sim.settings.batch_size) + 1
     for n in range(num_sims):
         batch_seeds = seeds[
@@ -55,7 +41,7 @@ def serial_driver(sim, seeds=None, data=None):
         sim.initialize_timesteps()
         parameters, state = initialize_vector_objects(sim, batch_seeds)
         new_data = Data()
-        new_data = dynamics.dynamics(sim, parameters, state, new_data)
         new_data.data_dic["seed"] = state.seed
+        new_data = dynamics.dynamics(sim, parameters, state, new_data)
         data.add_data(new_data)
     return data

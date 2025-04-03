@@ -15,6 +15,7 @@ def initialize_branch_seeds(sim, parameters, state, **kwargs):
         - num_quantum_states (int): Number of quantum states. Default: None.
     """
     del kwargs
+    # First ensure that the number of branches is correct.
     if sim.algorithm.settings.fssh_deterministic:
         num_branches = sim.model.constants.num_quantum_states
     else:
@@ -22,20 +23,18 @@ def initialize_branch_seeds(sim, parameters, state, **kwargs):
     batch_size = sim.settings.batch_size
     assert (
         batch_size % num_branches == 0
-    ), "Batch size must be divisible by number of quantums states for deterministic surface hopping."
+    ), "Batch size must be divisible by number of quantum states for deterministic surface hopping."
+    # Next, determine the number of trajectories that have been run by assuming that
+    # the minimum seed in the current batch of seeds is the number of trajectories
+    # that have been run modulo num_branches.
     orig_seeds = state.seed
-    min_seed = orig_seeds.min()
-    if min_seed != orig_seeds[0]:
-        warnings.warn(
-            "Minimum seed is not the first, this could lead to redundancies.",
-            UserWarning,
-        )
-    num_prev_trajs = min_seed * num_branches
+    # Now construct a branch index for each trajectory in the expanded batch.
     state.branch_ind = (
         np.zeros((batch_size // num_branches, num_branches), dtype=int)
         + np.arange(num_branches)[np.newaxis, :]
     ).flatten()
-    new_seeds = (num_prev_trajs + np.arange(len(orig_seeds))) // num_branches
+    # Now generate the new seeds for each trajectory in the expanded batch.
+    new_seeds = orig_seeds//num_branches
     parameters.seed = new_seeds
     state.seed = new_seeds
     return parameters, state
@@ -103,12 +102,12 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
         for s, seed_s in enumerate(burn_in_seeds):
             last_sample = np.copy(sample)
             last_z = np.diag(last_sample)
-            last_e = model.h_c(constants, parameters, z=last_z, batch_size = len(last_z))
+            last_e = model.h_c(constants, parameters, z=last_z, batch_size=len(last_z))
             proposed_sample, rand = _gen_sample_gaussian(
                 constants, z0=last_sample, seed=seed_s, separable=True
             )
             new_z = np.diag(proposed_sample)
-            new_e = model.h_c(constants, parameters, z=new_z, batch_size = len(new_z))
+            new_e = model.h_c(constants, parameters, z=new_z, batch_size=len(new_z))
             thresh = np.minimum(
                 np.ones(constants.num_classical_coordinates),
                 np.exp(-(new_e - last_e) / constants.temp),
@@ -117,12 +116,12 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
         for s, seed_s in enumerate(sample_seeds):
             last_sample = np.copy(sample)
             last_z = np.diag(last_sample)
-            last_e = model.h_c(constants, parameters, z=last_z, batch_size = len(last_z))
+            last_e = model.h_c(constants, parameters, z=last_z, batch_size=len(last_z))
             proposed_sample, rand = _gen_sample_gaussian(
                 constants, z0=last_sample, seed=seed_s, separable=True
             )
             new_z = np.diag(proposed_sample)
-            new_e = model.h_c(constants, parameters, z=new_z, batch_size = len(new_z))
+            new_e = model.h_c(constants, parameters, z=new_z, batch_size=len(new_z))
             thresh = np.minimum(
                 np.ones(constants.num_classical_coordinates),
                 np.exp(-(new_e - last_e) / constants.temp),
@@ -133,21 +132,29 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
 
     for s, seed_s in enumerate(burn_in_seeds):
         last_sample = np.copy(sample)
-        last_e = model.h_c(constants, parameters, z=last_sample, batch_size = len(last_sample))
+        last_e = model.h_c(
+            constants, parameters, z=last_sample, batch_size=len(last_sample)
+        )
         proposed_sample, rand = _gen_sample_gaussian(
             constants, z0=last_sample, seed=seed_s, separable=False
         )
-        new_e = model.h_c(constants, parameters, z=proposed_sample, batch_size = len(proposed_sample))
+        new_e = model.h_c(
+            constants, parameters, z=proposed_sample, batch_size=len(proposed_sample)
+        )
         thresh = min(1, np.exp(-(new_e - last_e) / constants.temp))
         if rand < thresh:
             sample = proposed_sample
     for s, seed_s in enumerate(sample_seeds):
         last_sample = np.copy(sample)
-        last_e = model.h_c(constants, parameters, z=last_sample, batch_size = len(last_sample))
+        last_e = model.h_c(
+            constants, parameters, z=last_sample, batch_size=len(last_sample)
+        )
         proposed_sample, rand = _gen_sample_gaussian(
             constants, z0=last_sample, seed=seed_s, separable=False
         )
-        new_e = model.h_c(constants, parameters, z=proposed_sample, batch_size = len(proposed_sample))
+        new_e = model.h_c(
+            constants, parameters, z=proposed_sample, batch_size=len(proposed_sample)
+        )
         thresh = min(1, np.exp(-(new_e - last_e) / constants.temp))
         if rand < thresh:
             sample = proposed_sample
@@ -218,7 +225,7 @@ def dh_c_dzc_finite_differences(model, constants, parameters, **kwargs):
             num_classical_coordinates,
         )
     )
-    h_c_0 = model.h_c(constants, parameters, z=z, batch_size = len(z))
+    h_c_0 = model.h_c(constants, parameters, z=z, batch_size=len(z))
     h_c_offset_re = model.h_c(
         constants,
         parameters,
@@ -533,7 +540,7 @@ def update_classical_energy(sim, parameters, state, **kwargs):
     """
     z = kwargs["z"]
     state.classical_energy = np.real(
-        sim.model.h_c(sim.model.constants, parameters, z=z, batch_size = len(z))
+        sim.model.h_c(sim.model.constants, parameters, z=z, batch_size=len(z))
     )
     return parameters, state
 
@@ -568,14 +575,14 @@ def update_classical_energy_fssh(sim, parameters, state, **kwargs):
                 * branch_weights[:, branch_ind][:, np.newaxis]
             )
             state.classical_energy = state.classical_energy + sim.model.h_c(
-                sim.model.constants, parameters, z=z_branch, batch_size = len(z_branch)
+                sim.model.constants, parameters, z=z_branch, batch_size=len(z_branch)
             )
     else:
         state.classical_energy = 0
         for branch_ind in range(num_branches):
             z_branch = z[state.branch_ind == branch_ind]
             state.classical_energy = state.classical_energy + sim.model.h_c(
-                sim.model.constants, parameters, z=z_branch, batch_size = len(z_branch)
+                sim.model.constants, parameters, z=z_branch, batch_size=len(z_branch)
             )
         state.classical_energy = state.classical_energy / num_branches
     state.classical_energy = np.real(state.classical_energy)
@@ -943,7 +950,7 @@ def initialize_random_values_fssh(sim, parameters, state, **kwargs):
     state.hopping_probs_rand_vals = np.zeros((batch_size, len(sim.settings.tdat)))
     state.stochastic_sh_rand_vals = np.zeros((batch_size, num_branches))
     for nt in range(batch_size):
-        np.random.seed(state.seed[nt])
+        np.random.seed(state.seed[int(nt*num_branches)])
         state.hopping_probs_rand_vals[nt] = np.random.rand(len(sim.settings.tdat))
         state.stochastic_sh_rand_vals[nt] = np.random.rand(num_branches)
     return parameters, state
