@@ -55,7 +55,7 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
         )
         for n in range(num_sims)
     ]
-    for i in range(len(input_data)):
+    for i in range(num_sims):
         input_data[i][0].settings.batch_size = len(input_data[i][2].seed)
     with multiprocessing.Pool(processes=size) as pool:
         results = pool.starmap(dynamics.dynamics, input_data)

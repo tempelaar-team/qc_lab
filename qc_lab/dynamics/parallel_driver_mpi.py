@@ -3,6 +3,7 @@ This file contains the parallel MPI driver for the dynamics simulation in QC Lab
 """
 
 import warnings
+import copy
 import numpy as np
 import qc_lab.dynamics as dynamics
 from qc_lab.data import Data
@@ -52,25 +53,27 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
     )
     batch_seeds_list[:num_trajs] = seeds
     batch_seeds_list = batch_seeds_list.reshape((num_sims, sim.settings.batch_size))
-
-    chunk_size = num_sims // size
+    # Split the simulations into chunks for each MPI process
+    chunk_inds = np.linspace(0, num_sims, size + 1, dtype=int)
+    start = chunk_inds[rank]
+    end = chunk_inds[rank + 1]
+    chunk_size = end - start
+    # Create the input data for each local simulation
     sim.initialize_timesteps()
-    # It would be more efficient to only generate the local data.
-    input_data = [
+    local_input_data = [
         (
-            sim,
+            copy.deepcopy(sim),
             *initialize_vector_objects(
                 sim, batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)
             ),
             Data(),
         )
-        for n in range(num_sims)
+        for n in np.arange(num_sims)[start:end]
     ]
-    for i in range(len(input_data)):
-        input_data[i][0].settings.batch_size = len(input_data[i][2].seed)
-    start = rank * chunk_size
-    end = (rank + 1) * chunk_size
-    local_input_data = input_data[start:end]
+    # Set the batch size for each local simulation
+    for i in range(chunk_size):
+        local_input_data[i][0].settings.batch_size = len(local_input_data[i][2].seed)
+    # Execute the local simulations
     local_results = [dynamics.dynamics(*x) for x in local_input_data]
 
     comm.Barrier()
