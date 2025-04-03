@@ -69,7 +69,7 @@ Initialization of classical coordinates
 
     :param seed: List of seeds used to initialize random numbers. 
     :type seed: np.ndarray((batch_size), dtype=int)
-    :returns: Initial complex classical coordinate. 
+    :returns: Initial complex-valued classical coordinate. 
     :rtype: np.ndarray((batch_size, sim.model.constants.num_classical_coordinates), dtype=complex)
 
 By default, QC Lab uses a Markov-chain Monte Carlo implementation of the Metropolis-Hastings algorithm to sample a Boltzmann distribution corresponding to 
@@ -111,7 +111,7 @@ Classical Hamiltonian gradients
 
 .. function:: sim.model.dh_c_dzc(model, constants, parameters, z = z)
 
-    :param z: Complex classical coordinate. 
+    :param z: complex-valued classical coordinate. 
     :type z: np.ndarray((batch_size, sim.model.constants.num_classical_coordinates), dtype=complex)
     :returns: Gradient of the classical Hamiltonian. 
     :rtype: np.ndarray((batch_size, sim.model.constants.num_classical_coordinates), dtype=complex)
@@ -137,7 +137,7 @@ Quantum-classical Hamiltonian gradients
 
 .. function:: sim.model.dh_c_dzc(model, constants, parameters, z = z)
 
-    :param z: Complex classical coordinate. 
+    :param z: complex-valued classical coordinate. 
     :type z: np.ndarray((batch_size, sim.model.constants.num_classical_coordinates), dtype=complex)
     :returns: indices of nonzero values
     :rtype: np.ndarray((# of nonzero values, 4), dtype=int)
@@ -166,7 +166,7 @@ Surface Hopping Switching Algorithm
 
 .. function:: sim.model.hop_function(model, constants, parameters, z=z, delta_z=delta_z, ev_diff=ev_diff)
 
-    :param z: complex classical coordinate (in a single trajectory)
+    :param z: complex-valued classical coordinate (in a single trajectory)
     :type z: np.ndarray(sim.model.constants.num_classical_coordinates, dtype=complex)
     :param delta_z: rescaling direction.
     :type delta_z: np.ndarray(sim.model.constants.num_classical_coordinates, dtype=complex)

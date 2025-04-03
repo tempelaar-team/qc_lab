@@ -70,7 +70,7 @@ def harmonic_oscillator_h_c(model, constants, parameters, **kwargs):
         - classical_coordinate_mass: Array of masses for classical coordinates.
 
     Keyword Arguments:
-        - z: Complex classical coordinates.
+        - z: complex-valued classical coordinates.
         - batch_size: (Optional) Number of batches for vectorized computation.
     """
     del model, parameters
@@ -109,7 +109,7 @@ def harmonic_oscillator_dh_c_dzc(model, constants, parameters, **kwargs):
         - harmonic_oscillator_frequency: Array of harmonic oscillator frequencies.
 
     Keyword Arguments:
-        - z: Complex classical coordinates.
+        - z: complex-valued classical coordinates.
         - batch_size: (Optional) Number of batches for vectorized computation.
     """
     del model, parameters
@@ -237,7 +237,7 @@ def diagonal_linear_h_qc(model, constants, parameters, **kwargs):
         - diagonal_linear_coupling: Array of coupling constants (num_sites, num_classical_coordinates).
 
     Keyword Arguments:
-        - z: Complex classical coordinates.
+        - z: complex-valued classical coordinates.
         - batch_size: (Optional) Number of batches for vectorized computation.
     """
     del model, parameters
@@ -265,7 +265,7 @@ def diagonal_linear_dh_qc_dzc(model, constants, parameters, **kwargs):
         - diagonal_linear_coupling: Array of coupling constants (num_sites, num_classical_coordinates).
 
     Keyword Arguments:
-        - z: Complex classical coordinates.
+        - z: complex-valued classical coordinates.
         - batch_size: (Optional) Number of batches for vectorized computation.
     """
     z = kwargs["z"]
@@ -316,7 +316,7 @@ def harmonic_oscillator_hop_function(model, constants, parameters, **kwargs):
         - classical_coordinate_weight: Array of weights for classical coordinates.
 
     Keyword Arguments:
-        - z: Complex classical coordinates.
+        - z: complex-valued classical coordinates.
         - delta_z: Change in classical coordinates.
         - ev_diff: Energy difference for the hopping operation.
     """
@@ -399,7 +399,7 @@ def harmonic_oscillator_boltzmann_init_classical(
         p = np.random.normal(
             loc=0, scale=std_p, size=constants.num_classical_coordinates
         )
-        # Calculate the complex classical coordinate.
+        # Calculate the complex-valued classical coordinate.
         z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
         out[s] = z
     return out
@@ -437,7 +437,7 @@ def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kw
         p = np.random.normal(
             loc=0, scale=std_p, size=constants.num_classical_coordinates
         )
-        # Calculate the complex classical coordinate.
+        # Calculate the complex-valued classical coordinate.
         z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
         out[s] = z
     return out

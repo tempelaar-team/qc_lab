@@ -521,7 +521,7 @@ This is accomplished by defining an ingredient called `init_classical` which has
         p = np.random.normal(
             loc=0, scale=std_p, size=constants.num_classical_coordinates
         )
-        # Calculate the complex classical coordinate.
+        # Calculate the complex-valued classical coordinate.
         z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
         out[s] = z
     return out
