@@ -760,10 +760,10 @@ Let's then add the ingredient and initialization function to the model class:
     model.h_q = ingredients.two_level_system_h_q
     model.initialize_constants_h_q = initialize_constants_h_q
     # also update the list of initialization functions
-    model.initialization_functions[3] = initialize_constants_h_q
+    model.swap_initialization_function(model, 'initialize_constants_h_q', initialize_constants_h_q)
 
-here, we set the initialization function to the fourth element (with index `3`) of the `model.initialization_functions` list. Remember you can always print out
-the `model.initialization_functions` list to see the order of the functions ensuring that you swap out the correct one!
+here, we used the `swap_initialization_function` method to update the list of initialization functions. This is a convenience function that will swap out the initialization function
+with a given name. In this case, we are swapping out the `initialize_constants_h_q` function with the new one we just defined.
 
 
 Next we can load the classical Hamiltonian as the built-in harmonic oscillator Hamiltonian and update the initialization function like before:
@@ -780,7 +780,7 @@ Next we can load the classical Hamiltonian as the built-in harmonic oscillator H
 
     model.h_c = ingredients.harmonic_oscillator_h_c
     model.initialize_constants_h_c = initialize_constants_h_c
-    model.initialization_functions[1] = initialize_constants_h_c
+    model.swap_initialization_function(model, 'initialize_constants_h_c', initialize_constants_h_c)
     
 We can also load analytic gradients for the classical Hamiltonian (which relies
 on the same constants has the classical Hamiltonian).
@@ -789,15 +789,36 @@ on the same constants has the classical Hamiltonian).
 
     model.dh_c_dzc = ingredients.harmonic_oscillator_dh_c_dzc
 
-Next we can load the quantum-classical Hamiltonian and its gradient. No additional initialization is needed.
+Next we can load the quantum-classical Hamiltonian and its gradient. We will use the built-in ingredient `diagonal_linear_h_qc` which is a generic 
+quantum-classical Hamiltonian that linearly couples classical coordinates to the diagonal of the Hamiltonian. As a result we must specify a set of 
+couplings to ensure that each coordinate is coupled to the correct entry of the diagonal.
 
 .. code-block:: python
+    def initialize_constants_h_qc(model):
+        """
+        Initialize the constants for the quantum-classical coupling Hamiltonian.
+        """
+        num_bosons = model.constants.get("A", model.default_constants.get("A"))
+        l_reorg = model.constants.get("l_reorg", model.default_constants.get("l_reorg"))
+        m = model.constants.get("boson_mass", model.default_constants.get("boson_mass"))
+        h = (
+            model.constants.classical_coordinate_weight
+        )  # np.sqrt(2 * l_reorg / num_bosons) * (1/np.sqrt(2*m*h))
+        w = model.constants.w
+        model.constants.diagonal_linear_coupling = np.zeros((2, num_bosons))
+        model.constants.diagonal_linear_coupling[0] = (
+            w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h))
+        )
+        model.constants.diagonal_linear_coupling[1] = (
+            -w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h))
+        )
 
     model.h_qc = ingredients.spin_boson_h_qc
     model.dh_qc_dzc = ingredients.spin_boson_dh_qc_dzc
     model.dh_qc_dzc_inds = None
     model.dh_qc_dzc_mels = None
     model.dh_qc_dzc_shape = None
+    model.swap_initialization_function(model, 'initialize_constants_h_qc', initialize_constants_h_qc)
 
 
 Then we can load in the built-in classical initialization ingredient which samples the Boltzmann distribution for the harmonic oscillator Hamiltonian.
@@ -848,7 +869,7 @@ The full code for upgrading the `MinimalSpinBoson` using built-in ingredients is
 
     model.initialize_constants_h_q = initialize_constants_h_q
     # also update the list of initialization functions
-    model.initialization_functions[3] = initialize_constants_h_q
+    model.swap_initialization_function(model, 'initialize_constants_h_q', initialize_constants_h_q)
 
     def initialize_constants_h_c(model):
         """
@@ -859,15 +880,35 @@ The full code for upgrading the `MinimalSpinBoson` using built-in ingredients is
 
     model.h_c = ingredients.harmonic_oscillator_h_c
     model.initialize_constants_h_c = initialize_constants_h_c
-    model.initialization_functions[1] = initialize_constants_h_c
+    model.swap_initialization_function(model, 'initialize_constants_h_c', initialize_constants_h_c)
 
     model.dh_c_dzc = ingredients.harmonic_oscillator_dh_c_dzc
 
-    model.h_qc = ingredients.spin_boson_h_qc
-    model.dh_qc_dzc = ingredients.spin_boson_dh_qc_dzc
+    def initialize_constants_h_qc(model):
+        """
+        Initialize the constants for the quantum-classical coupling Hamiltonian.
+        """
+        num_bosons = model.constants.get("A", model.default_constants.get("A"))
+        l_reorg = model.constants.get("l_reorg", model.default_constants.get("l_reorg"))
+        m = model.constants.get("boson_mass", model.default_constants.get("boson_mass"))
+        h = (
+            model.constants.classical_coordinate_weight
+        )  
+        w = model.constants.w
+        model.constants.diagonal_linear_coupling = np.zeros((2, num_bosons))
+        model.constants.diagonal_linear_coupling[0] = (
+            w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h))
+        )
+        model.constants.diagonal_linear_coupling[1] = (
+            -w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h))
+        )
+
+    model.h_qc = ingredients.diagonal_linear_h_qc
+    model.dh_qc_dzc = ingredients.diagonal_linear_dh_qc_dzc
     model.dh_qc_dzc_inds = None
     model.dh_qc_dzc_mels = None
     model.dh_qc_dzc_shape = None
+    model.swap_initialization_function(model, 'initialize_constants_h_qc', initialize_constants_h_qc)
 
     model.init_classical = ingredients.harmonic_oscillator_boltzmann_init_classical
 
