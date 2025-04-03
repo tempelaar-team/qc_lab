@@ -45,7 +45,7 @@ according to the quickstart guide.:
     # Import the MPI module
     from mpi4py import MPI
 
-    # initialize the sim object using the quickstart guide
+    # Initialize the sim object using the quickstart guide
 
     # Run the simulation using the parallel driver
     data = parallel_driver_mpi(sim, num_tasks=100)

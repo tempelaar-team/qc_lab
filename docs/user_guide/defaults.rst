@@ -12,9 +12,9 @@ By default QC Lab uses the following settings in the simulation object. These se
 .. code-block:: python
 
     sim = Simulation()
-    sim.settings.var = val# can change the value of a setting like this.
+    sim.settings.var = val # Can change the value of a setting like this
 
-    # or by passing the setting directly to the simulation object
+    # or by passing the setting directly to the simulation object.
     sim = Simulation({'var': val})
 
 
@@ -28,7 +28,7 @@ By default QC Lab uses the following settings in the simulation object. These se
      - The total number of trajectories to run.
      - 10
    * - `batch_size`
-     - The number of trajectories to run simultaneously (must be a divisor of `num_trajs`).
+     - The (maximum) number of trajectories to run simultaneously.
      - 1
    * - `tmax`
      - The total time of each trajectory.
@@ -42,8 +42,7 @@ By default QC Lab uses the following settings in the simulation object. These se
 
 .. note::
 
-    QC Lab expects that `num_trajs` is an integer multiple of `batch_size`. If not, it will use the lower integer multiple (which could be zero!). 
-    It also expects that the total time of the simulation is an integer multiple of the output timestep `dt_output`, which must also be an integer multiple 
+    QC Lab expects that the total time of the simulation is an integer multiple of the output timestep `dt_output`, which must also be an integer multiple 
     of the propagation timestep `dt`.
 
  
@@ -73,16 +72,17 @@ Initialization of classical coordinates
     :rtype: np.ndarray((batch_size, sim.model.constants.num_classical_coordinates), dtype=complex)
 
 By default, QC Lab uses a Markov-chain Monte Carlo implementation of the Metropolis-Hastings algorithm to sample a Boltzmann distribution corresponding to 
-`sim.model.h_c` at the temperature `sim.model.constants.kBT` assuming `kB=1`. We encourage caution and further validation before using it on arbitrary classical 
+`sim.model.h_c` at the thermal quantum `sim.model.constants.kBT`. We encourage caution and further validation before using it on arbitrary classical 
 potentials as fine-tuning of the algorithm parameters may be required to obtain reliable results.
 
-The implementation utilizes with a single random walker in `sim.model.constants.num_classical_coordinates` dimensions or `sim.model.constants.num_classical_coordinates` 
+The implementation utilizes a single random walker in `sim.model.constants.num_classical_coordinates` dimensions or `sim.model.constants.num_classical_coordinates` 
 walkers each in one dimension (depending on if `mcmc_h_c_separable==True`) and evolves the walkers from the initial point `mcmc_init_z` by sampling a Gaussian distribution with
-with standard deviation `mcmc_std` for `mcmc_burn_in_size` steps. It then evolves the walkers another `mcmc_sample_size` steps to collect a distribution of initial coordinates from which 
+a standard deviation `mcmc_std` for `mcmc_burn_in_size` steps. It then evolves the walkers another `mcmc_sample_size` steps to collect a distribution of initial coordinates from which 
 the required number of initial conditions are drawn uniformly. At a minimum, one should ensure that `mcmc_sample_size` is large enough to ensure a full exploration of the phase-space.
 
 
 .. list-table::
+   :widths: 30 80 20
    :header-rows: 1
 
    * - Variable name
@@ -100,7 +100,7 @@ the required number of initial conditions are drawn uniformly. At a minimum, one
    * - `mcmc_init_z`
      - The initial coordinate that the random walker is initialized at. 
      - A point in the interval (0,1) for both real and imaginary parts in each coordinate. (This is deterministically chosen for reproducability).
-   * - `mcmc_std``
+   * - `mcmc_std`
      - The standard deviation of the Gaussian used to generate the random walk.
      - 1
 
@@ -126,7 +126,7 @@ QC Lab utilizes a finite difference method to calculate the gradient of the clas
      - Description
      - Default value
    * - `dh_qc_dzc_finite_differences_delta`
-     - finite difference that each coordinate is varied by.
+     - Finite difference that each coordinate is varied by.
      - 1e-6
 
 
@@ -139,12 +139,12 @@ Quantum-classical Hamiltonian gradients
 
     :param z: complex-valued classical coordinate. 
     :type z: np.ndarray((batch_size, sim.model.constants.num_classical_coordinates), dtype=complex)
-    :returns: indices of nonzero values
+    :returns: Indices of nonzero values
     :rtype: np.ndarray((# of nonzero values, 4), dtype=int)
-    :returns: values
+    :returns: Values
     :rtype: np.ndarray((# of nonzero values), dtype=complex)
-    :returns: shape of dense gradient: (batch_size, sim.model.constants.num_classical_coordinates, sim.model.constants.num_quantum_states, sim.model.constants.num_quantum_states)
-    :rtype: tuple
+    :returns: Shape of dense gradient: (batch_size, sim.model.constants.num_classical_coordinates, sim.model.constants.num_quantum_states, sim.model.constants.num_quantum_states)
+    :rtype: Tuple
 
 
 QC Lab utilizes a finite difference method to calculate the gradient of the quantum-classical Hamiltonian. Unlike that of the 
@@ -166,18 +166,18 @@ Surface Hopping Switching Algorithm
 
 .. function:: sim.model.hop_function(model, constants, parameters, z=z, delta_z=delta_z, ev_diff=ev_diff)
 
-    :param z: complex-valued classical coordinate (in a single trajectory)
+    :param z: Complex-valued classical coordinate (in a single trajectory).
     :type z: np.ndarray(sim.model.constants.num_classical_coordinates, dtype=complex)
-    :param delta_z: rescaling direction.
+    :param delta_z: Rescaling direction.
     :type delta_z: np.ndarray(sim.model.constants.num_classical_coordinates, dtype=complex)
-    :param ev_diff: energy difference between final and initial surface (final - initial)
+    :param ev_diff: Energy difference between final and initial surface (final - initial).
     :type ev_diff: float
-    :returns: rescaled coordinate
+    :returns: Rescaled coordinate.
     :rtype: np.ndarray(sim.model.constants.num_classical_coordinates, dtype=complex)
     :returns: True or False depending on if a hop happened.
-    :rtype: Bool
+    :rtype: Bool.
 
-QC Lab implements a numerical method to find the scalar factor (gamma) required to rescale classical coordinates in the surface hopping Algorithm. It works by constructing a uniform grid with 
+QC Lab implements a numerical method to find the scalar factor (gamma) required to rescale classical coordinates in the surface hopping algorithm. It works by constructing a uniform grid with 
 `numerical_fssh_hop_num_points` points 
 from negative to positive and determines the point at which energy is conserved the closest. It then recenters the 
 grid at that point and reduces the range by 0.5 and once again searches for the point at which energy is conserved the closest. It repeats that step for `numerical_fssh_hop_max_iter`
@@ -191,7 +191,7 @@ accepted, if it is greater then the hop is rejected.
      - Description
      - Default value
    * - `numerical_fssh_hop_gamma_range`
-     - interval from minus to positive over which gamma is initially sampled.
+     - Interval from minus to positive over which gamma is initially sampled.
      - 5
    * - `numerical_fssh_hop_num_points`
      - The number of points on the grid used to sample gamma. 

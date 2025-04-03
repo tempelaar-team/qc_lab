@@ -10,7 +10,8 @@ Settings
 --------
 
 
-.. list-table:: MeanField Output Variables
+.. list-table:: `FewestSwitchesSurfaceHopping` settings
+   :widths: 30 80 20
    :header-rows: 1
 
    * - Setting name (type)
@@ -26,7 +27,7 @@ Settings
 Initial State
 -------------
 
-The FSSH algorithm requires an initial diabatic wavefunction called `wf_db` which is a complex numpy array with dimension `sim.model.constants.num_quantum_states`.
+The FSSH algorithm requires an initial diabatic wavefunction called `wf_db` which is a complex NumPy array with dimension `sim.model.constants.num_quantum_states`.
 For example:
 
 
@@ -40,7 +41,7 @@ Output Variables
 
 The following table lists the default output variables for the `FewestSwitchesSurfaceHopping` class.
 
-.. list-table:: FewestSwitchesSurfaceHopping Output Variables
+.. list-table:: `FewestSwitchesSurfaceHopping` Output Variables
    :header-rows: 1
 
    * - Variable name

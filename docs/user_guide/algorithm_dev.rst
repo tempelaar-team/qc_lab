@@ -34,8 +34,8 @@ referred to as "tasks".
     # the output recipe
     print(MeanField.output_recipe)
 
-As the name implies, the initialization_recipe initializes all the variables required for the algorithm. The update_recipe
-updates the variables at each time step and the output_recipe is used to output the results of the algorithm.
+As the name implies, the `initialization_recipe` initializes all the variables required for the algorithm. The `update_recipe`
+updates the variables at each time step, and the `output_recipe` is used to output the results of the algorithm.
 
 In addition to the recipes, a list of variable names is needed to specify which variables the algorithm will store in the Data object. 
 
@@ -125,8 +125,7 @@ We can then run a simulation and calculate the corresponding spectral function,
 
     # plot the data.
     print('calculated quantities:', data.data_dic.keys())
-    num_trajs = len(data.data_dict['seed'])
-    response_function = data.data_dict['response_function']/num_trajs
+    response_function = data.data_dict['response_function']
     time = sim.settings.tdat_output
     plt.plot(time, np.real(response_function), label='R(t)')
     plt.xlabel('time')
@@ -136,7 +135,7 @@ We can then run a simulation and calculate the corresponding spectral function,
 
     plt.plot(np.real(np.roll(np.fft.fft(response_function), len(time)//2)))
     plt.xlabel('freq')
-    plt.ylabel('Absorbrance')
+    plt.ylabel('absorbance')
     plt.show()
 
 
@@ -155,7 +154,7 @@ will only have a well-defined meaning in regimes with no nonadiabatic coupling.
         evals, evecs = np.linalg.eigh(H)
         # Now calculate the adiabatic wavefunction.
         wf_adb = np.einsum('tji,tj->ti', np.conj(evecs), state.wf_db)
-        # Finally calculate the populations (note that we do not sum over the batch).
+        # Finally calculate the populations (note that we do not sum over the batch, this is done internally by QC Lab).
         pops_adb = np.abs(wf_adb)**2
         # Store the populations in the state object.
         state.pops_adb = pops_adb
@@ -167,14 +166,16 @@ Next we can add this task to the output recipe.
 
     MeanField.output_recipe.append(update_adiabatic_populations)
 
+
 Finally we can add the relevant variable name to the output_variables list.
 
 .. code-block:: python
 
     MeanField.output_variables.append('pops_adb')
 
-We can then run a simulation and plot the populations, note that since the Spin-Boson model is always in a coupling regime these
- populations will not have a well-defined meaning.
+
+We can then run a simulation and plot the populations. Note that since the spin-boson model is always in a coupling regime these populations will not have a well-defined meaning.
+
 
 .. code-block:: python
 
@@ -182,53 +183,53 @@ We can then run a simulation and plot the populations, note that since the Spin-
     from qc_lab.dynamics import serial_driver
     from qc_lab.models import SpinBoson
 
-    # instantiate a simulation
+    # Instantiate a simulation.
     sim = Simulation()
     print('default simulation settings: ', sim.default_settings)
 
-    # change settings to customize simulation
+    # Change settings to customize simulation.
     sim.settings.num_trajs = 100
     sim.settings.batch_size = 100
     sim.settings.tmax = 25
     sim.settings.dt = 0.01
 
-    # instantiate a model 
+    # Instantiate a model.
     sim.model = SpinBoson()
     print('default model constants: ', sim.model.default_constants) # print out default constants
 
-    # instantiate an algorithm 
+    # Instantiate an algorithm.
     sim.algorithm = MeanField()
     print('default algorithm settings: ', sim.algorithm.default_settings) # print out default settings
 
 
 
-    # define an initial diabatic wavefunction 
+    # Define an initial diabatic wavefunction.
     sim.state.wf_db = np.array([1, 0], dtype=complex)
 
-    # run the simulation
+    # Run the simulation.
     data = serial_driver(sim)
 
-    # plot the data.
+    # Plot the data.
     print('calculated quantities:', data.data_dic.keys())
-    num_trajs = len(data.data_dict['seed'])
-    classical_energy = data.data_dict['classical_energy']/num_trajs
-    quantum_energy = data.data_dict['quantum_energy']/num_trajs
-    populations = np.real(np.einsum('tii->ti', data.data_dict['dm_db']/num_trajs))
-    adiabatic_populations = np.real(data.data_dict['pops_adb']/num_trajs)
+    classical_energy = data.data_dict['classical_energy']
+    quantum_energy = data.data_dict['quantum_energy']
+    populations = np.real(np.einsum('tii->ti', data.data_dict['dm_db']))
+    adiabatic_populations = np.real(data.data_dict['pops_adb'])
     time = sim.settings.tdat_output
     plt.plot(time, adiabatic_populations[:,0], label='adiabatic state 0')
     plt.plot(time, adiabatic_populations[:,1], label='adiabatic state 1')
     plt.xlabel('time')
     plt.ylabel('population')
     plt.legend()
-    #plt.savefig('../docs/user_guide/quickstart/quickstart_populations.png')
     plt.show()
+
 
 .. note::
 
     In the above code we chose to modify the MeanField class itself rather than an instance of it. This can lead to troublesome 
     behavior in a Jupyter notebook where the class will not be reloaded if the cell is rerun. Restarting the kernel 
     will fix this issue. Otherwise one can modify an instance of the class by creating a new instance and modifying it.
+
 
 Modifying algorithm behavior
 ----------------------------

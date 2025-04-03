@@ -52,7 +52,7 @@ The following table lists all of the constants required by the `SpinBosonModel` 
    * - Parameter (symbol)
      - Description
      - Default Value
-   * - `temp` :math:`(kBT)`
+   * - `kBT` :math:`(kBT)`
      - Thermal quantum
      - 1
    * - `V` :math:`(V)`

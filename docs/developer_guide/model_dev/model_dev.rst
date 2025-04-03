@@ -504,7 +504,7 @@ This is accomplished by defining an ingredient called `init_classical` which has
     def init_classical(model, constants, parameters, **kwargs):
     del model, parameters
     seed = kwargs.get("seed", None)
-    kbt = constants.kBT
+    kBT = constants.kBT
     h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
     m = constants.classical_coordinate_mass
@@ -512,8 +512,8 @@ This is accomplished by defining an ingredient called `init_classical` which has
     for s, seed_value in enumerate(seed):
         np.random.seed(seed_value)
         # Calculate the standard deviations for q and p.
-        std_q = np.sqrt(kbt / (m * (w**2)))
-        std_p = np.sqrt(m * kbt)
+        std_q = np.sqrt(kBT / (m * (w**2)))
+        std_p = np.sqrt(m * kBT)
         # Generate random q and p values.
         q = np.random.normal(
             loc=0, scale=std_q, size=constants.num_classical_coordinates

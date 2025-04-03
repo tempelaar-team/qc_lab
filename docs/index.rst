@@ -66,7 +66,7 @@ A reference guide for QC Lab, documenting all tasks and ingredients available in
 Bibliography
 ------------
 
-1. Miyazaki, K.; Krotz, A.; Tempelaar, R. Unitary Basis Transformations in Mixed Quantum-Classical Dynamics. arXiv April 23, 2024. http://arxiv.org/abs/2404.15614.
+1. Miyazaki, K.; Krotz, A.; Tempelaar, R. Mixed Quantum-Classical Dynamics under Arbitrary Unitary Basis Transformations. J. Chem. Theory Comput. 2024, 20 (15), 6500-6509. https://doi.org/10.1021/acs.jctc.4c00555
 2. Tully, J. C. Mixed Quantum–Classical Dynamics. Faraday Discuss. 1998, 110 (0), 407–419. https://doi.org/10.1039/A801824C.
 3. Hammes‐Schiffer, S.; Tully, J. C. Proton Transfer in Solution: Molecular Dynamics with Quantum Transitions. J. Chem. Phys. 1994, 101 (6), 4657–4667. https://doi.org/10.1063/1.467455.
 4. Tempelaar, R.; Reichman, D. R. Generalization of Fewest-Switches Surface Hopping for Coherences. The Journal of Chemical Physics 2018, 148 (10), 102309. https://doi.org/10.1063/1.5000843.

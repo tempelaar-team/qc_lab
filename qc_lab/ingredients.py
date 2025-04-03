@@ -94,9 +94,9 @@ def harmonic_oscillator_dh_c_dzc_jit(z, h, w):
     """
     Numba accelerated calculation of the gradient of the Harmonic oscillator Hamiltonian.
     """
-    a = (1 / 4) * (((w**2) / h) - h)
-    b = (1 / 4) * (((w**2) / h) + h)
-    out = 2 * b[..., :] * z + 2 * a[..., :] * np.conj(z)
+    a = (1 / 2) * (((w**2) / h) - h)
+    b = (1 / 2) * (((w**2) / h) + h)
+    out = b[..., :] * z + a[..., :] * np.conj(z)
     return out
 
 
@@ -382,7 +382,7 @@ def harmonic_oscillator_boltzmann_init_classical(
     """
     del model, parameters
     seed = kwargs.get("seed", None)
-    kbt = constants.kBT
+    kBT = constants.kBT
     h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
     m = constants.classical_coordinate_mass
@@ -390,8 +390,8 @@ def harmonic_oscillator_boltzmann_init_classical(
     for s, seed_value in enumerate(seed):
         np.random.seed(seed_value)
         # Calculate the standard deviations for q and p.
-        std_q = np.sqrt(kbt / (m * (w**2)))
-        std_p = np.sqrt(m * kbt)
+        std_q = np.sqrt(kBT / (m * (w**2)))
+        std_p = np.sqrt(m * kBT)
         # Generate random q and p values.
         q = np.random.normal(
             loc=0, scale=std_q, size=constants.num_classical_coordinates
@@ -423,13 +423,13 @@ def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kw
     m = constants.classical_coordinate_mass
     h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
-    kbt = constants.kBT
+    kBT = constants.kBT
     out = np.zeros((len(seed), constants.num_classical_coordinates), dtype=complex)
     for s, seed_value in enumerate(seed):
         np.random.seed(seed_value)
         # Calculate the standard deviations for q and p.
-        std_q = np.sqrt(1 / (2 * w * m * np.tanh(w / (2 * kbt))))
-        std_p = np.sqrt((m * w) / (2 * np.tanh(w / (2 * kbt))))
+        std_q = np.sqrt(1 / (2 * w * m * np.tanh(w / (2 * kBT))))
+        std_p = np.sqrt((m * w) / (2 * np.tanh(w / (2 * kBT))))
         # Generate random q and p values.
         q = np.random.normal(
             loc=0, scale=std_q, size=constants.num_classical_coordinates

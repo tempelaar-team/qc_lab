@@ -22,7 +22,7 @@ class HolsteinLattice(Model):
             "g": 0.5,
             "w": 0.5,
             "N": 10,
-            "j": 1,
+            "J": 1,
             "phonon_mass": 1,
             "periodic_boundary": True,
         }
@@ -43,11 +43,11 @@ class HolsteinLattice(Model):
         self.constants.classical_coordinate_mass = phonon_mass * np.ones(num_sites)
 
     def initialize_constants_h_q(self):
-        j = self.constants.get("j", self.default_constants.get("j"))
+        J = self.constants.get("J", self.default_constants.get("J"))
         periodic_boundary = self.constants.get(
             "periodic_boundary", self.default_constants.get("periodic_boundary")
         )
-        self.constants.nearest_neighbor_lattice_hopping_energy = j
+        self.constants.nearest_neighbor_lattice_hopping_energy = J
         self.constants.nearest_neighbor_lattice_periodic_boundary = periodic_boundary
 
     def initialize_constants_h_qc(self):
