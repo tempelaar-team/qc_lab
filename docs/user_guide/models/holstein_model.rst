@@ -33,7 +33,7 @@ The classical coordinates are sampled from a Boltzmann distribution:
 
 .. math::
 
-    P(q,p) \propto \exp\left(-\frac{H_{\mathrm{c}}}{T}\right)
+    P(\boldsymbol{p},\boldsymbol{q}) \propto \exp\left(-\frac{H_{\mathrm{c}}(\boldsymbol{p},\boldsymbol{q})}{k_{\mathrm{B}}T}\right)
 
 and by convention we assume that :math:`\hbar = 1`, :math:`k_{B} = 1`.
 

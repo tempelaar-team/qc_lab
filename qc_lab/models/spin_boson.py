@@ -16,12 +16,12 @@ class SpinBoson(Model):
         if constants is None:
             constants = {}
         self.default_constants = {
-            "temp": 1,
+            "kBT": 1,
             "V": 0.5,
             "E": 0.5,
             "A": 100,
             "W": 0.1,
-            "l_reorg": 0.02 / 4,
+            "l_reorg": 0.005,
             "boson_mass": 1,
         }
         super().__init__(self.default_constants, constants)

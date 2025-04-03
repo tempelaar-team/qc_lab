@@ -31,15 +31,15 @@ The couplings and frequencies are sampled from a Debye spectral density:
 
     g_{\alpha} = \omega_{\alpha}\sqrt{\frac{2\lambda}{A}}
 
-Where :math:`\Omega` is the characteristic frequency and :math:`\lambda` is the reorganization energy. 
+where :math:`\Omega` is the characteristic frequency and :math:`\lambda` is the reorganization energy. 
 
-The classical coordinates are sampled from a Boltzmann distribution:
+The classical coordinates are sampled from a Boltzmann distribution.
 
 .. math::
 
-    P(z) \propto \exp\left(-\frac{H_{\mathrm{c}}(\boldsymbol{z})}{T}\right)
+    P(\boldsymbol{p},\boldsymbol{q}) \propto \exp\left(-\frac{H_{\mathrm{c}}(\boldsymbol{p},\boldsymbol{q})}{k_{\mathrm{B}}T}\right)
 
-and by convention we assume that :math:`\hbar = 1`, :math:`k_{B} = 1`.
+
 
 Constants
 ----------
@@ -52,8 +52,8 @@ The following table lists all of the constants required by the `SpinBosonModel` 
    * - Parameter (symbol)
      - Description
      - Default Value
-   * - `temp` :math:`(T)`
-     - Temperature
+   * - `temp` :math:`(kBT)`
+     - Thermal quantum
      - 1
    * - `V` :math:`(V)`
      - Off-diagonal coupling

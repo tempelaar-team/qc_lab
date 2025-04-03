@@ -504,7 +504,7 @@ This is accomplished by defining an ingredient called `init_classical` which has
     def init_classical(model, constants, parameters, **kwargs):
     del model, parameters
     seed = kwargs.get("seed", None)
-    kbt = constants.temp
+    kbt = constants.kBT
     h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
     m = constants.classical_coordinate_mass

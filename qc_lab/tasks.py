@@ -110,7 +110,7 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
         - mcmc_std (float): Standard deviation for sampling. Default: 1.
         - mcmc_h_c_separable (bool): If the classical Hamiltonian is separable. Default: True.
         - mcmc_init_z (np.ndarray): Initial sample. Default: None.
-        - temp (float): Temperature. Default: None.
+        - kBT (float): Thermal quantum. Default: None.
     """
     seed = kwargs.get("seed", None)
     burn_in_size = constants.get("mcmc_burn_in_size", 10000)
@@ -139,7 +139,7 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
             new_e = model.h_c(constants, parameters, z=new_z, batch_size=len(new_z))
             thresh = np.minimum(
                 np.ones(constants.num_classical_coordinates),
-                np.exp(-(new_e - last_e) / constants.temp),
+                np.exp(-(new_e - last_e) / constants.kBT),
             )
             sample[rand < thresh] = proposed_sample[rand < thresh]
         for s, seed_s in enumerate(sample_seeds):
@@ -153,7 +153,7 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
             new_e = model.h_c(constants, parameters, z=new_z, batch_size=len(new_z))
             thresh = np.minimum(
                 np.ones(constants.num_classical_coordinates),
-                np.exp(-(new_e - last_e) / constants.temp),
+                np.exp(-(new_e - last_e) / constants.kBT),
             )
             sample[rand < thresh] = proposed_sample[rand < thresh]
             out_tmp[s] = sample
@@ -170,7 +170,7 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
         new_e = model.h_c(
             constants, parameters, z=proposed_sample, batch_size=len(proposed_sample)
         )
-        thresh = min(1, np.exp(-(new_e - last_e) / constants.temp))
+        thresh = min(1, np.exp(-(new_e - last_e) / constants.kBT))
         if rand < thresh:
             sample = proposed_sample
     for s, seed_s in enumerate(sample_seeds):
@@ -184,7 +184,7 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
         new_e = model.h_c(
             constants, parameters, z=proposed_sample, batch_size=len(proposed_sample)
         )
-        thresh = min(1, np.exp(-(new_e - last_e) / constants.temp))
+        thresh = min(1, np.exp(-(new_e - last_e) / constants.kBT))
         if rand < thresh:
             sample = proposed_sample
         out_tmp[s] = sample

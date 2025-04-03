@@ -113,6 +113,7 @@ Each of the calculated quantities is normalized with respect to the number of tr
 The normlaization factor for the data is kept in `data.data_dict["norm_factor"]`.
 
 .. code-block:: python
+
     norm_factor = data.data_dict['norm_factor']
     classical_energy = data.data_dict['classical_energy']
     quantum_energy = data.data_dict['quantum_energy']
@@ -198,3 +199,10 @@ over four tasks.
 
     data = parallel_driver_multiprocessing(sim, num_tasks=4)
 
+
+Units in QC Lab
+~~~~~~~~~~~~~~~~~~~~
+
+QC Lab is written assuming all energies are in units of the thermal quantum (:math:`k_{\mathrm{B}}T`). Units of time are then determined by assuming a value for 
+the temperature defining the thermal quantum and calculating the equivalent timescales. For example, if we assume a standard temperature of :math:`T = 298.15\,\mathrm{K}`
+then the thermal quantum is :math:`k_{\mathrm{B}}T = 25.7\,\mathrm{meV}` and one unit of time is :math:`\hbar/k_{\mathrm{B}}T = 25.6\,\mathrm{fs}`.

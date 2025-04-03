@@ -20,8 +20,7 @@ density according to `Mulvihill et. al 2021 <https://doi.org/10.1063/5.0051101>`
         -9.9 & 4.3 & 6.0 & -63.3 & -1.3 & 39.7 & 12440
     \end{pmatrix}
 
-where the matrix elements above are in units of wavenumbers. Note that the values below are in units of kBT at 298.15K, internally QC Lab 
-also implements the quantum Hamiltonian in these units.
+where the matrix elements above are in units of wavenumbers. Note that the values below are in units of thermal quantum at 298.15K.
 
 .. math::
 
@@ -48,7 +47,7 @@ The classical coordinates are sampled from a Boltzmann distribution:
 
 .. math::
 
-    P(q,p) \propto \exp\left(-\frac{H_{\mathrm{c}}}{T}\right)
+    P(\boldsymbol{p},\boldsymbol{q}) \propto \exp\left(-\frac{H_{\mathrm{c}}(\boldsymbol{p},\boldsymbol{q})}{k_{\mathrm{B}}T}\right)
 
 and by convention we assume that :math:`\hbar = 1`, :math:`k_{B} = 1`.
 

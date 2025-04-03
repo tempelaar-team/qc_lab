@@ -372,7 +372,7 @@ def harmonic_oscillator_boltzmann_init_classical(
     Initialize classical coordinates according to Boltzmann statistics for the harmonic oscillator.
 
     Required Constants:
-        - temp: Temperature of the system.
+        - kBT: Thermal quantum.
         - classical_coordinate_weight: Array of weights for classical coordinates.
         - harmonic_oscillator_frequency: Array of harmonic oscillator frequencies.
         - classical_coordinate_mass: Array of masses for classical coordinates.
@@ -382,7 +382,7 @@ def harmonic_oscillator_boltzmann_init_classical(
     """
     del model, parameters
     seed = kwargs.get("seed", None)
-    kbt = constants.temp
+    kbt = constants.kBT
     h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
     m = constants.classical_coordinate_mass
@@ -410,7 +410,7 @@ def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kw
     Initialize classical coordinates according to the Wigner distribution of the ground state of a harmonic oscillator.
 
     Required Constants:
-        - temp: Temperature of the system.
+        - kBT: Thermal quantum.
         - classical_coordinate_weight: Array of weights for classical coordinates.
         - harmonic_oscillator_frequency: Array of harmonic oscillator frequencies.
         - classical_coordinate_mass: Array of masses for classical coordinates.
@@ -423,7 +423,7 @@ def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kw
     m = constants.classical_coordinate_mass
     h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
-    kbt = constants.temp
+    kbt = constants.kBT
     out = np.zeros((len(seed), constants.num_classical_coordinates), dtype=complex)
     for s, seed_value in enumerate(seed):
         np.random.seed(seed_value)

@@ -73,7 +73,7 @@ Initialization of classical coordinates
     :rtype: np.ndarray((batch_size, sim.model.constants.num_classical_coordinates), dtype=complex)
 
 By default, QC Lab uses a Markov-chain Monte Carlo implementation of the Metropolis-Hastings algorithm to sample a Boltzmann distribution corresponding to 
-`sim.model.h_c` at the temperature `sim.model.constants.temp` assuming `kB=1`. We encourage caution and further validation before using it on arbitrary classical 
+`sim.model.h_c` at the temperature `sim.model.constants.kBT` assuming `kB=1`. We encourage caution and further validation before using it on arbitrary classical 
 potentials as fine-tuning of the algorithm parameters may be required to obtain reliable results.
 
 The implementation utilizes with a single random walker in `sim.model.constants.num_classical_coordinates` dimensions or `sim.model.constants.num_classical_coordinates` 

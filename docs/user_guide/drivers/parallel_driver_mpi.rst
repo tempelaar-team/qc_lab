@@ -87,7 +87,6 @@ If using a scheduler like SLURM, the number of tasks can be specified in the job
 Notes
 -----
 
-- The total number of trajectories must be an integer multiple of the number of tasks times the batch size.
 - This driver is suitable for use in cluster environments and is compatible with different schedulers like SLURM.
 - For single-node calculations, optionally consider using the multiprocessing driver.
 

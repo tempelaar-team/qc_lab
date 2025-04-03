@@ -44,8 +44,6 @@ that the simulation object has been set up according to the quickstart guide.:
 Notes
 -----
 
-- The total number of trajectories must be an integer multiple of the number of tasks times the batch size. If not,
-    the driver will use the lower integer multiple (which could be zero!).
 - This driver is suitable for use in Jupyter notebooks and single-node calculations. 
 - For cluster-based calculations, consider using the MPI driver.
 

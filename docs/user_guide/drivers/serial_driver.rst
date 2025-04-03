@@ -39,11 +39,5 @@ that the simulation object has been set up according to the quickstart guide.:
     # Run the simulation using the parallel driver
     data = serial_driver(sim)
 
-Notes
------
-
-- The total number of trajectories must be an integer multiple of the batch size. If not,
-    the driver will use the lower integer multiple (which could be zero!).
-
 
 

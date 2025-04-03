@@ -18,7 +18,7 @@ class HolsteinLattice(Model):
         if constants is None:
             constants = {}
         self.default_constants = {
-            "temp": 1,
+            "kBT": 1,
             "g": 0.5,
             "w": 0.5,
             "N": 10,
