@@ -14,7 +14,7 @@ The code in this page is implemented in the notebook `quickstart.ipynb` which ca
 Importing Modules
 ~~~~~~~~~~~~~~~~~
 
-First, we import the necessary modules:
+First, we import the necessary modules.
 
 .. code-block:: python
 
@@ -39,14 +39,13 @@ Passing a dictionary to the simulation object when instantiating it will overrid
     # default simulation settings:  {'tmax': 10, 'dt': 0.01, 'dt_output': 0.1, 'num_trajs': 10, 'batch_size': 1}
 
 Alternatively, you can directly modify the simulation settings by assigning new values to the settings attribute of the simulation object. Here we change the number
-of trajectories that the simulation will run, and how many trajectories are run at a time (the batch size). We also change the total time of each trajectory (tmax) and the 
-timestep used for propagation (dt). 
+of trajectories that the simulation will run, and how many trajectories are run at a time (the batch size). We also change the total time of each trajectory (`tmax`) and the 
+timestep used for propagation (`dt`). 
 
 .. note::
     
-    QC Lab expects that `num_trajs` is an integer multiple of `batch_size`. If not, it will use the lower integer multiple (which could be zero!). 
-    It also expects that the total time of the simulation is an integer multiple of the output timestep `dt_output`, which must also be an integer multiple 
-    of the propagation timestep `dt`.
+    QC Lab expects that the total time of the simulation (`tmax`) is an integer multiple of the output timestep (`dt_output`), which must also be an integer multiple 
+    of the propagation timestep (`dt`).
 
 .. code-block:: python
 
@@ -84,13 +83,11 @@ Setting Initial State
 
 Before using the dynamics driver to run the simulation, it is necessary to provide the simulation with an initial state. This initial state is
 dependent on both the model and algorithm. For mean-field dynamics, we require a diabatic wavefunction called "wf_db". Because we are using a spin-boson model,
-this wavefunction should have dimension 2. 
-
-The initial state is stored in `sim.state` which can be accessed as follows,
+this wavefunction should have dimension 2. The initial state is stored in `sim.state` which can be accessed as follows.
 
 .. code-block:: python
 
-    sim.state.wf_db= np.array([1, 0], dtype=complex)
+    sim.state.wf_db = np.array([1, 0], dtype=complex)
 
 Running the Simulation
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -109,20 +106,20 @@ to the names of the observables that were requested to be recorded during the si
 
 .. code-block:: python
 
-    print('calculated quantities:', data.data_dic.keys())
+    print('calculated quantities:', data.data_dict.keys())
     # calculated quantities: dict_keys(['seed', 'dm_db', 'classical_energy', 'quantum_energy'])
 
-Each of the calculated quantities must be normalized with respect to the number of trajectories. In mean-field dynamics this is equivalent 
-to the number of seeds.
+Each of the calculated quantities is normalized with respect to the number of trajectories (note that this might depend on the type of algorithm used) and can be accessed through the `data.data_dict` attribute.
+The normlaization factor for the data is kept in `data.data_dict["norm_factor"]`.
 
 .. code-block:: python
-    
-    num_trajs = len(data.data_dict['seed'])
-    classical_energy = data.data_dict['classical_energy'] / num_trajs
-    quantum_energy = data.data_dict['quantum_energy'] / num_trajs
-    populations = np.real(np.einsum('tii->ti', data.data_dict['dm_db'] / num_trajs))
 
-The time axis can be retrieved from the simulation object through its settings
+    norm_factor = data.data_dict['norm_factor']
+    classical_energy = data.data_dict['classical_energy']
+    quantum_energy = data.data_dict['quantum_energy']
+    populations = np.real(np.einsum('tii->ti', data.data_dict['dm_db']))
+
+The time axis can be retrieved from the simulation object through its settings.
 
 .. code-block:: python
 
@@ -131,7 +128,7 @@ The time axis can be retrieved from the simulation object through its settings
 Plotting Results
 ~~~~~~~~~~~~~~~~
 
-Finally, we can plot the results of the simulation like the population dynamics:
+Finally, we can plot the results of the simulation like the population dynamics.
 
 .. code-block:: python
 
@@ -166,7 +163,7 @@ Changing the Algorithm
 ~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to do a surface hopping calculation rather than a mean-field one, QC Lab makes it very easy to do so. 
-Simply import the relevant Algorithm class and set `sim.algorithm` to it and rerun the calculation: 
+Simply import the relevant Algorithm class and set `sim.algorithm` to it and rerun the calculation. 
 
 
 .. code-block:: python
@@ -194,8 +191,7 @@ Changing the Driver
 ~~~~~~~~~~~~~~~~~~~
 
 You can likewise run the simulation using a parallel driver. Here we use the multiprocessing driver to split the trajectories 
-over four tasks. An important thing to note is that when using the parallel driver, the total number of trajectories must be 
-an integer multiple of the number of tasks times the batch size.
+over four tasks.
 
 .. code-block:: python
 
@@ -203,3 +199,10 @@ an integer multiple of the number of tasks times the batch size.
 
     data = parallel_driver_multiprocessing(sim, num_tasks=4)
 
+
+Units in QC Lab
+~~~~~~~~~~~~~~~~~~~~
+
+QC Lab is written assuming all energies are in units of the thermal quantum (:math:`k_{\mathrm{B}}T`). Units of time are then determined by assuming a value for 
+the temperature defining the thermal quantum and calculating the equivalent timescales. For example, if we assume a standard temperature of :math:`T = 298.15\,\mathrm{K}`
+then the thermal quantum is :math:`k_{\mathrm{B}}T = 25.7\,\mathrm{meV}` and one unit of time is :math:`\hbar/k_{\mathrm{B}}T = 25.6\,\mathrm{fs}`.

@@ -11,7 +11,7 @@ The quantum Hamiltonian of the Holstein model is a nearest-neighbor tight-bindin
 
 .. math::
     
-    \hat{H}_{\mathrm{q}} = -j\sum_{\langle i,j\rangle}^{N}\hat{c}^{\dagger}_{i}\hat{c}_{j}
+    \hat{H}_{\mathrm{q}} = -J\sum_{\langle i,j\rangle}^{N}\hat{c}^{\dagger}_{i}\hat{c}_{j}
 
 where :math:`\langle i,j\rangle` denotes nearest-neighbor sites with or without periodic boundaries determined by the parameter `periodic_boundary=True`.
 
@@ -29,13 +29,11 @@ and the classical Hamiltonian is the harmonic oscillator
 
 with mass :math:`m`.
 
-The classical coordinates are sampled from a Boltzmann distribution:
+The classical coordinates are sampled from a Boltzmann distribution.
 
 .. math::
 
-    P(q,p) \propto \exp\left(-\frac{H_{\mathrm{c}}}{T}\right)
-
-and by convention we assume that :math:`\hbar = 1`, :math:`k_{B} = 1`.
+    P(\boldsymbol{p},\boldsymbol{q}) \propto \exp\left(-\frac{H_{\mathrm{c}}(\boldsymbol{p},\boldsymbol{q})}{k_{\mathrm{B}}T}\right)
 
 Constants
 ----------
@@ -60,7 +58,7 @@ The following table lists all of the constants required by the `HolsteinLatticeM
    * - `N` :math:`(N)`
      - Number of sites
      - 10
-   * - `j` :math:`(j)`
+   * - `J` :math:`(J)`
      - Hopping energy
      - 1
    * - `phonon_mass` :math:`(m)`
@@ -92,9 +90,8 @@ Example
     sim.algorithm = MeanField()
 
     # define an initial diabatic wavefunction 
-    wf_db_0 = np.zeros((sim.model.constants.num_quantum_states), dtype=np.complex128)
-    wf_db_0[0] = 1.0 + 0.0j
-    sim.state.wf_db = wf_db_0
+    sim.state.wf_db = np.zeros((sim.model.constants.num_quantum_states), dtype=complex)
+    sim.state.wf_db[0] = 1.0
 
     # run the simulation
     data = serial_driver(sim)

@@ -32,7 +32,7 @@ of the model ingredients to run.
 
 ::
 
-    from qclab import Model  # import the model class
+    from qc_lab import Model  # import the model class
 
     # create a minimal spin-boson model subclass
     class MinimalSpinBoson(Model):
@@ -504,7 +504,7 @@ This is accomplished by defining an ingredient called `init_classical` which has
     def init_classical(model, constants, parameters, **kwargs):
     del model, parameters
     seed = kwargs.get("seed", None)
-    kbt = constants.temp
+    kBT = constants.kBT
     h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
     m = constants.classical_coordinate_mass
@@ -512,8 +512,8 @@ This is accomplished by defining an ingredient called `init_classical` which has
     for s, seed_value in enumerate(seed):
         np.random.seed(seed_value)
         # Calculate the standard deviations for q and p.
-        std_q = np.sqrt(kbt / (m * (w**2)))
-        std_p = np.sqrt(m * kbt)
+        std_q = np.sqrt(kBT / (m * (w**2)))
+        std_p = np.sqrt(m * kBT)
         # Generate random q and p values.
         q = np.random.normal(
             loc=0, scale=std_q, size=constants.num_classical_coordinates
@@ -521,7 +521,7 @@ This is accomplished by defining an ingredient called `init_classical` which has
         p = np.random.normal(
             loc=0, scale=std_p, size=constants.num_classical_coordinates
         )
-        # Calculate the complex classical coordinate.
+        # Calculate the complex-valued classical coordinate.
         z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
         out[s] = z
     return out

@@ -3,40 +3,49 @@
 Ingredients
 -----------
 
-Ingredients are are methods associated with model classes. A generic ingredient has the form:
+Ingredients are methods associated with model classes. A generic ingredient has the form:
 
 .. code-block:: python
 
     def ingredient_name(model, constants, parameters, **kwargs):
+        # Calculate var.
+        var = None
         return var
 
 
 For consistency we include all of the arguments even if the ingredient does not use them.
-An ingredient that generates the quantum-classical Hamiltonian for the spin-boson model might look like this:
+An ingredient that generates the quantum Hamiltonian for a two-level system might look like this:
 
 .. code-block:: python
 
-    def spin_boson_h_qc(model, constants, parameters, **kwargs):
-        z = kwargs.get("z")
+    def two_level_system_h_q(model, constants, parameters, **kwargs):
+        """
+        Quantum Hamiltonian for a two-level system.
+
+        Required Constants:
+            - two_level_system_a: Energy of the first level.
+            - two_level_system_b: Energy of the second level.
+            - two_level_system_c: Real part of the coupling between levels.
+            - two_level_system_d: Imaginary part of the coupling between levels.
+
+        Keyword Arguments:
+            - batch_size: (Optional) Number of batches for vectorized computation.
+        """
+        del model
         if kwargs.get("batch_size") is not None:
             batch_size = kwargs.get("batch_size")
-            assert len(z) == batch_size
         else:
-            batch_size = len(z)
-        g = constants.spin_boson_coupling
-        m = constants.classical_coordinate_mass
-        h = constants.classical_coordinate_weight
-        h_qc = np.zeros((batch_size, 2, 2), dtype=complex)
-        h_qc[:, 0, 0] = np.sum(
-            g * np.sqrt(1 / (2 * m * h))[np.newaxis, :] * (z + np.conj(z)), axis=-1
-        )
-        h_qc[:, 1, 1] = -h_qc[:, 0, 0]
-        return h_qc
+            batch_size = len(parameters.seed)
+        h_q = np.zeros((batch_size, 2, 2), dtype=complex)
+        h_q[:, 0, 0] = constants.two_level_system_a
+        h_q[:, 1, 1] = constants.two_level_system_b
+        h_q[:, 0, 1] = constants.two_level_system_c + 1j * constants.two_level_system_d
+        h_q[:, 1, 0] = constants.two_level_system_c - 1j * constants.two_level_system_d
+        return h_q
 
 
-When incorporated directly into the model class one should replace `model` with `self`. See the :ref:`model_class` section 
+When incorporated directly into the model class (for instance when writing a model class from scratch) one should replace `model` with `self`. See the Model Development section of the User Guide
 for a detailed example.
-
 
 Below we list all of the ingredients available in the current version of QC Lab and group ingredients by the attribute of the model that they pertain to. 
 

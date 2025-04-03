@@ -2,7 +2,7 @@
 Mean-Field Dynamics 
 ~~~~~~~~~~~~~~~~~~~
 
-The `qclab.algorithms.MeanField` class implements the mean-field (Ehrenfest) dynamics algorithm according to `Tully 1998 <https://doi.org/10.1039/A801824C>`_.
+The `qc_lab.algorithms.MeanField` class implements the mean-field (Ehrenfest) dynamics algorithm according to `Tully 1998 <https://doi.org/10.1039/A801824C>`_.
 
 Settings
 --------
@@ -12,7 +12,7 @@ The mean-field algorithm has no default settings.
 Initial State
 -------------
 
-The mean-field algorithm requires an initial diabatic wavefunction called `wf_db` which is a complex numpy array with dimension `sim.model.constants.num_quantum_states`.
+The mean-field algorithm requires an initial diabatic wavefunction called `wf_db` which is a complex NumPy array with dimension `sim.model.constants.num_quantum_states`.
 For example:
 
 
@@ -26,7 +26,7 @@ Output Variables
 
 The following table lists the default output variables for the `MeanField` class.
 
-.. list-table:: MeanField Output Variables
+.. list-table:: `MeanField` Output Variables
    :header-rows: 1
 
    * - Variable name

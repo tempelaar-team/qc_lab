@@ -76,3 +76,22 @@ class Model:
         initialize_constants_h_qc,
         initialize_constants_h_q,
     ]
+
+    def swap_initialization_function(self, old_func_name, new_func):
+        """
+        Swaps the function with name old_func_name for new_func in the initialization_functions list. 
+
+        args:
+            old_func_name: a string giving the name of the old function
+            new_func: a function to be added to the initialization_functions list
+        """
+        found = False
+        for func_n, func in enumerate(self.initialization_functions):
+            if func.__name__ == old_func_name:
+                self.initialization_functions[func_n] = new_func
+                found = True
+        if not found:
+            print('Function not found in initialization_functions\nAdding it as a new initialization function to the list.')
+            self.initialization_functions.append(new_func)
+        
+        

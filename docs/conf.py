@@ -13,8 +13,8 @@ sys.path.insert(0, os.path.abspath('../'))
 
 project = 'QC Lab'
 year = datetime.now().year
-copyright = f'2025-{year}, Tempelaar Group'
-author = 'Tempelaar Group'
+copyright = f'2025-{year}, Tempelaar Team'
+author = 'Tempelaar Team'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

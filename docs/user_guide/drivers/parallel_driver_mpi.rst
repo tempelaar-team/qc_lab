@@ -6,7 +6,7 @@
 MPI Driver
 ~~~~~~~~~~
 
-The `parallel_driver_mpi` function in the `qclab.dynamics` module is used to run simulations 
+The `parallel_driver_mpi` function in the `qc_lab.dynamics` module is used to run simulations 
 in parallel using the `mpi4py` library. This driver is suitable for use in cluster environments 
 and is compatible with different schedulers like SLURM. Unlike the multiprocessing driver, the MPI driver
 requires a script to be run using the `mpiexec` or `mpirun` command.
@@ -16,7 +16,7 @@ Function Signature
 
 .. code-block:: python
 
-    qclab.dynamics.parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None)
+    qc_lab.dynamics.parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None)
 
 Parameters
 ----------
@@ -45,7 +45,7 @@ according to the quickstart guide.:
     # Import the MPI module
     from mpi4py import MPI
 
-    # initialize the sim object using the quickstart guide
+    # Initialize the sim object using the quickstart guide
 
     # Run the simulation using the parallel driver
     data = parallel_driver_mpi(sim, num_tasks=100)
@@ -87,7 +87,6 @@ If using a scheduler like SLURM, the number of tasks can be specified in the job
 Notes
 -----
 
-- The total number of trajectories must be an integer multiple of the number of tasks times the batch size.
 - This driver is suitable for use in cluster environments and is compatible with different schedulers like SLURM.
 - For single-node calculations, optionally consider using the multiprocessing driver.
 

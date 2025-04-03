@@ -25,7 +25,7 @@ class Data:
         """
         # Check if the norm_factor is zero, if it is, save it from the state object.
         if self.data_dict["norm_factor"] == 0:
-            if not(hasattr(state, "norm_factor")):
+            if not (hasattr(state, "norm_factor")):
                 raise ValueError(
                     "The state object does not have a norm_factor attribute."
                 )
