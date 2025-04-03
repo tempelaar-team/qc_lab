@@ -12,23 +12,9 @@ class Data:
     """
 
     def __init__(self):
-        self.data_dict = {"seed": np.array([], dtype=int), "norm_factor":0}
+        self.data_dict = {"seed": np.array([], dtype=int), "norm_factor": 0}
 
-    def initialize_output_total_arrays_(self, sim, state):
-        """
-        Initialize the output total arrays for data collection.
-
-        Args:
-            sim: The simulation object containing settings and parameters.
-            state: The state object containing the current simulation state.
-        """
-        self.data_dict["seed"] = np.copy(state.get("seed"))
-        for key, val in state.output_dict.items():
-            self.data_dict[key] = np.zeros(
-                (len(sim.settings.tdat_output), *np.shape(val)[1:]), dtype=val.dtype
-            )
-
-    def add_to_output_total_arrays(self, sim, full_state, t_ind):
+    def add_to_output_total_arrays(self, sim, state, t_ind):
         """
         Add data to the output total arrays.
 
@@ -37,17 +23,24 @@ class Data:
             full_state: The full state object containing the current simulation state.
             t_ind: The current time index in the simulation.
         """
-        for key, val in full_state.output_dict.items():
+        # Check if the norm_factor is zero, if it is, save it from the state object.
+        if self.data_dict["norm_factor"] == 0:
+            if not(hasattr(state, "norm_factor")):
+                raise ValueError(
+                    "The state object does not have a norm_factor attribute."
+                )
+            self.data_dict["norm_factor"] = state.norm_factor
+        for key, val in state.output_dict.items():
             if key in self.data_dict:
-                self.data_dict[key][int(t_ind / sim.settings.dt_output_n)] = np.sum(
-                    val, axis=0
+                self.data_dict[key][int(t_ind / sim.settings.dt_output_n)] = (
+                    np.sum(val, axis=0) / self.data_dict["norm_factor"]
                 )
             else:
                 self.data_dict[key] = np.zeros(
                     (len(sim.settings.tdat_output), *np.shape(val)[1:]), dtype=val.dtype
                 )
-                self.data_dict[key][int(t_ind / sim.settings.dt_output_n)] = np.sum(
-                    val, axis=0
+                self.data_dict[key][int(t_ind / sim.settings.dt_output_n)] = (
+                    np.sum(val, axis=0) / self.data_dict["norm_factor"]
                 )
 
     def add_data(self, new_data):
@@ -57,6 +50,9 @@ class Data:
         Args:
             new_data: A Data object containing the new data to be merged.
         """
+        new_norm_factor = (
+            new_data.data_dict["norm_factor"] + self.data_dict["norm_factor"]
+        )
         for key, val in new_data.data_dict.items():
             if val is None:
                 print(key, val)
@@ -64,11 +60,15 @@ class Data:
                 self.data_dict[key] = np.concatenate(
                     (self.data_dict[key], val.flatten()), axis=0
                 )
-            else:
+            elif key != "norm_factor":
                 if key in self.data_dict:
-                    self.data_dict[key] += val
+                    self.data_dict[key] = (
+                        self.data_dict[key] * self.data_dict["norm_factor"]
+                        + val * new_data.data_dict["norm_factor"]
+                    ) / new_norm_factor
                 else:
                     self.data_dict[key] = val
+        self.data_dict["norm_factor"] = new_norm_factor
 
     def save_as_h5(self, filename):
         """
