@@ -28,7 +28,9 @@ def assign_norm_factor_fssh(sim, parameters, state, **kwargs):
     """
     del kwargs
     if sim.algorithm.settings.fssh_deterministic:
-        state.norm_factor = sim.settings.batch_size // sim.model.constants.num_quantum_states
+        state.norm_factor = (
+            sim.settings.batch_size // sim.model.constants.num_quantum_states
+        )
     else:
         state.norm_factor = sim.settings.batch_size
     return parameters, state
@@ -61,7 +63,7 @@ def initialize_branch_seeds(sim, parameters, state, **kwargs):
         + np.arange(num_branches)[np.newaxis, :]
     ).flatten()
     # Now generate the new seeds for each trajectory in the expanded batch.
-    new_seeds = orig_seeds//num_branches
+    new_seeds = orig_seeds // num_branches
     parameters.seed = new_seeds
     state.seed = new_seeds
     return parameters, state
@@ -977,7 +979,7 @@ def initialize_random_values_fssh(sim, parameters, state, **kwargs):
     state.hopping_probs_rand_vals = np.zeros((batch_size, len(sim.settings.tdat)))
     state.stochastic_sh_rand_vals = np.zeros((batch_size, num_branches))
     for nt in range(batch_size):
-        np.random.seed(state.seed[int(nt*num_branches)])
+        np.random.seed(state.seed[int(nt * num_branches)])
         state.hopping_probs_rand_vals[nt] = np.random.rand(len(sim.settings.tdat))
         state.stochastic_sh_rand_vals[nt] = np.random.rand(num_branches)
     return parameters, state
