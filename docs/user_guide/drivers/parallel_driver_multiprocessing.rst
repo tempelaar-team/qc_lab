@@ -3,7 +3,7 @@
 Parallel Multiprocessing Driver
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The `parallel_driver_multiprocessing` function in the `qclab.dynamics` module is used to run simulations in parallel 
+The `parallel_driver_multiprocessing` function in the `qc_lab.dynamics` module is used to run simulations in parallel 
 using the `multiprocessing` library in Python. This driver is compatible with Jupyter notebooks and is useful for 
 calculations on a single node.
 
@@ -12,7 +12,7 @@ Function Signature
 
 .. code-block:: python
 
-    qclab.dynamics.parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None)
+    qc_lab.dynamics.parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None)
 
 Parameters
 ----------

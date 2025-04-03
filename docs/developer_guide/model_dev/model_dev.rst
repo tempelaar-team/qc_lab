@@ -32,7 +32,7 @@ of the model ingredients to run.
 
 ::
 
-    from qclab import Model  # import the model class
+    from qc_lab import Model  # import the model class
 
     # create a minimal spin-boson model subclass
     class MinimalSpinBoson(Model):

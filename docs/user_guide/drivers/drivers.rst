@@ -3,8 +3,8 @@
 Dynamics Drivers
 ----------------
 
-Drivers in QC Lab are functions that interface a Simulation object with the dynamics core. Drivers are responsible for initializing the 
-objects needed for the dynamics core to operate and handle the assignment of random seeds and the grouping of simulations into batches.
+Drivers in QC Lab are functions that interface a Simulation object with the Dynamics core. Drivers are responsible for initializing the 
+objects needed for the Dynamics core to operate and handle the assignment of random seeds and the grouping of simulations into batches.
 
 
 .. toctree::
