@@ -44,5 +44,5 @@ Attributes
 .. attribute:: data.data_dic
 
     A dictionary containing the data stored in the Data object. By default, this contains the seeds 
-    (`data.data_dic["seed"]`)
+    (`data.data_dict["seed"]`)
     used in the simulation. In a new data object, this list is empty.

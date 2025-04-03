@@ -40,4 +40,4 @@ data = parallel_driver_mpi(sim)
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 if rank == 0:
-    print(data.data_dic["seed"])
+    print(data.data_dict["seed"])

@@ -117,10 +117,10 @@ to the number of seeds.
 
 .. code-block:: python
     
-    num_trajs = len(data.data_dic['seed'])
-    classical_energy = data.data_dic['classical_energy'] / num_trajs
-    quantum_energy = data.data_dic['quantum_energy'] / num_trajs
-    populations = np.real(np.einsum('tii->ti', data.data_dic['dm_db'] / num_trajs))
+    num_trajs = len(data.data_dict['seed'])
+    classical_energy = data.data_dict['classical_energy'] / num_trajs
+    quantum_energy = data.data_dict['quantum_energy'] / num_trajs
+    populations = np.real(np.einsum('tii->ti', data.data_dict['dm_db'] / num_trajs))
 
 The time axis can be retrieved from the simulation object through its settings
 

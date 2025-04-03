@@ -12,7 +12,7 @@ class Data:
     """
 
     def __init__(self):
-        self.data_dic = {"seed": np.array([], dtype=int)}
+        self.data_dict = {"seed": np.array([], dtype=int), "norm_factor":0}
 
     def initialize_output_total_arrays_(self, sim, state):
         """
@@ -22,9 +22,9 @@ class Data:
             sim: The simulation object containing settings and parameters.
             state: The state object containing the current simulation state.
         """
-        self.data_dic["seed"] = np.copy(state.get("seed"))
+        self.data_dict["seed"] = np.copy(state.get("seed"))
         for key, val in state.output_dict.items():
-            self.data_dic[key] = np.zeros(
+            self.data_dict[key] = np.zeros(
                 (len(sim.settings.tdat_output), *np.shape(val)[1:]), dtype=val.dtype
             )
 
@@ -38,15 +38,15 @@ class Data:
             t_ind: The current time index in the simulation.
         """
         for key, val in full_state.output_dict.items():
-            if key in self.data_dic:
-                self.data_dic[key][int(t_ind / sim.settings.dt_output_n)] = np.sum(
+            if key in self.data_dict:
+                self.data_dict[key][int(t_ind / sim.settings.dt_output_n)] = np.sum(
                     val, axis=0
                 )
             else:
-                self.data_dic[key] = np.zeros(
+                self.data_dict[key] = np.zeros(
                     (len(sim.settings.tdat_output), *np.shape(val)[1:]), dtype=val.dtype
                 )
-                self.data_dic[key][int(t_ind / sim.settings.dt_output_n)] = np.sum(
+                self.data_dict[key][int(t_ind / sim.settings.dt_output_n)] = np.sum(
                     val, axis=0
                 )
 
@@ -57,18 +57,18 @@ class Data:
         Args:
             new_data: A Data object containing the new data to be merged.
         """
-        for key, val in new_data.data_dic.items():
+        for key, val in new_data.data_dict.items():
             if val is None:
                 print(key, val)
             if key == "seed":
-                self.data_dic[key] = np.concatenate(
-                    (self.data_dic[key], val.flatten()), axis=0
+                self.data_dict[key] = np.concatenate(
+                    (self.data_dict[key], val.flatten()), axis=0
                 )
             else:
-                if key in self.data_dic:
-                    self.data_dic[key] += val
+                if key in self.data_dict:
+                    self.data_dict[key] += val
                 else:
-                    self.data_dic[key] = val
+                    self.data_dict[key] = val
 
     def save_as_h5(self, filename):
         """
@@ -78,7 +78,7 @@ class Data:
             filename: The name of the file to save the data to.
         """
         with h5py.File(filename, "w") as h5file:
-            self._recursive_save(h5file, "/", self.data_dic)
+            self._recursive_save(h5file, "/", self.data_dict)
 
     def load_from_h5(self, filename):
         """
@@ -91,7 +91,7 @@ class Data:
             The Data object with the loaded data.
         """
         with h5py.File(filename, "r") as h5file:
-            self._recursive_load(h5file, "/", self.data_dic)
+            self._recursive_load(h5file, "/", self.data_dict)
         return self
 
     def _recursive_save(self, h5file, path, dic):
