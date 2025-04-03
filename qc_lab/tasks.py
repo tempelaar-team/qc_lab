@@ -7,6 +7,33 @@ import numpy as np
 from numba import njit
 
 
+def assign_norm_factor_mf(sim, parameters, state, **kwargs):
+    """
+    Assign the normalization factor to the state object for MF dynamics.
+
+    Required constants:
+        - None.
+    """
+    del kwargs
+    state.norm_factor = sim.settings.batch_size
+    return parameters, state
+
+
+def assign_norm_factor_fssh(sim, parameters, state, **kwargs):
+    """
+    Assign the normalization factor to the state object for FSSH.
+
+    Required constants:
+        - None.
+    """
+    del kwargs
+    if sim.algorithm.settings.fssh_deterministic:
+        state.norm_factor = sim.settings.batch_size // sim.model.constants.num_quantum_states
+    else:
+        state.norm_factor = sim.settings.batch_size
+    return parameters, state
+
+
 def initialize_branch_seeds(sim, parameters, state, **kwargs):
     """
     Initialize the seeds in each branch.
