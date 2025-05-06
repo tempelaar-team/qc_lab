@@ -19,12 +19,17 @@ Minimal Model Class
 A physical model in QC Lab is assumed to consist of a Hamiltonian following the formalism developed in `Miyazaki 2024 <https://doi.org/10.1021/acs.jctc.4c00555>`_
 
 .. math::
-
+luis
     \hat{H}(\boldsymbol{z}) = \hat{H}_{\mathrm{q}} + \hat{H}_{\mathrm{q-c}}(\boldsymbol{z}) + H_{\mathrm{c}}(\boldsymbol{z})
 
 where :math:`\hat{H}_{\mathrm{q}}` is the quantum Hamiltonian, :math:`\hat{H}_{\mathrm{q-c}}` is the quantum-classical coupling Hamiltonian,
 and :math:`H_{\mathrm{c}}` is the classical Hamiltonian. :math:`\boldsymbol{z}` is a complex-valued classical coordinate that defines the
 classical degrees of freedom.
+
+The precise form of the Hamiltonian that is required for a model class is in practice determined by the algorithm being used. For the MF and FSSH algorithms the 
+ingredients generating the Hamiltonian are required to return the Hamiltonian in a prescribed quantum basis. This is primarily relevant for cases such as the 
+Holstein Lattice Model where the quantum and quantum-classical Hamiltonians are given in second quantization. In order to be used in QC Lab, the ingredients 
+would choose a basis (for example a basis of one or more electrons) and then return that matrix. 
 
 Before describing how the model ingredients should be structured in the model class, we will first describe the `__init__` method of the model class 
 which is responsible for initializing the default model constants and any input constants into the set of constants needed for QC Lab and all 
@@ -175,14 +180,13 @@ take a standard form which is required by QC Lab.
 
 
 A generic ingredients has as arguments the model class itself, the constants object containing time independent quantities (stored in `sim.model.constants`), and 
-the parameters object which contain potentially time-dependent quantities (stored in `sim.model.parameters`). The ingredients can also take additional keyword arguments
-which are passed to the ingredient when it is called. The ingredients return the result of the calculation directly. Typically, users will never call ingredients as they 
-are internal functions used by QC Lab to define the model.
+the parameters object which contains potentially time-dependent quantities (stored in `sim.model.parameters`). The ingredients can also take additional keyword arguments
+which are passed to the ingredient when it is called. The ingredients return the result of the calculation directly.
 
 As an example we will use the quantum Hamiltonian. Importantly, QC Lab is a vectorized code capable of calculating multiple quantum-classical trajectories simultaneously. 
 As a result, the ingredients must also be vectorized, meaning that they accept as input quantities with an additional dimension corresponding to the number of trajectories 
-(this is taken to be the first dimension as a convention). The quantum Hamiltonian is a :math:`2\times 2` matrix and so the vectorized quantum Hamiltonian is a 3D array with shape
-`(len(parameters.seed), 2, 2)` where the number of trajectories is given by the number of seeds in the parameters object. 
+(this is taken to be the first dimension as a convention). In the case of the spin-boson model, the quantum Hamiltonian is a :math:`2\times 2` matrix and so the vectorized 
+quantum Hamiltonian is a 3D array with shape `(len(parameters.seed), 2, 2)` where the number of trajectories is given by the number of seeds in the parameters object. 
 
 Rather than writing a vectorized ingredient (which will be discussed later) we can invoke a decorator (`ingredients.vectorize`) which will automatically vectorize the ingredient
 at the cost of some performance (it is strongly recommended to write vectorized ingredients as a first pass for performance optimization).
