@@ -19,7 +19,7 @@ Minimal Model Class
 A physical model in QC Lab is assumed to consist of a Hamiltonian following the formalism developed in `Miyazaki 2024 <https://doi.org/10.1021/acs.jctc.4c00555>`_
 
 .. math::
-luis
+
     \hat{H}(\boldsymbol{z}) = \hat{H}_{\mathrm{q}} + \hat{H}_{\mathrm{q-c}}(\boldsymbol{z}) + H_{\mathrm{c}}(\boldsymbol{z})
 
 where :math:`\hat{H}_{\mathrm{q}}` is the quantum Hamiltonian, :math:`\hat{H}_{\mathrm{q-c}}` is the quantum-classical coupling Hamiltonian,
