@@ -426,7 +426,9 @@ def update_quantum_classical_forces(sim, parameters, state, **kwargs):
         inds, mels, shape, wf, wf
     )
     if hasattr(sim.model, "gauge_field_force") and use_gauge_field_force:
-        state.quantum_classical_forces += sim.model.gauge_field_force(sim.model.constants, parameters, z=z, wf=wf)
+        state.quantum_classical_forces += sim.model.gauge_field_force(
+            sim.model.constants, parameters, z=z, wf=wf
+        )
     return parameters, state
 
 
@@ -450,7 +452,12 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     output_name = kwargs["output_name"]
     parameters, state = update_classical_forces(sim, parameters, state, z=z_0)
     parameters, state = update_quantum_classical_forces(
-        sim, parameters, state, wf=wf, z=z_0, use_gauge_field_force=use_gauge_field_force
+        sim,
+        parameters,
+        state,
+        wf=wf,
+        z=z_0,
+        use_gauge_field_force=use_gauge_field_force,
     )
     k1 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     parameters, state = update_classical_forces(
@@ -458,7 +465,12 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     )
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
-            sim, parameters, state, wf=wf, z=z_0 + 0.5 * dt * k1, use_gauge_field_force=use_gauge_field_force
+            sim,
+            parameters,
+            state,
+            wf=wf,
+            z=z_0 + 0.5 * dt * k1,
+            use_gauge_field_force=use_gauge_field_force,
         )
     k2 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     parameters, state = update_classical_forces(
@@ -466,13 +478,23 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     )
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
-            sim, parameters, state, wf=wf, z=z_0 + 0.5 * dt * k2, use_gauge_field_force=use_gauge_field_force
+            sim,
+            parameters,
+            state,
+            wf=wf,
+            z=z_0 + 0.5 * dt * k2,
+            use_gauge_field_force=use_gauge_field_force,
         )
     k3 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     parameters, state = update_classical_forces(sim, parameters, state, z=z_0 + dt * k3)
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
-            sim, parameters, state, wf=wf, z=z_0 + dt * k3, use_gauge_field_force=use_gauge_field_force
+            sim,
+            parameters,
+            state,
+            wf=wf,
+            z=z_0 + dt * k3,
+            use_gauge_field_force=use_gauge_field_force,
         )
     k4 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     setattr(state, output_name, z_0 + dt * 0.166667 * (k1 + 2 * k2 + 2 * k3 + k4))
@@ -1187,6 +1209,98 @@ def numerical_fssh_hop(model, constants, parameters, **kwargs):
     return z - 1.0j * min_gamma * delta_z, True
 
 
+def calc_delta_z_fssh(sim, parameters, state, **kwargs):
+    """
+    Update the rescaling direction state.delta_z in FSSH.
+    """
+    traj_ind, final_state_ind, init_state_ind = (
+        kwargs["traj_ind"],
+        kwargs["final_state_ind"],
+        kwargs["init_state_ind"]
+    )
+    if hasattr(sim.model, "rescaling_direction_fssh"):
+        delta_z = sim.model.rescaling_direction_fssh(
+            sim.model.constants, parameters,
+            z=state.z[traj_ind],
+            init_state_ind=init_state_ind,
+            final_state_ind=final_state_ind,
+        )
+        return delta_z
+    
+    inds, mels, _ = state.dh_qc_dzc
+    eigvecs_flat = state.eigvecs
+    eigvals_flat = state.eigvals
+    evec_init_state = eigvecs_flat[traj_ind][:, init_state_ind]
+    evec_final_state = eigvecs_flat[traj_ind][:, final_state_ind]
+    eval_init_state = eigvals_flat[traj_ind][init_state_ind]
+    eval_final_state = eigvals_flat[traj_ind][final_state_ind]
+    ev_diff = eval_final_state - eval_init_state
+    inds_traj_ind = (
+        inds[0][inds[0] == traj_ind],
+        inds[1][inds[0] == traj_ind],
+        inds[2][inds[0] == traj_ind],
+        inds[3][inds[0] == traj_ind],
+    )
+    mels_traj_ind = mels[inds[0] == traj_ind]
+    dkj_z = np.zeros((sim.model.constants.num_classical_coordinates), dtype=complex)
+    dkj_zc = np.zeros((sim.model.constants.num_classical_coordinates), dtype=complex)
+    np.add.at(
+        dkj_z,
+        (inds_traj_ind[1]),
+        np.conj(evec_init_state)[inds_traj_ind[2]]
+        * mels_traj_ind
+        * evec_final_state[inds_traj_ind[3]]
+        / ev_diff,
+    )
+    np.add.at(
+        dkj_zc,
+        (inds_traj_ind[1]),
+        np.conj(evec_init_state)[inds_traj_ind[3]]
+        * np.conj(mels_traj_ind)
+        * evec_final_state[inds_traj_ind[2]]
+        / ev_diff,
+    )
+    dkj_p = (
+        1.0j
+        * np.sqrt(
+            1
+            / (
+                2
+                * sim.model.constants.classical_coordinate_weight
+                * sim.model.constants.classical_coordinate_mass
+            )
+        )
+        * (dkj_z - dkj_zc)
+    )
+    dkj_q = np.sqrt(
+        sim.model.constants.classical_coordinate_weight
+        * sim.model.constants.classical_coordinate_mass
+        / 2
+    ) * (dkj_z + dkj_zc)
+
+    max_pos_q = np.argmax(np.abs(dkj_q))
+    max_pos_p = np.argmax(np.abs(dkj_p))
+    # Check for complex nonadiabatic couplings.
+    if (
+        np.abs(dkj_q[max_pos_q]) > 1e-8
+        and np.abs(np.sin(np.angle(dkj_q[max_pos_q]))) > 1e-2
+    ):
+        warnings.warn(
+            "dkj_q Nonadiabatic coupling is complex, needs gauge fixing!",
+            UserWarning,
+        )
+    if (
+        np.abs(dkj_p[max_pos_p]) > 1e-8
+        and np.abs(np.sin(np.angle(dkj_p[max_pos_p]))) > 1e-2
+    ):
+        warnings.warn(
+            "dkj_p Nonadiabatic coupling is complex, needs gauge fixing!",
+            UserWarning,
+        )
+    delta_z = dkj_zc
+    return delta_z
+
+
 def update_active_surface_fssh(sim, parameters, state, **kwargs):
     """
     Update the active surface in FSSH. If a hopping function is not specified in the model
@@ -1241,84 +1355,92 @@ def update_active_surface_fssh(sim, parameters, state, **kwargs):
         z = np.copy(state.z)
         act_surf_flat = state.act_surf
         for traj_ind in traj_hop_ind:
-            k = np.argmax(
+            final_state_ind = np.argmax(
                 (cumulative_probs[traj_ind] > rand_branch[traj_ind]).astype(int)
             )
-            j = act_surf_ind_flat[traj_ind]
-            evec_k = eigvecs_flat[traj_ind][:, j]
-            evec_j = eigvecs_flat[traj_ind][:, k]
-            eval_k = eigvals_flat[traj_ind][j]
-            eval_j = eigvals_flat[traj_ind][k]
-            ev_diff = eval_j - eval_k
-            inds_traj_ind = (
-                inds[0][inds[0] == traj_ind],
-                inds[1][inds[0] == traj_ind],
-                inds[2][inds[0] == traj_ind],
-                inds[3][inds[0] == traj_ind],
-            )
-            mels_traj_ind = mels[inds[0] == traj_ind]
-            dkj_z = np.zeros(
-                (sim.model.constants.num_classical_coordinates), dtype=complex
-            )
-            dkj_zc = np.zeros(
-                (sim.model.constants.num_classical_coordinates), dtype=complex
-            )
-            np.add.at(
-                dkj_z,
-                (inds_traj_ind[1]),
-                np.conj(evec_k)[inds_traj_ind[2]]
-                * mels_traj_ind
-                * evec_j[inds_traj_ind[3]]
-                / ev_diff,
-            )
-            np.add.at(
-                dkj_zc,
-                (inds_traj_ind[1]),
-                np.conj(evec_k)[inds_traj_ind[3]]
-                * np.conj(mels_traj_ind)
-                * evec_j[inds_traj_ind[2]]
-                / ev_diff,
-            )
-            dkj_p = (
-                1.0j
-                * np.sqrt(
-                    1
-                    / (
-                        2
-                        * sim.model.constants.classical_coordinate_weight
-                        * sim.model.constants.classical_coordinate_mass
-                    )
-                )
-                * (dkj_z - dkj_zc)
-            )
-            dkj_q = np.sqrt(
-                sim.model.constants.classical_coordinate_weight
-                * sim.model.constants.classical_coordinate_mass
-                / 2
-            ) * (dkj_z + dkj_zc)
+            init_state_ind = act_surf_ind_flat[traj_ind]
+            # evec_k = eigvecs_flat[traj_ind][:, j]
+            # evec_j = eigvecs_flat[traj_ind][:, k]
+            eval_init_state = eigvals_flat[traj_ind][init_state_ind]
+            eval_final_state = eigvals_flat[traj_ind][final_state_ind]
+            ev_diff = eval_final_state - eval_init_state
+            # inds_traj_ind = (
+            #     inds[0][inds[0] == traj_ind],
+            #     inds[1][inds[0] == traj_ind],
+            #     inds[2][inds[0] == traj_ind],
+            #     inds[3][inds[0] == traj_ind],
+            # )
+            # mels_traj_ind = mels[inds[0] == traj_ind]
+            # dkj_z = np.zeros(
+            #     (sim.model.constants.num_classical_coordinates), dtype=complex
+            # )
+            # dkj_zc = np.zeros(
+            #     (sim.model.constants.num_classical_coordinates), dtype=complex
+            # )
+            # np.add.at(
+            #     dkj_z,
+            #     (inds_traj_ind[1]),
+            #     np.conj(evec_k)[inds_traj_ind[2]]
+            #     * mels_traj_ind
+            #     * evec_j[inds_traj_ind[3]]
+            #     / ev_diff,
+            # )
+            # np.add.at(
+            #     dkj_zc,
+            #     (inds_traj_ind[1]),
+            #     np.conj(evec_k)[inds_traj_ind[3]]
+            #     * np.conj(mels_traj_ind)
+            #     * evec_j[inds_traj_ind[2]]
+            #     / ev_diff,
+            # )
+            # dkj_p = (
+            #     1.0j
+            #     * np.sqrt(
+            #         1
+            #         / (
+            #             2
+            #             * sim.model.constants.classical_coordinate_weight
+            #             * sim.model.constants.classical_coordinate_mass
+            #         )
+            #     )
+            #     * (dkj_z - dkj_zc)
+            # )
+            # dkj_q = np.sqrt(
+            #     sim.model.constants.classical_coordinate_weight
+            #     * sim.model.constants.classical_coordinate_mass
+            #     / 2
+            # ) * (dkj_z + dkj_zc)
 
-            max_pos_q = np.argmax(np.abs(dkj_q))
-            max_pos_p = np.argmax(np.abs(dkj_p))
-            # Check for complex nonadiabatic couplings.
-            if (
-                np.abs(dkj_q[max_pos_q]) > 1e-8
-                and np.abs(np.sin(np.angle(dkj_q[max_pos_q]))) > 1e-2
-            ):
-                warnings.warn(
-                    "dkj_q Nonadiabatic coupling is complex, needs gauge fixing!",
-                    UserWarning,
-                )
-            if (
-                np.abs(dkj_p[max_pos_p]) > 1e-8
-                and np.abs(np.sin(np.angle(dkj_p[max_pos_p]))) > 1e-2
-            ):
-                warnings.warn(
-                    "dkj_p Nonadiabatic coupling is complex, needs gauge fixing!",
-                    UserWarning,
-                )
-            delta_z = dkj_zc
+            # max_pos_q = np.argmax(np.abs(dkj_q))
+            # max_pos_p = np.argmax(np.abs(dkj_p))
+            # # Check for complex nonadiabatic couplings.
+            # if (
+            #     np.abs(dkj_q[max_pos_q]) > 1e-8
+            #     and np.abs(np.sin(np.angle(dkj_q[max_pos_q]))) > 1e-2
+            # ):
+            #     warnings.warn(
+            #         "dkj_q Nonadiabatic coupling is complex, needs gauge fixing!",
+            #         UserWarning,
+            #     )
+            # if (
+            #     np.abs(dkj_p[max_pos_p]) > 1e-8
+            #     and np.abs(np.sin(np.angle(dkj_p[max_pos_p]))) > 1e-2
+            # ):
+            #     warnings.warn(
+            #         "dkj_p Nonadiabatic coupling is complex, needs gauge fixing!",
+            #         UserWarning,
+            #     )
+            # delta_z = dkj_zc
             # Perform hopping using the model's hop function
             # or the default numerical hop function
+            delta_z = calc_delta_z_fssh(
+                sim,
+                parameters,
+                state,
+                traj_ind=traj_ind,
+                final_state_ind=final_state_ind,
+                init_state_ind=init_state_ind,
+            )
             hopped = False
             z_out = None
             if hasattr(sim.model, "hop_function"):
@@ -1340,9 +1462,9 @@ def update_active_surface_fssh(sim, parameters, state, **kwargs):
                     ev_diff=ev_diff,
                 )
             if hopped:
-                act_surf_ind_flat[traj_ind] = k
+                act_surf_ind_flat[traj_ind] = final_state_ind
                 act_surf_flat[traj_ind] = np.zeros_like(act_surf_flat[traj_ind])
-                act_surf_flat[traj_ind][k] = 1
+                act_surf_flat[traj_ind][final_state_ind] = 1
                 z[traj_ind] = z_out
                 state.act_surf_ind = np.copy(
                     act_surf_ind_flat.reshape((num_trajs, num_branches))
