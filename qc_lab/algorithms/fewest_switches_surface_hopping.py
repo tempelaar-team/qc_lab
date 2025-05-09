@@ -108,6 +108,7 @@ class FewestSwitchesSurfaceHopping(Algorithm):
             wf=state.act_surf_wf,
             z=state.z,
             output_name="z",
+            use_gauge_field_force=True,
         ),
         lambda sim, parameters, state: tasks.update_wf_db_eigs(
             sim=sim,

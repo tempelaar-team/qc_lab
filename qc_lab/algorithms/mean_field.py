@@ -40,6 +40,7 @@ class MeanField(Algorithm):
             z=state.z,
             output_name="z",
             wf=state.wf_db,
+            use_gauge_field_force=False,
         ),
         tasks.update_wf_db_rk4,
     ]

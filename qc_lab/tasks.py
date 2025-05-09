@@ -419,13 +419,14 @@ def update_quantum_classical_forces(sim, parameters, state, **kwargs):
     """
     z = kwargs["z"]
     wf = kwargs["wf"]
+    use_gauge_field_force = kwargs.get("use_gauge_field_force", False)
     parameters, state = update_dh_qc_dzc(sim, parameters, state, z=z)
     inds, mels, shape = state.dh_qc_dzc
     state.quantum_classical_forces = calc_sparse_inner_product(
         inds, mels, shape, wf, wf
     )
-    if hasattr(sim.model, "gauge_field_force"):
-        state.quantum_classical_forces += sim.model.gauge_field_force(sim.model.constants, parameters, z=z)
+    if hasattr(sim.model, "gauge_field_force") and use_gauge_field_force:
+        state.quantum_classical_forces += sim.model.gauge_field_force(sim.model.constants, parameters, z=z, wf=wf)
     return parameters, state
 
 
@@ -440,6 +441,7 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     """
     dt = sim.settings.dt
     wf = kwargs["wf"]
+    use_gauge_field_force = kwargs.get("use_gauge_field_force", False)
     if hasattr(sim.model, "linear_h_qc"):
         update_quantum_classical_forces_bool = not sim.model.linear_h_qc
     else:
@@ -448,7 +450,7 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     output_name = kwargs["output_name"]
     parameters, state = update_classical_forces(sim, parameters, state, z=z_0)
     parameters, state = update_quantum_classical_forces(
-        sim, parameters, state, wf=wf, z=z_0
+        sim, parameters, state, wf=wf, z=z_0, use_gauge_field_force=use_gauge_field_force
     )
     k1 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     parameters, state = update_classical_forces(
@@ -456,7 +458,7 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     )
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
-            sim, parameters, state, wf=wf, z=z_0 + 0.5 * dt * k1
+            sim, parameters, state, wf=wf, z=z_0 + 0.5 * dt * k1, use_gauge_field_force=use_gauge_field_force
         )
     k2 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     parameters, state = update_classical_forces(
@@ -464,13 +466,13 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     )
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
-            sim, parameters, state, wf=wf, z=z_0 + 0.5 * dt * k2
+            sim, parameters, state, wf=wf, z=z_0 + 0.5 * dt * k2, use_gauge_field_force=use_gauge_field_force
         )
     k3 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     parameters, state = update_classical_forces(sim, parameters, state, z=z_0 + dt * k3)
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
-            sim, parameters, state, wf=wf, z=z_0 + dt * k3
+            sim, parameters, state, wf=wf, z=z_0 + dt * k3, use_gauge_field_force=use_gauge_field_force
         )
     k4 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     setattr(state, output_name, z_0 + dt * 0.166667 * (k1 + 2 * k2 + 2 * k3 + k4))
