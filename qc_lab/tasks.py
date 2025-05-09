@@ -989,6 +989,7 @@ def initialize_active_surface(sim, parameters, state, **kwargs):
     state.act_surf = act_surf.astype(int).reshape(
         (num_trajs * num_branches, num_states)
     )
+    parameters.act_surf_ind = state.act_surf_ind
     return parameters, state
 
 
@@ -1471,4 +1472,5 @@ def update_active_surface_fssh(sim, parameters, state, **kwargs):
                 )
                 state.act_surf = np.copy(act_surf_flat)
                 state.z = np.copy(z)
+    parameters.act_surf_ind = state.act_surf_ind
     return parameters, state
