@@ -411,6 +411,9 @@ def update_quantum_classical_forces(sim, parameters, state, **kwargs):
     """
     Update the quantum-classical forces w.r.t the state defined by wf.
 
+    If the model has a gauge_field_force ingredient, this term will be added
+    to the quantum-classical forces.
+
     Required constants:
         - None.
     """
@@ -421,6 +424,8 @@ def update_quantum_classical_forces(sim, parameters, state, **kwargs):
     state.quantum_classical_forces = calc_sparse_inner_product(
         inds, mels, shape, wf, wf
     )
+    if hasattr(sim.model, "gauge_field_force"):
+        state.quantum_classical_forces += sim.model.gauge_field_force(sim.model.constants, parameters, z=z)
     return parameters, state
 
 
