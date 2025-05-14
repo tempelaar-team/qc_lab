@@ -33,23 +33,19 @@ class FMOComplex(Model):
         Initialize the model-specific constants.
         """
         self.constants.num_quantum_states = 7
-        num_bosons = self.constants.get("A", self.default_constants.get("A"))
-        char_freq = self.constants.get("W", self.default_constants.get("W"))
+        A = self.constants.get("A", self.default_constants.get("A"))
+        W = self.constants.get("W", self.default_constants.get("W"))
         boson_mass = self.constants.get(
             "boson_mass", self.default_constants.get("boson_mass")
         )
 
         self.constants.w = (
-            char_freq
-            * np.tan(((np.arange(num_bosons) + 1) - 0.5) * np.pi / (2 * num_bosons))[
-                np.newaxis, :
-            ]
-            * np.ones((self.constants.num_quantum_states, num_bosons))
+            W
+            * np.tan(((np.arange(A) + 1) - 0.5) * np.pi / (2 * A))[np.newaxis, :]
+            * np.ones((self.constants.num_quantum_states, A))
         ).flatten()
-        self.constants.num_classical_coordinates = (
-            self.constants.num_quantum_states
-            * self.constants.get("A", self.default_constants.get("A"))
-        )
+        self.constants.num_classical_coordinates = self.constants.num_quantum_states * A
+
         self.constants.classical_coordinate_weight = self.constants.w
         self.constants.classical_coordinate_mass = boson_mass * np.ones(
             self.constants.num_classical_coordinates
@@ -65,7 +61,7 @@ class FMOComplex(Model):
         """
         Initialize the constants for the quantum-classical coupling Hamiltonian.
         """
-        num_bosons = self.constants.get("A", self.default_constants.get("A"))
+        A = self.constants.get("A", self.default_constants.get("A"))
         l_reorg = self.constants.get("l_reorg", self.default_constants.get("l_reorg"))
         m = self.constants.classical_coordinate_mass
         h = self.constants.classical_coordinate_weight
@@ -77,11 +73,9 @@ class FMOComplex(Model):
             )
         )
         for n in range(self.constants.num_quantum_states):
-            self.constants.diagonal_linear_coupling[
-                n, n * num_bosons : (n + 1) * num_bosons
-            ] = (w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h)))[
-                n * num_bosons : (n + 1) * num_bosons
-            ]
+            self.constants.diagonal_linear_coupling[n, n * A : (n + 1) * A] = (
+                w * np.sqrt(2 * l_reorg / A) * (1 / np.sqrt(2 * m * h))
+            )[n * A : (n + 1) * A]
 
     def initialize_constants_h_q(self):
         """

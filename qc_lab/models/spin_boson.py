@@ -33,18 +33,16 @@ class SpinBoson(Model):
         """
         Initialize the model-specific constants.
         """
-        num_bosons = self.constants.get("A", self.default_constants.get("A"))
-        char_freq = self.constants.get("W", self.default_constants.get("W"))
+        A = self.constants.get("A", self.default_constants.get("A"))
+        W = self.constants.get("W", self.default_constants.get("W"))
         boson_mass = self.constants.get(
             "boson_mass", self.default_constants.get("boson_mass")
         )
-        self.constants.w = char_freq * np.tan(
-            ((np.arange(num_bosons) + 1) - 0.5) * np.pi / (2 * num_bosons)
-        )
-        self.constants.num_classical_coordinates = num_bosons
+        self.constants.w = W * np.tan(((np.arange(A) + 1) - 0.5) * np.pi / (2 * A))
+        self.constants.num_classical_coordinates = A
         self.constants.num_quantum_states = 2
         self.constants.classical_coordinate_weight = self.constants.w
-        self.constants.classical_coordinate_mass = boson_mass * np.ones(num_bosons)
+        self.constants.classical_coordinate_mass = boson_mass * np.ones(A)
 
     def initialize_constants_h_c(self):
         """
@@ -56,19 +54,19 @@ class SpinBoson(Model):
         """
         Initialize the constants for the quantum-classical coupling Hamiltonian.
         """
-        num_bosons = self.constants.get("A", self.default_constants.get("A"))
+        A = self.constants.get("A", self.default_constants.get("A"))
         l_reorg = self.constants.get("l_reorg", self.default_constants.get("l_reorg"))
-        m = self.constants.get("boson_mass", self.default_constants.get("boson_mass"))
-        h = (
-            self.constants.classical_coordinate_weight
-        )  # np.sqrt(2 * l_reorg / num_bosons) * (1/np.sqrt(2*m*h))
+        boson_mass = self.constants.get(
+            "boson_mass", self.default_constants.get("boson_mass")
+        )
+        h = self.constants.classical_coordinate_weight
         w = self.constants.w
-        self.constants.diagonal_linear_coupling = np.zeros((2, num_bosons))
+        self.constants.diagonal_linear_coupling = np.zeros((2, A))
         self.constants.diagonal_linear_coupling[0] = (
-            w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h))
+            w * np.sqrt(2 * l_reorg / A) * (1 / np.sqrt(2 * boson_mass * h))
         )
         self.constants.diagonal_linear_coupling[1] = (
-            -w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h))
+            -w * np.sqrt(2 * l_reorg / A) * (1 / np.sqrt(2 * boson_mass * h))
         )
 
     def initialize_constants_h_q(self):
