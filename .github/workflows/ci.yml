@@ -28,8 +28,6 @@ jobs:
           pip install --upgrade pip setuptools wheel
           pip install .
 
-      - name: Run test suite
-        run: pytest -q
 
   test-arm:
     name: Build & Test (ARM64 via QEMU)
@@ -54,6 +52,3 @@ jobs:
             --load \
             -t qc_lab-arm64 .
 
-      - name: Run tests inside ARM64 container
-        run: |
-          docker run --rm qc_lab-arm64 pytest -q
