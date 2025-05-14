@@ -7,6 +7,27 @@ import numpy as np
 from numba import njit
 
 
+def z_to_qp(z, constants):
+    """
+    Convert complex coordinates to real coordinates.
+    """
+    h = constants.classical_coordinate_weight
+    m = constants.classical_coordinate_mass
+    q = np.real((1 / np.sqrt(2 * m * h)) * (z + np.conj(z)))
+    p = np.real(1.0j * np.sqrt((m * h) / 2) * (np.conj(z) - z))
+    return q, p
+
+
+def qp_to_z(q, p, constants):
+    """
+    Convert real coordinates to complex coordinates.
+    """
+    h = constants.classical_coordinate_weight
+    m = constants.classical_coordinate_mass
+    z = np.sqrt((m * h) / 2) * q + 1.0j * np.sqrt(1 / (2 * m * h)) * p
+    return z
+
+
 def make_ingredient_sparse(ingredient):
     """
     Wrapper that converts a vectorized ingredient output to a sparse format
@@ -83,8 +104,9 @@ def harmonic_oscillator_h_c(model, constants, parameters, **kwargs):
     h = constants.classical_coordinate_weight[np.newaxis, :]
     w = constants.harmonic_oscillator_frequency[np.newaxis, :]
     m = constants.classical_coordinate_mass[np.newaxis, :]
-    q = np.sqrt(2 / (m * h)) * np.real(z)
-    p = np.sqrt(2 * m * h) * np.imag(z)
+    # q = np.sqrt(2 / (m * h)) * np.real(z)
+    # p = np.sqrt(2 * m * h) * np.imag(z)
+    q, p = z_to_qp(z, constants)
     h_c = np.sum((1 / 2) * (((p**2) / m) + m * (w**2) * (q**2)), axis=-1)
     return h_c
 
@@ -383,7 +405,6 @@ def harmonic_oscillator_boltzmann_init_classical(
     del model, parameters
     seed = kwargs.get("seed", None)
     kBT = constants.kBT
-    h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
     m = constants.classical_coordinate_mass
     out = np.zeros((len(seed), constants.num_classical_coordinates), dtype=complex)
@@ -400,7 +421,7 @@ def harmonic_oscillator_boltzmann_init_classical(
             loc=0, scale=std_p, size=constants.num_classical_coordinates
         )
         # Calculate the complex-valued classical coordinate.
-        z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
+        z = qp_to_z(q, p, constants)
         out[s] = z
     return out
 
@@ -421,7 +442,6 @@ def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kw
     del model, parameters
     seed = kwargs.get("seed", None)
     m = constants.classical_coordinate_mass
-    h = constants.classical_coordinate_weight
     w = constants.harmonic_oscillator_frequency
     kBT = constants.kBT
     out = np.zeros((len(seed), constants.num_classical_coordinates), dtype=complex)
@@ -438,6 +458,7 @@ def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kw
             loc=0, scale=std_p, size=constants.num_classical_coordinates
         )
         # Calculate the complex-valued classical coordinate.
-        z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
+        # z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
+        z = qp_to_z(q, p, constants)
         out[s] = z
     return out
