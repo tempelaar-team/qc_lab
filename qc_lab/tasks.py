@@ -7,7 +7,7 @@ import numpy as np
 from numba import njit
 
 
-def assign_norm_factor_mf(sim, parameters, state, **kwargs):
+def assign_norm_factor_mf(algorithm, sim, parameters, state, **kwargs):
     """
     Assign the normalization factor to the state object for MF dynamics.
 
@@ -19,7 +19,7 @@ def assign_norm_factor_mf(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def assign_norm_factor_fssh(sim, parameters, state, **kwargs):
+def assign_norm_factor_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Assign the normalization factor to the state object for FSSH.
 
@@ -36,7 +36,7 @@ def assign_norm_factor_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def initialize_branch_seeds(sim, parameters, state, **kwargs):
+def initialize_branch_seeds(algorithm, sim, parameters, state, **kwargs):
     """
     Initialize the seeds in each branch.
 
@@ -99,7 +99,9 @@ def _gen_sample_gaussian(constants, z0=None, seed=None, separable=True):
     return z0 + z, rand
 
 
-def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwargs):
+def numerical_boltzmann_mcmc_init_classical(
+    algorithm, model, constants, parameters, **kwargs
+):
     """
     Initialize classical coordinates according to Boltzmann statistics using Markov-Chain
     Monte Carlo with a Metropolis-Hastings algorithm.
@@ -191,7 +193,7 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
     return out_tmp[save_inds]
 
 
-def initialize_z(sim, parameters, state, **kwargs):
+def initialize_z(algorithm, sim, parameters, state, **kwargs):
     """
     Initialize the classical coordinate by using the init_classical function from the model object.
 
@@ -206,12 +208,12 @@ def initialize_z(sim, parameters, state, **kwargs):
             )
             return parameters, state
     state.z = numerical_boltzmann_mcmc_init_classical(
-        sim.model, sim.model.constants, parameters, seed=seed
+        algorithm, sim.model, sim.model.constants, parameters, seed=seed
     )
     return parameters, state
 
 
-def assign_to_parameters(sim, parameters, state, **kwargs):
+def assign_to_parameters(algorithm, sim, parameters, state, **kwargs):
     """
     Assign the value of the variable "val" to the parameters object with the name "name".
 
@@ -225,7 +227,7 @@ def assign_to_parameters(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def dh_c_dzc_finite_differences(model, constants, parameters, **kwargs):
+def dh_c_dzc_finite_differences(algorithm, model, constants, parameters, **kwargs):
     """
     Calculate the gradient of the classical Hamiltonian using finite differences.
 
@@ -273,7 +275,7 @@ def dh_c_dzc_finite_differences(model, constants, parameters, **kwargs):
     return dh_c_dzc
 
 
-def dh_qc_dzc_finite_differences(model, constants, parameters, **kwargs):
+def dh_qc_dzc_finite_differences(algorithm, model, constants, parameters, **kwargs):
     """
     Calculate the gradient of the quantum-classical Hamiltonian using finite differences.
 
@@ -337,7 +339,7 @@ def dh_qc_dzc_finite_differences(model, constants, parameters, **kwargs):
     return inds, mels, shape
 
 
-def update_dh_c_dzc(sim, parameters, state, **kwargs):
+def update_dh_c_dzc(algorithm, sim, parameters, state, **kwargs):
     """
     Update the gradient of the classical Hamiltonian
     w.r.t the conjugate classical coordinate.
@@ -351,12 +353,12 @@ def update_dh_c_dzc(sim, parameters, state, **kwargs):
             state.dh_c_dzc = sim.model.dh_c_dzc(sim.model.constants, parameters, z=z)
             return parameters, state
     state.dh_c_dzc = dh_c_dzc_finite_differences(
-        sim.model, sim.model.constants, parameters, z=z
+        algorithm, sim.model, sim.model.constants, parameters, z=z
     )
     return parameters, state
 
 
-def update_dh_qc_dzc(sim, parameters, state, **kwargs):
+def update_dh_qc_dzc(algorithm, sim, parameters, state, **kwargs):
     """
     Update the gradient of the quantum-classical Hamiltonian
     w.r.t the conjugate classical coordinate.
@@ -370,12 +372,12 @@ def update_dh_qc_dzc(sim, parameters, state, **kwargs):
             state.dh_qc_dzc = sim.model.dh_qc_dzc(sim.model.constants, parameters, z=z)
             return parameters, state
     state.dh_qc_dzc = dh_qc_dzc_finite_differences(
-        sim.model, sim.model.constants, parameters, z=z
+        algorithm, sim.model, sim.model.constants, parameters, z=z
     )
     return parameters, state
 
 
-def update_classical_forces(sim, parameters, state, **kwargs):
+def update_classical_forces(algorithm, sim, parameters, state, **kwargs):
     """
     Update the classical forces.
 
@@ -383,7 +385,7 @@ def update_classical_forces(sim, parameters, state, **kwargs):
         - None.
     """
     z = kwargs["z"]
-    parameters, state = update_dh_c_dzc(sim, parameters, state, z=z)
+    parameters, state = update_dh_c_dzc(algorithm, sim, parameters, state, z=z)
     state.classical_forces = state.dh_c_dzc
     return parameters, state
 
@@ -407,7 +409,7 @@ def calc_sparse_inner_product(inds, mels, shape, vec_l, vec_r):
     return out
 
 
-def update_quantum_classical_forces(sim, parameters, state, **kwargs):
+def update_quantum_classical_forces(algorithm, sim, parameters, state, **kwargs):
     """
     Update the quantum-classical forces w.r.t the state defined by wf.
 
@@ -420,7 +422,7 @@ def update_quantum_classical_forces(sim, parameters, state, **kwargs):
     z = kwargs["z"]
     wf = kwargs["wf"]
     use_gauge_field_force = kwargs.get("use_gauge_field_force", False)
-    parameters, state = update_dh_qc_dzc(sim, parameters, state, z=z)
+    parameters, state = update_dh_qc_dzc(algorithm, sim, parameters, state, z=z)
     inds, mels, shape = state.dh_qc_dzc
     state.quantum_classical_forces = calc_sparse_inner_product(
         inds, mels, shape, wf, wf
@@ -432,7 +434,7 @@ def update_quantum_classical_forces(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_z_rk4(sim, parameters, state, **kwargs):
+def update_z_rk4(algorithm, sim, parameters, state, **kwargs):
     """
     Update the z-coordinates using the 4th-order Runge-Kutta method.
     If the gradient of the quantum-classical Hamiltonian depends on z then
@@ -450,8 +452,11 @@ def update_z_rk4(sim, parameters, state, **kwargs):
         update_quantum_classical_forces_bool = True
     z_0 = kwargs["z"]
     output_name = kwargs["output_name"]
-    parameters, state = update_classical_forces(sim, parameters, state, z=z_0)
+    parameters, state = update_classical_forces(
+        algorithm, sim, parameters, state, z=z_0
+    )
     parameters, state = update_quantum_classical_forces(
+        algorithm,
         sim,
         parameters,
         state,
@@ -461,10 +466,11 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     )
     k1 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     parameters, state = update_classical_forces(
-        sim, parameters, state, z=z_0 + 0.5 * dt * k1
+        algorithm, sim, parameters, state, z=z_0 + 0.5 * dt * k1
     )
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
+            algorithm,
             sim,
             parameters,
             state,
@@ -474,10 +480,11 @@ def update_z_rk4(sim, parameters, state, **kwargs):
         )
     k2 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     parameters, state = update_classical_forces(
-        sim, parameters, state, z=z_0 + 0.5 * dt * k2
+        algorithm, sim, parameters, state, z=z_0 + 0.5 * dt * k2
     )
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
+            algorithm,
             sim,
             parameters,
             state,
@@ -486,9 +493,12 @@ def update_z_rk4(sim, parameters, state, **kwargs):
             use_gauge_field_force=use_gauge_field_force,
         )
     k3 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
-    parameters, state = update_classical_forces(sim, parameters, state, z=z_0 + dt * k3)
+    parameters, state = update_classical_forces(
+        algorithm, sim, parameters, state, z=z_0 + dt * k3
+    )
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
+            algorithm,
             sim,
             parameters,
             state,
@@ -501,7 +511,7 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_z_parameter(sim, parameters, state, **kwargs):
+def update_z_parameter(algorithm, sim, parameters, state, **kwargs):
     """
     Put the current z-coordinate into the parameters object.
 
@@ -514,7 +524,7 @@ def update_z_parameter(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_h_quantum(sim, parameters, state, **kwargs):
+def update_h_quantum(algorithm, sim, parameters, state, **kwargs):
     """
     Update the quantum + quantum-classical Hamiltonian.
 
@@ -561,7 +571,7 @@ def wf_db_rk4(h_quantum, wf_db, dt):
     return wf_db + dt * 0.166667 * (k1 + 2 * k2 + 2 * k3 + k4)
 
 
-def update_wf_db_rk4(sim, parameters, state, **kwargs):
+def update_wf_db_rk4(algorithm, sim, parameters, state, **kwargs):
     """
     Update the wavefunction using the 4th-order Runge-Kutta method.
 
@@ -576,7 +586,7 @@ def update_wf_db_rk4(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_dm_db_mf(sim, parameters, state, **kwargs):
+def update_dm_db_mf(algorithm, sim, parameters, state, **kwargs):
     """
     Update the density matrix in the mean-field approximation.
 
@@ -589,7 +599,7 @@ def update_dm_db_mf(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_classical_energy(sim, parameters, state, **kwargs):
+def update_classical_energy(algorithm, sim, parameters, state, **kwargs):
     """
     Update the classical energy.
 
@@ -603,7 +613,7 @@ def update_classical_energy(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_classical_energy_fssh(sim, parameters, state, **kwargs):
+def update_classical_energy_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Update the classical energy as a sum of equally-weighted contributions from each branch.
 
@@ -647,7 +657,7 @@ def update_classical_energy_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_quantum_energy(sim, parameters, state, **kwargs):
+def update_quantum_energy(algorithm, sim, parameters, state, **kwargs):
     """
     Update the quantum energy w.r.t the wavefunction specified by wf.
 
@@ -662,7 +672,7 @@ def update_quantum_energy(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_quantum_energy_fssh(sim, parameters, state, **kwargs):
+def update_quantum_energy_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Update the quantum energy w.r.t the wavefunction specified by wf.
 
@@ -695,7 +705,7 @@ def update_quantum_energy_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def diagonalize_matrix(sim, parameters, state, **kwargs):
+def diagonalize_matrix(algorithm, sim, parameters, state, **kwargs):
     """
     Diagonalizes a given matrix and stores the eigenvalues and eigenvectors in the state object.
 
@@ -712,7 +722,7 @@ def diagonalize_matrix(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def analytic_der_couple_phase(sim, parameters, state, eigvals, eigvecs):
+def analytic_der_couple_phase(algorithm, sim, parameters, state, eigvals, eigvecs):
     """
     Calculates the phase change needed to fix the gauge using analytic derivative couplings.
 
@@ -818,7 +828,7 @@ def analytic_der_couple_phase(sim, parameters, state, eigvals, eigvecs):
     return der_couple_q_phase, der_couple_p_phase
 
 
-def gauge_fix_eigs(sim, parameters, state, **kwargs):
+def gauge_fix_eigs(algorithm, sim, parameters, state, **kwargs):
     """
     Fixes the gauge of the eigenvectors as specified by the gauge_fixing parameter.
 
@@ -846,9 +856,9 @@ def gauge_fix_eigs(sim, parameters, state, **kwargs):
         eigvecs = np.einsum("tai,ti->tai", eigvecs, phase, optimize="greedy")
     if kwargs["gauge_fixing"] >= 2:
         z = kwargs["z"]
-        parameters, state = update_dh_qc_dzc(sim, parameters, state, z=z)
+        parameters, state = update_dh_qc_dzc(algorithm, sim, parameters, state, z=z)
         der_couple_q_phase, _ = analytic_der_couple_phase(
-            sim, parameters, state, eigvals, eigvecs
+            algorithm, sim, parameters, state, eigvals, eigvecs
         )
         eigvecs = np.einsum(
             "tai,ti->tai", eigvecs, np.conj(der_couple_q_phase), optimize="greedy"
@@ -858,7 +868,7 @@ def gauge_fix_eigs(sim, parameters, state, **kwargs):
         eigvecs = np.einsum("tai,ti->tai", eigvecs, signs, optimize="greedy")
     if kwargs["gauge_fixing"] == 2:
         der_couple_q_phase_new, der_couple_p_phase_new = analytic_der_couple_phase(
-            sim, parameters, state, eigvals, eigvecs
+            algorithm, sim, parameters, state, eigvals, eigvecs
         )
         if (
             np.sum(
@@ -874,7 +884,7 @@ def gauge_fix_eigs(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def assign_to_state(sim, parameters, state, **kwargs):
+def assign_to_state(algorithm, sim, parameters, state, **kwargs):
     """
     Creates a new state variable with the name "name" and the value "val".
 
@@ -888,7 +898,7 @@ def assign_to_state(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def basis_transform_vec(sim, parameters, state, **kwargs):
+def basis_transform_vec(algorithm, sim, parameters, state, **kwargs):
     """
     Transforms a vector "input_vec" to a new basis defined by "basis".
 
@@ -908,7 +918,7 @@ def basis_transform_vec(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def basis_transform_mat(sim, parameters, state, **kwargs):
+def basis_transform_mat(algorithm, sim, parameters, state, **kwargs):
     """
     Transforms a matrix "input_mat" to a new basis
     defined by "basis" and stores it in the state object
@@ -935,7 +945,7 @@ def basis_transform_mat(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def initialize_active_surface(sim, parameters, state, **kwargs):
+def initialize_active_surface(algorithm, sim, parameters, state, **kwargs):
     """
     Initializes the active surface (act_surf), active surface index
     (act_surf_ind) and initial active surface index (act_surf_ind_0)
@@ -993,7 +1003,7 @@ def initialize_active_surface(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def initialize_random_values_fssh(sim, parameters, state, **kwargs):
+def initialize_random_values_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Initialize a set of random variables using the trajectory seeds for FSSH.
 
@@ -1015,7 +1025,7 @@ def initialize_random_values_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def initialize_dm_adb_0_fssh(sim, parameters, state, **kwargs):
+def initialize_dm_adb_0_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Initialize the initial adiabatic density matrix for FSSH.
 
@@ -1032,7 +1042,7 @@ def initialize_dm_adb_0_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_act_surf_wf(sim, parameters, state, **kwargs):
+def update_act_surf_wf(algorithm, sim, parameters, state, **kwargs):
     """
     Update the wavefunction corresponding to the active surface.
 
@@ -1050,7 +1060,7 @@ def update_act_surf_wf(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_dm_db_fssh(sim, parameters, state, **kwargs):
+def update_dm_db_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Update the diabatic density matrix for FSSH.
 
@@ -1085,6 +1095,7 @@ def update_dm_db_fssh(sim, parameters, state, **kwargs):
     else:
         dm_adb_branch = dm_adb_branch / num_branches
     parameters, state = basis_transform_mat(
+        algorithm,
         sim,
         parameters,
         state,
@@ -1112,7 +1123,7 @@ def update_dm_db_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_wf_db_eigs(sim, parameters, state, **kwargs):
+def update_wf_db_eigs(algorithm, sim, parameters, state, **kwargs):
     """
     Evolve the diabatic wavefunction using the electronic eigenbasis.
 
@@ -1126,6 +1137,7 @@ def update_wf_db_eigs(sim, parameters, state, **kwargs):
     eigvecs = kwargs["eigvecs"]
     evals_exp = np.exp(-1.0j * eigvals * sim.settings.dt)
     parameters, state = basis_transform_vec(
+        algorithm,
         sim=sim,
         parameters=parameters,
         state=state,
@@ -1135,6 +1147,7 @@ def update_wf_db_eigs(sim, parameters, state, **kwargs):
     )
     setattr(state, adb_name, (state.wf_adb * evals_exp))
     parameters, state = basis_transform_vec(
+        algorithm,
         sim=sim,
         parameters=parameters,
         state=state,
@@ -1210,24 +1223,25 @@ def numerical_fssh_hop(model, constants, parameters, **kwargs):
     return z - 1.0j * min_gamma * delta_z, True
 
 
-def calc_delta_z_fssh(sim, parameters, state, **kwargs):
+def calc_delta_z_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Update the rescaling direction state.delta_z in FSSH.
     """
     traj_ind, final_state_ind, init_state_ind = (
         kwargs["traj_ind"],
         kwargs["final_state_ind"],
-        kwargs["init_state_ind"]
+        kwargs["init_state_ind"],
     )
     if hasattr(sim.model, "rescaling_direction_fssh"):
         delta_z = sim.model.rescaling_direction_fssh(
-            sim.model.constants, parameters,
+            sim.model.constants,
+            parameters,
             z=state.z[traj_ind],
             init_state_ind=init_state_ind,
             final_state_ind=final_state_ind,
         )
         return delta_z
-    
+
     inds, mels, _ = state.dh_qc_dzc
     eigvecs_flat = state.eigvecs
     eigvals_flat = state.eigvals
@@ -1302,7 +1316,7 @@ def calc_delta_z_fssh(sim, parameters, state, **kwargs):
     return delta_z
 
 
-def update_active_surface_fssh(sim, parameters, state, **kwargs):
+def update_active_surface_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Update the active surface in FSSH. If a hopping function is not specified in the model
     class a numerical hopping procedure is used instead.
@@ -1435,6 +1449,7 @@ def update_active_surface_fssh(sim, parameters, state, **kwargs):
             # Perform hopping using the model's hop function
             # or the default numerical hop function
             delta_z = calc_delta_z_fssh(
+                algorithm,
                 sim,
                 parameters,
                 state,

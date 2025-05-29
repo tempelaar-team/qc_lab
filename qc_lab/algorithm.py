@@ -3,6 +3,7 @@ This module contains the Algorithm class, which is the base class for Algorithm 
 """
 
 from qc_lab.constants import Constants
+import copy
 
 
 class Algorithm:
@@ -21,6 +22,11 @@ class Algorithm:
             setattr(self.settings, key, val)
         self.settings._init_complete = True
         self.update_algorithm_settings()
+        # copy the recipes and output variables to ensure they are not shared across instances
+        self.initialization_recipe = copy.copy(self.initialization_recipe)
+        self.update_recipe = copy.copy(self.update_recipe)
+        self.output_recipe = copy.copy(self.output_recipe)
+        self.output_variables = copy.copy(self.output_variables)
 
     def update_algorithm_settings(self):
         """
@@ -36,22 +42,22 @@ class Algorithm:
         """
         Executes the initialization recipe for the given simulation.
         """
-        for _, func in enumerate(sim.algorithm.initialization_recipe):
-            parameter, state = func(sim, parameter, state)
+        for _, func in enumerate(self.initialization_recipe):
+            parameter, state = func(self, sim, parameter, state)
         return parameter, state
 
     def execute_update_recipe(self, sim, parameter, state):
         """
         Executes the update recipe for the given simulation.
         """
-        for _, func in enumerate(sim.algorithm.update_recipe):
-            parameter, state = func(sim, parameter, state)
+        for _, func in enumerate(self.update_recipe):
+            parameter, state = func(self, sim, parameter, state)
         return parameter, state
 
     def execute_output_recipe(self, sim, parameter, state):
         """
         Executes the output recipe for the given simulation.
         """
-        for _, func in enumerate(sim.algorithm.output_recipe):
-            parameter, state = func(sim, parameter, state)
+        for _, func in enumerate(self.output_recipe):
+            parameter, state = func(self, sim, parameter, state)
         return parameter, state
