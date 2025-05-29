@@ -15,7 +15,7 @@ setup(
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     packages=find_packages(),
-    python_requires=">3.7,<3.14",
+    python_requires=">3.9,<3.14",
     install_requires=["numpy<=1.26,>=1.22", "tqdm","h5py","numba<=0.60,>=0.58","matplotlib"],
     extras_requires={"test":["pytest"]},
     keywords=["surface hopping", "mixed quantum-classical dynamics",

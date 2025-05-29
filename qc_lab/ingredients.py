@@ -104,8 +104,6 @@ def harmonic_oscillator_h_c(model, constants, parameters, **kwargs):
     h = constants.classical_coordinate_weight[np.newaxis, :]
     w = constants.harmonic_oscillator_frequency[np.newaxis, :]
     m = constants.classical_coordinate_mass[np.newaxis, :]
-    # q = np.sqrt(2 / (m * h)) * np.real(z)
-    # p = np.sqrt(2 * m * h) * np.imag(z)
     q, p = z_to_qp(z, constants)
     h_c = np.sum((1 / 2) * (((p**2) / m) + m * (w**2) * (q**2)), axis=-1)
     return h_c
@@ -458,7 +456,6 @@ def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kw
             loc=0, scale=std_p, size=constants.num_classical_coordinates
         )
         # Calculate the complex-valued classical coordinate.
-        # z = np.sqrt(h * m / 2) * (q + 1.0j * (p / (h * m)))
         z = qp_to_z(q, p, constants)
         out[s] = z
     return out
