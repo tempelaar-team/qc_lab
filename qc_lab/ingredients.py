@@ -445,9 +445,14 @@ def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kw
     out = np.zeros((len(seed), constants.num_classical_coordinates), dtype=complex)
     for s, seed_value in enumerate(seed):
         np.random.seed(seed_value)
+        
         # Calculate the standard deviations for q and p.
-        std_q = np.sqrt(1 / (2 * w * m * np.tanh(w / (2 * kBT))))
-        std_p = np.sqrt((m * w) / (2 * np.tanh(w / (2 * kBT))))
+        if kBT > 0:
+            std_q = np.sqrt(1 / (2 * w * m * np.tanh(w / (2 * (kBT)))))
+            std_p = np.sqrt((m * w) / (2 * np.tanh(w / (2 * (kBT)))))
+        else:
+            std_q = np.sqrt(1 / (2 * w * m))
+            std_p = np.sqrt((m * w) / (2))
         # Generate random q and p values.
         q = np.random.normal(
             loc=0, scale=std_q, size=constants.num_classical_coordinates
