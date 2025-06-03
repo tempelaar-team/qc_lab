@@ -23,10 +23,10 @@ class Algorithm:
         self.settings._init_complete = True
         self.update_algorithm_settings()
         # copy the recipes and output variables to ensure they are not shared across instances
-        self.initialization_recipe = copy.copy(self.initialization_recipe)
-        self.update_recipe = copy.copy(self.update_recipe)
-        self.output_recipe = copy.copy(self.output_recipe)
-        self.output_variables = copy.copy(self.output_variables)
+        self.initialization_recipe = copy.deepcopy(self.initialization_recipe)
+        self.update_recipe = copy.deepcopy(self.update_recipe)
+        self.output_recipe = copy.deepcopy(self.output_recipe)
+        self.output_variables = copy.deepcopy(self.output_variables)
 
     def update_algorithm_settings(self):
         """
