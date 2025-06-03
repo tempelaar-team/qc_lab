@@ -10,12 +10,15 @@ def dynamics(sim, parameter_vector, state_vector, data):
     """
     Dynamics core for QC Lab.
     """
-    # Execute initialization recipe.
-    parameter_vector, state_vector = sim.algorithm.execute_initialization_recipe(
-        sim, parameter_vector, state_vector
-    )
     # Iterate over each time step.
     for sim.t_ind in tqdm(sim.settings.tdat_n):
+        if sim.t_ind == 0:
+            # Execute initialization recipe.
+            parameter_vector, state_vector = (
+                sim.algorithm.execute_initialization_recipe(
+                    sim, parameter_vector, state_vector
+                )
+            )
         # Detect output timesteps.
         if np.mod(sim.t_ind, sim.settings.dt_output_n) == 0:
             # Calculate output variables.
