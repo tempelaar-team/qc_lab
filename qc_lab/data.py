@@ -104,7 +104,20 @@ class Data:
             dic: The dictionary to save.
         """
         for key, item in dic.items():
-            if isinstance(item, (np.ndarray, np.int64, np.float64, str, bytes, int, float, bool, complex)):
+            if isinstance(
+                item,
+                (
+                    np.ndarray,
+                    np.int64,
+                    np.float64,
+                    str,
+                    bytes,
+                    int,
+                    float,
+                    bool,
+                    complex,
+                ),
+            ):
                 h5file[path + key] = item
             elif isinstance(item, dict):
                 self._recursive_save(h5file, path + key + "/", item)
