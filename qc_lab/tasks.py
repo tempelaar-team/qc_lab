@@ -1190,7 +1190,7 @@ def nan_num(num):
     return num
 
 
-def numerical_fssh_hop(model, constants, parameters, **kwargs):
+def numerical_fssh_hop(model, parameters, **kwargs):
     """
     Determines the coordinate rescaling in FSSH numerically.
 
@@ -1202,12 +1202,12 @@ def numerical_fssh_hop(model, constants, parameters, **kwargs):
     z = kwargs["z"]
     delta_z = kwargs["delta_z"]
     ev_diff = kwargs["ev_diff"]
-    gamma_range = constants.get("numerical_fssh_hop_gamma_range", 5)
-    max_iter = constants.get("numerical_fssh_hop_max_iter", 20)
-    num_points = constants.get("numerical_fssh_hop_num_points", 10)
-    thresh = constants.get("numerical_fssh_hop_threshold", 1e-6)
+    gamma_range = model.constants.get("numerical_fssh_hop_gamma_range", 5)
+    max_iter = model.constants.get("numerical_fssh_hop_max_iter", 20)
+    num_points = model.constants.get("numerical_fssh_hop_num_points", 10)
+    thresh = model.constants.get("numerical_fssh_hop_threshold", 1e-6)
     init_energy = model.ingredients["h_c"](
-        model, constants, parameters, z=np.array([z]), batch_size=1
+        model, model.constants, parameters, z=np.array([z]), batch_size=1
     )[0]
     min_gamma = 0
     num_iter = 0
@@ -1223,7 +1223,6 @@ def numerical_fssh_hop(model, constants, parameters, **kwargs):
                     init_energy
                     - model.ingredients["h_c"](
                         model,
-                        constants,
                         parameters,
                         z=np.array([z - 1.0j * gamma * delta_z]),
                         batch_size=1,
