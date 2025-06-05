@@ -4,6 +4,7 @@ This module contains the Algorithm class, which is the base class for Algorithm 
 
 from qc_lab.constants import Constants
 import copy
+import numpy as np
 
 
 class Algorithm:
@@ -23,41 +24,30 @@ class Algorithm:
         self.settings._init_complete = True
         self.update_algorithm_settings()
         # copy the recipes and output variables to ensure they are not shared across instances
-        self.initialization_recipe = copy.deepcopy(self.initialization_recipe)
-        self.update_recipe = copy.deepcopy(self.update_recipe)
-        self.output_recipe = copy.deepcopy(self.output_recipe)
-        self.output_variables = copy.deepcopy(self.output_variables)
+        self.initialization_recipe = copy.copy(self.initialization_recipe)
+        self.update_recipe = copy.copy(self.update_recipe)
+        self.output_recipe = copy.copy(self.output_recipe)
+        self.output_variables = copy.copy(self.output_variables)
+        self.test_recipe = copy.copy(self.test_recipe)
 
     def update_algorithm_settings(self):
         """
         Update algorithm settings. This method should be overridden by subclasses.
         """
 
-    initialization_recipe = []
-    update_recipe = []
-    output_recipe = []
-    output_variables = []
+    initialization_recipe = {}
+    update_recipe = {}
+    output_recipe = {}
+    output_variables = {}
+    test_recipe = []
 
-    def execute_initialization_recipe(self, sim, parameter, state):
+    def execute_recipe(self, sim, parameter, state, recipe):
         """
-        Executes the initialization recipe for the given simulation.
+        Executes the given recipe for the simulation.
         """
-        for _, func in enumerate(self.initialization_recipe):
-            parameter, state = func(self, sim, parameter, state)
-        return parameter, state
-
-    def execute_update_recipe(self, sim, parameter, state):
-        """
-        Executes the update recipe for the given simulation.
-        """
-        for _, func in enumerate(self.update_recipe):
-            parameter, state = func(self, sim, parameter, state)
-        return parameter, state
-
-    def execute_output_recipe(self, sim, parameter, state):
-        """
-        Executes the output recipe for the given simulation.
-        """
-        for _, func in enumerate(self.output_recipe):
-            parameter, state = func(self, sim, parameter, state)
+        steps = np.array([int(i) for i in recipe.keys()])
+        order = np.argsort(steps)
+        for ind in order:
+            func = recipe[str(steps[ind])]
+            parameter, state = func(sim.algorithm, sim, parameter, state)
         return parameter, state
