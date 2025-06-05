@@ -27,6 +27,7 @@ class FMOComplex(Model):
         self.dh_qc_dzc_inds = None
         self.dh_qc_dzc_mels = None
         self.dh_qc_dzc_shape = None
+        self.linear_h_qc = True
 
     def initialize_constants_model(self):
         """
@@ -82,7 +83,7 @@ class FMOComplex(Model):
         Initialize the constants for the quantum Hamiltonian.
         """
 
-    def h_q(self, constants, parameters, **kwargs):
+    def h_q(self, parameters, **kwargs):
         if kwargs.get("batch_size") is not None:
             batch_size = kwargs.get("batch_size")
         else:
@@ -122,16 +123,18 @@ class FMOComplex(Model):
         )
         return out
 
-    init_classical = ingredients.harmonic_oscillator_boltzmann_init_classical
-    hop_function = ingredients.harmonic_oscillator_hop_function
-    h_c = ingredients.harmonic_oscillator_h_c
-    h_qc = ingredients.diagonal_linear_h_qc
-    dh_qc_dzc = ingredients.diagonal_linear_dh_qc_dzc
-    dh_c_dzc = ingredients.harmonic_oscillator_dh_c_dzc
-    linear_h_qc = True
-    initialization_functions = [
-        initialize_constants_model,
-        initialize_constants_h_c,
-        initialize_constants_h_qc,
-        initialize_constants_h_q,
-    ]
+    initialization_functions = {
+        "initialize_constants_model": initialize_constants_model,
+        "initialize_constants_h_c": initialize_constants_h_c,
+        "initialize_constants_h_qc": initialize_constants_h_qc,
+        "initialize_constants_h_q": initialize_constants_h_q,
+    }
+    ingredients = {
+        "h_q": h_q,
+        "h_qc": ingredients.diagonal_linear_h_qc,
+        "h_c": ingredients.harmonic_oscillator_h_c,
+        "dh_qc_dzc": ingredients.diagonal_linear_dh_qc_dzc,
+        "dh_c_dzc": ingredients.harmonic_oscillator_dh_c_dzc,
+        "init_classical": ingredients.harmonic_oscillator_boltzmann_init_classical,
+        "hop_function": ingredients.harmonic_oscillator_hop_function,
+    }
