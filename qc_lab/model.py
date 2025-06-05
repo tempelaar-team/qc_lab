@@ -22,6 +22,7 @@ class Model:
             setattr(self.constants, key, val)
         self.constants._init_complete = True
         self.parameters = Vector()
+        self.initialize_constants()
         self.initialization_functions = copy.deepcopy(self.initialization_functions)
         self.ingredients = copy.deepcopy(self.ingredients)
 

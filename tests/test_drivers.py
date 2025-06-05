@@ -6,9 +6,9 @@ import pytest
 def test_drivers_spinboson():
     import numpy as np
     import matplotlib.pyplot as plt
-    from qc_lab import Simulation # import simulation class 
-    from qc_lab.models import SpinBoson # import model class 
-    from qc_lab.algorithms import MeanField # import algorithm class 
+    from qc_lab import Simulation # import simulation class
+    from qc_lab.models import SpinBoson # import model class
+    from qc_lab.algorithms import MeanField # import algorithm class
     from qc_lab.dynamics import serial_driver, parallel_driver_multiprocessing # import dynamics driver
 
     sim = Simulation()
