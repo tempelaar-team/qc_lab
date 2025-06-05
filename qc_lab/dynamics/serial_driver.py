@@ -13,6 +13,8 @@ def serial_driver(sim, seeds=None, data=None):
     """
     Serial driver for the dynamics core.
     """
+    # first initialize the model constants
+    sim.model.initialize_constants()
     if data is None:
         data = Data()
     if seeds is None:

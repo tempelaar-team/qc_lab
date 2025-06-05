@@ -14,6 +14,8 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
     """
     Parallel driver for the dynamics core using the mpi4py library.
     """
+    # first initialize the model constants
+    sim.model.initialize_constants()
     try:
         from mpi4py import MPI
     except ImportError:

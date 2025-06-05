@@ -7,7 +7,7 @@ import numpy as np
 from numba import njit
 
 
-def assign_norm_factor_mf(sim, parameters, state, **kwargs):
+def assign_norm_factor_mf(algorithm, sim, parameters, state, **kwargs):
     """
     Assign the normalization factor to the state object for MF dynamics.
 
@@ -19,7 +19,7 @@ def assign_norm_factor_mf(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def assign_norm_factor_fssh(sim, parameters, state, **kwargs):
+def assign_norm_factor_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Assign the normalization factor to the state object for FSSH.
 
@@ -36,7 +36,7 @@ def assign_norm_factor_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def initialize_branch_seeds(sim, parameters, state, **kwargs):
+def initialize_branch_seeds(algorithm, sim, parameters, state, **kwargs):
     """
     Initialize the seeds in each branch.
 
@@ -99,7 +99,7 @@ def _gen_sample_gaussian(constants, z0=None, seed=None, separable=True):
     return z0 + z, rand
 
 
-def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwargs):
+def numerical_boltzmann_mcmc_init_classical(model, parameters, **kwargs):
     """
     Initialize classical coordinates according to Boltzmann statistics using Markov-Chain
     Monte Carlo with a Metropolis-Hastings algorithm.
@@ -113,47 +113,57 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
         - kBT (float): Thermal quantum. Default: None.
     """
     seed = kwargs.get("seed", None)
-    burn_in_size = constants.get("mcmc_burn_in_size", 10000)
-    sample_size = constants.get("mcmc_sample_size", 100000)
-    mcmc_h_c_separable = constants.get("mcmc_h_c_separable", True)
+    burn_in_size = model.constants.get("mcmc_burn_in_size", 10000)
+    sample_size = model.constants.get("mcmc_sample_size", 100000)
+    mcmc_h_c_separable = model.constants.get("mcmc_h_c_separable", True)
     burn_in_seeds = np.arange(burn_in_size)
     sample_seeds = np.arange(sample_size)
     save_inds = np.zeros(len(seed), dtype=int)
     out_tmp = np.zeros(
-        (sample_size, constants.num_classical_coordinates), dtype=complex
+        (sample_size, model.constants.num_classical_coordinates), dtype=complex
     )
     for s, seed_s in enumerate(seed):
         np.random.seed(seed_s)
         save_inds[s] = np.random.randint(0, sample_size)
-    mcmc_init_z, _ = _gen_sample_gaussian(constants, z0=None, seed=0, separable=False)
-    sample = constants.get("mcmc_init_z", mcmc_init_z)
+    mcmc_init_z, _ = _gen_sample_gaussian(
+        model.constants, z0=None, seed=0, separable=False
+    )
+    sample = model.constants.get("mcmc_init_z", mcmc_init_z)
     if mcmc_h_c_separable:
         for s, seed_s in enumerate(burn_in_seeds):
             last_sample = np.copy(sample)
             last_z = np.diag(last_sample)
-            last_e = model.h_c(constants, parameters, z=last_z, batch_size=len(last_z))
+            last_e = model.ingredients["h_c"](
+                model, parameters, z=last_z, batch_size=len(last_z)
+            )
             proposed_sample, rand = _gen_sample_gaussian(
-                constants, z0=last_sample, seed=seed_s, separable=True
+                model.constants, z0=last_sample, seed=seed_s, separable=True
             )
             new_z = np.diag(proposed_sample)
-            new_e = model.h_c(constants, parameters, z=new_z, batch_size=len(new_z))
+            new_e = model.ingredients["h_c"](
+                model, parameters, z=new_z, batch_size=len(new_z)
+            )
             thresh = np.minimum(
-                np.ones(constants.num_classical_coordinates),
-                np.exp(-(new_e - last_e) / constants.kBT),
+                np.ones(model.constants.num_classical_coordinates),
+                np.exp(-(new_e - last_e) / model.constants.kBT),
             )
             sample[rand < thresh] = proposed_sample[rand < thresh]
         for s, seed_s in enumerate(sample_seeds):
             last_sample = np.copy(sample)
             last_z = np.diag(last_sample)
-            last_e = model.h_c(constants, parameters, z=last_z, batch_size=len(last_z))
+            last_e = model.ingredients["h_c"](
+                model, parameters, z=last_z, batch_size=len(last_z)
+            )
             proposed_sample, rand = _gen_sample_gaussian(
-                constants, z0=last_sample, seed=seed_s, separable=True
+                model.constants, z0=last_sample, seed=seed_s, separable=True
             )
             new_z = np.diag(proposed_sample)
-            new_e = model.h_c(constants, parameters, z=new_z, batch_size=len(new_z))
+            new_e = model.ingredients["h_c"](
+                model, parameters, z=new_z, batch_size=len(new_z)
+            )
             thresh = np.minimum(
-                np.ones(constants.num_classical_coordinates),
-                np.exp(-(new_e - last_e) / constants.kBT),
+                np.ones(model.constants.num_classical_coordinates),
+                np.exp(-(new_e - last_e) / model.constants.kBT),
             )
             sample[rand < thresh] = proposed_sample[rand < thresh]
             out_tmp[s] = sample
@@ -161,37 +171,43 @@ def numerical_boltzmann_mcmc_init_classical(model, constants, parameters, **kwar
 
     for s, seed_s in enumerate(burn_in_seeds):
         last_sample = np.copy(sample)
-        last_e = model.h_c(
-            constants, parameters, z=last_sample, batch_size=len(last_sample)
+        last_e = model.ingredients["h_c"](
+            model, parameters, z=last_sample, batch_size=len(last_sample)
         )
         proposed_sample, rand = _gen_sample_gaussian(
-            constants, z0=last_sample, seed=seed_s, separable=False
+            model.constants, z0=last_sample, seed=seed_s, separable=False
         )
-        new_e = model.h_c(
-            constants, parameters, z=proposed_sample, batch_size=len(proposed_sample)
+        new_e = model.ingredients["h_c"](
+            model,
+            parameters,
+            z=proposed_sample,
+            batch_size=len(proposed_sample),
         )
-        thresh = min(1, np.exp(-(new_e - last_e) / constants.kBT))
+        thresh = min(1, np.exp(-(new_e - last_e) / model.constants.kBT))
         if rand < thresh:
             sample = proposed_sample
     for s, seed_s in enumerate(sample_seeds):
         last_sample = np.copy(sample)
-        last_e = model.h_c(
-            constants, parameters, z=last_sample, batch_size=len(last_sample)
+        last_e = model.ingredients["h_c"](
+            model, parameters, z=last_sample, batch_size=len(last_sample)
         )
         proposed_sample, rand = _gen_sample_gaussian(
-            constants, z0=last_sample, seed=seed_s, separable=False
+            model.constants, z0=last_sample, seed=seed_s, separable=False
         )
-        new_e = model.h_c(
-            constants, parameters, z=proposed_sample, batch_size=len(proposed_sample)
+        new_e = model.ingredients["h_c"](
+            model,
+            parameters,
+            z=proposed_sample,
+            batch_size=len(proposed_sample),
         )
-        thresh = min(1, np.exp(-(new_e - last_e) / constants.kBT))
+        thresh = min(1, np.exp(-(new_e - last_e) / model.constants.kBT))
         if rand < thresh:
             sample = proposed_sample
         out_tmp[s] = sample
     return out_tmp[save_inds]
 
 
-def initialize_z(sim, parameters, state, **kwargs):
+def initialize_z(algorithm, sim, parameters, state, **kwargs):
     """
     Initialize the classical coordinate by using the init_classical function from the model object.
 
@@ -199,19 +215,16 @@ def initialize_z(sim, parameters, state, **kwargs):
         - None.
     """
     seed = kwargs["seed"]
-    if hasattr(sim.model, "init_classical"):
-        if sim.model.init_classical is not None:
-            state.z = sim.model.init_classical(
-                sim.model.constants, parameters, seed=seed
-            )
-            return parameters, state
-    state.z = numerical_boltzmann_mcmc_init_classical(
-        sim.model, sim.model.constants, parameters, seed=seed
-    )
+    if "init_classical" in sim.model.ingredients:
+        state.z = sim.model.ingredients["init_classical"](
+            sim.model, parameters, seed=seed
+        )
+        return parameters, state
+    state.z = numerical_boltzmann_mcmc_init_classical(sim.model, parameters, seed=seed)
     return parameters, state
 
 
-def assign_to_parameters(sim, parameters, state, **kwargs):
+def assign_to_parameters(algorithm, sim, parameters, state, **kwargs):
     """
     Assign the value of the variable "val" to the parameters object with the name "name".
 
@@ -225,7 +238,7 @@ def assign_to_parameters(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def dh_c_dzc_finite_differences(model, constants, parameters, **kwargs):
+def dh_c_dzc_finite_differences(model, parameters, **kwargs):
     """
     Calculate the gradient of the classical Hamiltonian using finite differences.
 
@@ -233,7 +246,7 @@ def dh_c_dzc_finite_differences(model, constants, parameters, **kwargs):
         - num_classical_coordinates (int): Number of classical coordinates. Default: None.
     """
     z = kwargs["z"]
-    delta_z = constants.get("dh_c_dzc_finite_difference_delta", 1e-6)
+    delta_z = model.constants.get("dh_c_dzc_finite_difference_delta", 1e-6)
     batch_size = len(parameters.seed)
     num_classical_coordinates = model.constants.num_classical_coordinates
     offset_z_re = (
@@ -254,15 +267,15 @@ def dh_c_dzc_finite_differences(model, constants, parameters, **kwargs):
             num_classical_coordinates,
         )
     )
-    h_c_0 = model.h_c(constants, parameters, z=z, batch_size=len(z))
-    h_c_offset_re = model.h_c(
-        constants,
+    h_c_0 = model.ingredients["h_c"](model, parameters, z=z, batch_size=len(z))
+    h_c_offset_re = model.ingredients["h_c"](
+        model,
         parameters,
         z=offset_z_re,
         batch_size=batch_size * num_classical_coordinates,
     ).reshape(batch_size, num_classical_coordinates)
-    h_c_offset_im = model.h_c(
-        constants,
+    h_c_offset_im = model.ingredients["h_c"](
+        model,
         parameters,
         z=offset_z_im,
         batch_size=batch_size * num_classical_coordinates,
@@ -273,7 +286,7 @@ def dh_c_dzc_finite_differences(model, constants, parameters, **kwargs):
     return dh_c_dzc
 
 
-def dh_qc_dzc_finite_differences(model, constants, parameters, **kwargs):
+def dh_qc_dzc_finite_differences(model, parameters, **kwargs):
     """
     Calculate the gradient of the quantum-classical Hamiltonian using finite differences.
 
@@ -283,7 +296,7 @@ def dh_qc_dzc_finite_differences(model, constants, parameters, **kwargs):
         - finite_difference_dz (float): Step size for finite differences. Default: 1e-6.
     """
     z = kwargs["z"]
-    delta_z = constants.get("dh_qc_dzc_finite_difference_delta", 1e-6)
+    delta_z = model.constants.get("dh_qc_dzc_finite_difference_delta", 1e-6)
     batch_size = len(parameters.seed)
     num_classical_coordinates = model.constants.num_classical_coordinates
     num_quantum_states = model.constants.num_quantum_states
@@ -305,9 +318,9 @@ def dh_qc_dzc_finite_differences(model, constants, parameters, **kwargs):
             num_classical_coordinates,
         )
     )
-    h_qc_0 = model.h_qc(constants, parameters, z=z)
-    h_qc_offset_re = model.h_qc(
-        constants,
+    h_qc_0 = model.ingredients["h_qc"](model, parameters, z=z)
+    h_qc_offset_re = model.ingredients["h_qc"](
+        model,
         parameters,
         z=offset_z_re,
         batch_size=batch_size * num_classical_coordinates,
@@ -317,8 +330,8 @@ def dh_qc_dzc_finite_differences(model, constants, parameters, **kwargs):
         num_quantum_states,
         num_quantum_states,
     )
-    h_qc_offset_im = model.h_qc(
-        constants,
+    h_qc_offset_im = model.ingredients["h_qc"](
+        model,
         parameters,
         z=offset_z_im,
         batch_size=batch_size * num_classical_coordinates,
@@ -337,7 +350,7 @@ def dh_qc_dzc_finite_differences(model, constants, parameters, **kwargs):
     return inds, mels, shape
 
 
-def update_dh_c_dzc(sim, parameters, state, **kwargs):
+def update_dh_c_dzc(algorithm, sim, parameters, state, **kwargs):
     """
     Update the gradient of the classical Hamiltonian
     w.r.t the conjugate classical coordinate.
@@ -346,17 +359,14 @@ def update_dh_c_dzc(sim, parameters, state, **kwargs):
         - None.
     """
     z = kwargs["z"]
-    if hasattr(sim.model, "dh_c_dzc"):
-        if sim.model.dh_c_dzc is not None:
-            state.dh_c_dzc = sim.model.dh_c_dzc(sim.model.constants, parameters, z=z)
-            return parameters, state
-    state.dh_c_dzc = dh_c_dzc_finite_differences(
-        sim.model, sim.model.constants, parameters, z=z
-    )
+    if "dh_c_dzc" in sim.model.ingredients:
+        state.dh_c_dzc = sim.model.ingredients["dh_c_dzc"](sim.model, parameters, z=z)
+        return parameters, state
+    state.dh_c_dzc = dh_c_dzc_finite_differences(sim.model, parameters, z=z)
     return parameters, state
 
 
-def update_dh_qc_dzc(sim, parameters, state, **kwargs):
+def update_dh_qc_dzc(algorithm, sim, parameters, state, **kwargs):
     """
     Update the gradient of the quantum-classical Hamiltonian
     w.r.t the conjugate classical coordinate.
@@ -365,17 +375,14 @@ def update_dh_qc_dzc(sim, parameters, state, **kwargs):
         - None.
     """
     z = kwargs["z"]
-    if hasattr(sim.model, "dh_qc_dzc"):
-        if sim.model.dh_qc_dzc is not None:
-            state.dh_qc_dzc = sim.model.dh_qc_dzc(sim.model.constants, parameters, z=z)
-            return parameters, state
-    state.dh_qc_dzc = dh_qc_dzc_finite_differences(
-        sim.model, sim.model.constants, parameters, z=z
-    )
+    if "dh_qc_dzc" in sim.model.ingredients:
+        state.dh_qc_dzc = sim.model.ingredients["dh_qc_dzc"](sim.model, parameters, z=z)
+        return parameters, state
+    state.dh_qc_dzc = dh_qc_dzc_finite_differences(sim.model, parameters, z=z)
     return parameters, state
 
 
-def update_classical_forces(sim, parameters, state, **kwargs):
+def update_classical_forces(algorithm, sim, parameters, state, **kwargs):
     """
     Update the classical forces.
 
@@ -383,7 +390,7 @@ def update_classical_forces(sim, parameters, state, **kwargs):
         - None.
     """
     z = kwargs["z"]
-    parameters, state = update_dh_c_dzc(sim, parameters, state, z=z)
+    parameters, state = update_dh_c_dzc(algorithm, sim, parameters, state, z=z)
     state.classical_forces = state.dh_c_dzc
     return parameters, state
 
@@ -407,7 +414,7 @@ def calc_sparse_inner_product(inds, mels, shape, vec_l, vec_r):
     return out
 
 
-def update_quantum_classical_forces(sim, parameters, state, **kwargs):
+def update_quantum_classical_forces(algorithm, sim, parameters, state, **kwargs):
     """
     Update the quantum-classical forces w.r.t the state defined by wf.
 
@@ -420,19 +427,19 @@ def update_quantum_classical_forces(sim, parameters, state, **kwargs):
     z = kwargs["z"]
     wf = kwargs["wf"]
     use_gauge_field_force = kwargs.get("use_gauge_field_force", False)
-    parameters, state = update_dh_qc_dzc(sim, parameters, state, z=z)
+    parameters, state = update_dh_qc_dzc(algorithm, sim, parameters, state, z=z)
     inds, mels, shape = state.dh_qc_dzc
     state.quantum_classical_forces = calc_sparse_inner_product(
         inds, mels, shape, wf, wf
     )
-    if hasattr(sim.model, "gauge_field_force") and use_gauge_field_force:
+    if "gauge_field_force" in sim.model.ingredients and use_gauge_field_force:
         state.quantum_classical_forces += sim.model.gauge_field_force(
-            sim.model.constants, parameters, z=z, wf=wf
+            parameters, z=z, wf=wf
         )
     return parameters, state
 
 
-def update_z_rk4(sim, parameters, state, **kwargs):
+def update_z_rk4(algorithm, sim, parameters, state, **kwargs):
     """
     Update the z-coordinates using the 4th-order Runge-Kutta method.
     If the gradient of the quantum-classical Hamiltonian depends on z then
@@ -450,8 +457,11 @@ def update_z_rk4(sim, parameters, state, **kwargs):
         update_quantum_classical_forces_bool = True
     z_0 = kwargs["z"]
     output_name = kwargs["output_name"]
-    parameters, state = update_classical_forces(sim, parameters, state, z=z_0)
+    parameters, state = update_classical_forces(
+        algorithm, sim, parameters, state, z=z_0
+    )
     parameters, state = update_quantum_classical_forces(
+        algorithm,
         sim,
         parameters,
         state,
@@ -461,10 +471,11 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     )
     k1 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     parameters, state = update_classical_forces(
-        sim, parameters, state, z=z_0 + 0.5 * dt * k1
+        algorithm, sim, parameters, state, z=z_0 + 0.5 * dt * k1
     )
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
+            algorithm,
             sim,
             parameters,
             state,
@@ -474,10 +485,11 @@ def update_z_rk4(sim, parameters, state, **kwargs):
         )
     k2 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
     parameters, state = update_classical_forces(
-        sim, parameters, state, z=z_0 + 0.5 * dt * k2
+        algorithm, sim, parameters, state, z=z_0 + 0.5 * dt * k2
     )
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
+            algorithm,
             sim,
             parameters,
             state,
@@ -486,9 +498,12 @@ def update_z_rk4(sim, parameters, state, **kwargs):
             use_gauge_field_force=use_gauge_field_force,
         )
     k3 = -1.0j * (state.classical_forces + state.quantum_classical_forces)
-    parameters, state = update_classical_forces(sim, parameters, state, z=z_0 + dt * k3)
+    parameters, state = update_classical_forces(
+        algorithm, sim, parameters, state, z=z_0 + dt * k3
+    )
     if update_quantum_classical_forces_bool:
         parameters, state = update_quantum_classical_forces(
+            algorithm,
             sim,
             parameters,
             state,
@@ -501,7 +516,7 @@ def update_z_rk4(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_z_parameter(sim, parameters, state, **kwargs):
+def update_z_parameter(algorithm, sim, parameters, state, **kwargs):
     """
     Put the current z-coordinate into the parameters object.
 
@@ -514,7 +529,7 @@ def update_z_parameter(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_h_quantum(sim, parameters, state, **kwargs):
+def update_h_quantum(algorithm, sim, parameters, state, **kwargs):
     """
     Update the quantum + quantum-classical Hamiltonian.
 
@@ -522,8 +537,8 @@ def update_h_quantum(sim, parameters, state, **kwargs):
         - None.
     """
     z = kwargs.get("z", state.z)
-    h_q = sim.model.h_q(sim.model.constants, parameters)
-    h_qc = sim.model.h_qc(sim.model.constants, parameters, z=z)
+    h_q = sim.model.ingredients["h_q"](sim.model, parameters)
+    h_qc = sim.model.ingredients["h_qc"](sim.model, parameters, z=z)
     state.h_quantum = h_q + h_qc
     return parameters, state
 
@@ -561,7 +576,7 @@ def wf_db_rk4(h_quantum, wf_db, dt):
     return wf_db + dt * 0.166667 * (k1 + 2 * k2 + 2 * k3 + k4)
 
 
-def update_wf_db_rk4(sim, parameters, state, **kwargs):
+def update_wf_db_rk4(algorithm, sim, parameters, state, **kwargs):
     """
     Update the wavefunction using the 4th-order Runge-Kutta method.
 
@@ -576,7 +591,7 @@ def update_wf_db_rk4(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_dm_db_mf(sim, parameters, state, **kwargs):
+def update_dm_db_mf(algorithm, sim, parameters, state, **kwargs):
     """
     Update the density matrix in the mean-field approximation.
 
@@ -589,7 +604,7 @@ def update_dm_db_mf(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_classical_energy(sim, parameters, state, **kwargs):
+def update_classical_energy(algorithm, sim, parameters, state, **kwargs):
     """
     Update the classical energy.
 
@@ -598,12 +613,12 @@ def update_classical_energy(sim, parameters, state, **kwargs):
     """
     z = kwargs["z"]
     state.classical_energy = np.real(
-        sim.model.h_c(sim.model.constants, parameters, z=z, batch_size=len(z))
+        sim.model.ingredients["h_c"](sim.model, parameters, z=z, batch_size=len(z))
     )
     return parameters, state
 
 
-def update_classical_energy_fssh(sim, parameters, state, **kwargs):
+def update_classical_energy_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Update the classical energy as a sum of equally-weighted contributions from each branch.
 
@@ -632,22 +647,32 @@ def update_classical_energy_fssh(sim, parameters, state, **kwargs):
                 z[state.branch_ind == branch_ind]
                 * branch_weights[:, branch_ind][:, np.newaxis]
             )
-            state.classical_energy = state.classical_energy + sim.model.h_c(
-                sim.model.constants, parameters, z=z_branch, batch_size=len(z_branch)
+            state.classical_energy = state.classical_energy + sim.model.ingredients[
+                "h_c"
+            ](
+                sim.model,
+                parameters,
+                z=z_branch,
+                batch_size=len(z_branch),
             )
     else:
         state.classical_energy = 0
         for branch_ind in range(num_branches):
             z_branch = z[state.branch_ind == branch_ind]
-            state.classical_energy = state.classical_energy + sim.model.h_c(
-                sim.model.constants, parameters, z=z_branch, batch_size=len(z_branch)
+            state.classical_energy = state.classical_energy + sim.model.ingredients[
+                "h_c"
+            ](
+                sim.model,
+                parameters,
+                z=z_branch,
+                batch_size=len(z_branch),
             )
         state.classical_energy = state.classical_energy / num_branches
     state.classical_energy = np.real(state.classical_energy)
     return parameters, state
 
 
-def update_quantum_energy(sim, parameters, state, **kwargs):
+def update_quantum_energy(algorithm, sim, parameters, state, **kwargs):
     """
     Update the quantum energy w.r.t the wavefunction specified by wf.
 
@@ -662,7 +687,7 @@ def update_quantum_energy(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_quantum_energy_fssh(sim, parameters, state, **kwargs):
+def update_quantum_energy_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Update the quantum energy w.r.t the wavefunction specified by wf.
 
@@ -695,7 +720,7 @@ def update_quantum_energy_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def diagonalize_matrix(sim, parameters, state, **kwargs):
+def diagonalize_matrix(algorithm, sim, parameters, state, **kwargs):
     """
     Diagonalizes a given matrix and stores the eigenvalues and eigenvectors in the state object.
 
@@ -712,7 +737,7 @@ def diagonalize_matrix(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def analytic_der_couple_phase(sim, parameters, state, eigvals, eigvecs):
+def analytic_der_couple_phase(algorithm, sim, parameters, state, eigvals, eigvecs):
     """
     Calculates the phase change needed to fix the gauge using analytic derivative couplings.
 
@@ -818,7 +843,7 @@ def analytic_der_couple_phase(sim, parameters, state, eigvals, eigvecs):
     return der_couple_q_phase, der_couple_p_phase
 
 
-def gauge_fix_eigs(sim, parameters, state, **kwargs):
+def gauge_fix_eigs(algorithm, sim, parameters, state, **kwargs):
     """
     Fixes the gauge of the eigenvectors as specified by the gauge_fixing parameter.
 
@@ -846,9 +871,9 @@ def gauge_fix_eigs(sim, parameters, state, **kwargs):
         eigvecs = np.einsum("tai,ti->tai", eigvecs, phase, optimize="greedy")
     if kwargs["gauge_fixing"] >= 2:
         z = kwargs["z"]
-        parameters, state = update_dh_qc_dzc(sim, parameters, state, z=z)
+        parameters, state = update_dh_qc_dzc(algorithm, sim, parameters, state, z=z)
         der_couple_q_phase, _ = analytic_der_couple_phase(
-            sim, parameters, state, eigvals, eigvecs
+            algorithm, sim, parameters, state, eigvals, eigvecs
         )
         eigvecs = np.einsum(
             "tai,ti->tai", eigvecs, np.conj(der_couple_q_phase), optimize="greedy"
@@ -858,7 +883,7 @@ def gauge_fix_eigs(sim, parameters, state, **kwargs):
         eigvecs = np.einsum("tai,ti->tai", eigvecs, signs, optimize="greedy")
     if kwargs["gauge_fixing"] == 2:
         der_couple_q_phase_new, der_couple_p_phase_new = analytic_der_couple_phase(
-            sim, parameters, state, eigvals, eigvecs
+            algorithm, sim, parameters, state, eigvals, eigvecs
         )
         if (
             np.sum(
@@ -874,7 +899,7 @@ def gauge_fix_eigs(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def assign_to_state(sim, parameters, state, **kwargs):
+def assign_to_state(algorithm, sim, parameters, state, **kwargs):
     """
     Creates a new state variable with the name "name" and the value "val".
 
@@ -888,7 +913,7 @@ def assign_to_state(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def basis_transform_vec(sim, parameters, state, **kwargs):
+def basis_transform_vec(algorithm, sim, parameters, state, **kwargs):
     """
     Transforms a vector "input_vec" to a new basis defined by "basis".
 
@@ -908,7 +933,7 @@ def basis_transform_vec(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def basis_transform_mat(sim, parameters, state, **kwargs):
+def basis_transform_mat(algorithm, sim, parameters, state, **kwargs):
     """
     Transforms a matrix "input_mat" to a new basis
     defined by "basis" and stores it in the state object
@@ -935,7 +960,7 @@ def basis_transform_mat(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def initialize_active_surface(sim, parameters, state, **kwargs):
+def initialize_active_surface(algorithm, sim, parameters, state, **kwargs):
     """
     Initializes the active surface (act_surf), active surface index
     (act_surf_ind) and initial active surface index (act_surf_ind_0)
@@ -993,7 +1018,7 @@ def initialize_active_surface(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def initialize_random_values_fssh(sim, parameters, state, **kwargs):
+def initialize_random_values_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Initialize a set of random variables using the trajectory seeds for FSSH.
 
@@ -1015,7 +1040,7 @@ def initialize_random_values_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def initialize_dm_adb_0_fssh(sim, parameters, state, **kwargs):
+def initialize_dm_adb_0_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Initialize the initial adiabatic density matrix for FSSH.
 
@@ -1032,7 +1057,7 @@ def initialize_dm_adb_0_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_act_surf_wf(sim, parameters, state, **kwargs):
+def update_act_surf_wf(algorithm, sim, parameters, state, **kwargs):
     """
     Update the wavefunction corresponding to the active surface.
 
@@ -1050,7 +1075,7 @@ def update_act_surf_wf(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_dm_db_fssh(sim, parameters, state, **kwargs):
+def update_dm_db_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Update the diabatic density matrix for FSSH.
 
@@ -1085,6 +1110,7 @@ def update_dm_db_fssh(sim, parameters, state, **kwargs):
     else:
         dm_adb_branch = dm_adb_branch / num_branches
     parameters, state = basis_transform_mat(
+        algorithm,
         sim,
         parameters,
         state,
@@ -1112,7 +1138,7 @@ def update_dm_db_fssh(sim, parameters, state, **kwargs):
     return parameters, state
 
 
-def update_wf_db_eigs(sim, parameters, state, **kwargs):
+def update_wf_db_eigs(algorithm, sim, parameters, state, **kwargs):
     """
     Evolve the diabatic wavefunction using the electronic eigenbasis.
 
@@ -1126,6 +1152,7 @@ def update_wf_db_eigs(sim, parameters, state, **kwargs):
     eigvecs = kwargs["eigvecs"]
     evals_exp = np.exp(-1.0j * eigvals * sim.settings.dt)
     parameters, state = basis_transform_vec(
+        algorithm,
         sim=sim,
         parameters=parameters,
         state=state,
@@ -1135,6 +1162,7 @@ def update_wf_db_eigs(sim, parameters, state, **kwargs):
     )
     setattr(state, adb_name, (state.wf_adb * evals_exp))
     parameters, state = basis_transform_vec(
+        algorithm,
         sim=sim,
         parameters=parameters,
         state=state,
@@ -1178,7 +1206,9 @@ def numerical_fssh_hop(model, constants, parameters, **kwargs):
     max_iter = constants.get("numerical_fssh_hop_max_iter", 20)
     num_points = constants.get("numerical_fssh_hop_num_points", 10)
     thresh = constants.get("numerical_fssh_hop_threshold", 1e-6)
-    init_energy = model.h_c(constants, parameters, z=np.array([z]), batch_size=1)[0]
+    init_energy = model.ingredients["h_c"](
+        model, constants, parameters, z=np.array([z]), batch_size=1
+    )[0]
     min_gamma = 0
     num_iter = 0
     min_energy = 1
@@ -1191,7 +1221,8 @@ def numerical_fssh_hop(model, constants, parameters, **kwargs):
             - np.array(
                 [
                     init_energy
-                    - model.h_c(
+                    - model.ingredients["h_c"](
+                        model,
                         constants,
                         parameters,
                         z=np.array([z - 1.0j * gamma * delta_z]),
@@ -1210,24 +1241,25 @@ def numerical_fssh_hop(model, constants, parameters, **kwargs):
     return z - 1.0j * min_gamma * delta_z, True
 
 
-def calc_delta_z_fssh(sim, parameters, state, **kwargs):
+def calc_delta_z_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Update the rescaling direction state.delta_z in FSSH.
     """
     traj_ind, final_state_ind, init_state_ind = (
         kwargs["traj_ind"],
         kwargs["final_state_ind"],
-        kwargs["init_state_ind"]
+        kwargs["init_state_ind"],
     )
-    if hasattr(sim.model, "rescaling_direction_fssh"):
+    # if hasattr(sim.model, "rescaling_direction_fssh"):
+    if "rescaling_direction_fssh" in sim.model.ingredients:
         delta_z = sim.model.rescaling_direction_fssh(
-            sim.model.constants, parameters,
+            parameters,
             z=state.z[traj_ind],
             init_state_ind=init_state_ind,
             final_state_ind=final_state_ind,
         )
         return delta_z
-    
+
     inds, mels, _ = state.dh_qc_dzc
     eigvecs_flat = state.eigvecs
     eigvals_flat = state.eigvals
@@ -1302,7 +1334,7 @@ def calc_delta_z_fssh(sim, parameters, state, **kwargs):
     return delta_z
 
 
-def update_active_surface_fssh(sim, parameters, state, **kwargs):
+def update_active_surface_fssh(algorithm, sim, parameters, state, **kwargs):
     """
     Update the active surface in FSSH. If a hopping function is not specified in the model
     class a numerical hopping procedure is used instead.
@@ -1435,6 +1467,7 @@ def update_active_surface_fssh(sim, parameters, state, **kwargs):
             # Perform hopping using the model's hop function
             # or the default numerical hop function
             delta_z = calc_delta_z_fssh(
+                algorithm,
                 sim,
                 parameters,
                 state,
@@ -1444,19 +1477,19 @@ def update_active_surface_fssh(sim, parameters, state, **kwargs):
             )
             hopped = False
             z_out = None
-            if hasattr(sim.model, "hop_function"):
-                if sim.model.hop_function is not None:
-                    z_out, hopped = sim.model.hop_function(
-                        sim.model.constants,
-                        parameters,
-                        z=z[traj_ind],
-                        delta_z=delta_z,
-                        ev_diff=ev_diff,
-                    )
-            if not hasattr(sim.model, "hop_function") or sim.model.hop_function is None:
+            # if hasattr(sim.model, "hop_function"):
+            # if sim.model.hop_function is not None:
+            if "hop_function" in sim.model.ingredients:
+                z_out, hopped = sim.model.hop_function(
+                    parameters,
+                    z=z[traj_ind],
+                    delta_z=delta_z,
+                    ev_diff=ev_diff,
+                )
+            # if not hasattr(sim.model, "hop_function") or sim.model.hop_function is None:
+            if not "hop_function" in sim.model.ingredients:
                 z_out, hopped = numerical_fssh_hop(
                     sim.model,
-                    sim.model.constants,
                     parameters,
                     z=z[traj_ind],
                     delta_z=delta_z,

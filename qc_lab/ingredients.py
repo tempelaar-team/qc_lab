@@ -81,7 +81,7 @@ def vectorize_ingredient(ingredient):
     return vectorized_ingredient
 
 
-def harmonic_oscillator_h_c(model, constants, parameters, **kwargs):
+def harmonic_oscillator_h_c(model, parameters, **kwargs):
     """
     Harmonic oscillator classical Hamiltonian function.
 
@@ -94,17 +94,17 @@ def harmonic_oscillator_h_c(model, constants, parameters, **kwargs):
         - `z`: complex-valued classical coordinates.
         - `batch_size`: (Optional) Number of batches for vectorized computation.
     """
-    del model, parameters
+    del parameters
     z = kwargs.get("z")
     if kwargs.get("batch_size") is not None:
         batch_size = kwargs.get("batch_size")
         assert len(z) == batch_size
     else:
         batch_size = len(z)
-    h = constants.classical_coordinate_weight[np.newaxis, :]
-    w = constants.harmonic_oscillator_frequency[np.newaxis, :]
-    m = constants.classical_coordinate_mass[np.newaxis, :]
-    q, p = z_to_qp(z, constants)
+    h = model.constants.classical_coordinate_weight[np.newaxis, :]
+    w = model.constants.harmonic_oscillator_frequency[np.newaxis, :]
+    m = model.constants.classical_coordinate_mass[np.newaxis, :]
+    q, p = z_to_qp(z, model.constants)
     h_c = np.sum((1 / 2) * (((p**2) / m) + m * (w**2) * (q**2)), axis=-1)
     return h_c
 
@@ -120,7 +120,7 @@ def harmonic_oscillator_dh_c_dzc_jit(z, h, w):
     return out
 
 
-def harmonic_oscillator_dh_c_dzc(model, constants, parameters, **kwargs):
+def harmonic_oscillator_dh_c_dzc(model, parameters, **kwargs):
     """
     Derivative of the classical harmonic oscillator Hamiltonian with respect to the `z` coordinate.
 
@@ -132,19 +132,19 @@ def harmonic_oscillator_dh_c_dzc(model, constants, parameters, **kwargs):
         - `z`: complex-valued classical coordinates.
         - `batch_size`: (Optional) Number of batches for vectorized computation.
     """
-    del model, parameters
+    del parameters
     z = kwargs.get("z")
     if kwargs.get("batch_size") is not None:
         batch_size = kwargs.get("batch_size")
         assert len(z) == batch_size
     else:
         batch_size = len(z)
-    h = constants.classical_coordinate_weight
-    w = constants.harmonic_oscillator_frequency
+    h = model.constants.classical_coordinate_weight
+    w = model.constants.harmonic_oscillator_frequency
     return harmonic_oscillator_dh_c_dzc_jit(z, h, w)
 
 
-def two_level_system_h_q(model, constants, parameters, **kwargs):
+def two_level_system_h_q(model, parameters, **kwargs):
     """
     Quantum Hamiltonian for a two-level system.
 
@@ -157,16 +157,19 @@ def two_level_system_h_q(model, constants, parameters, **kwargs):
     Keyword Arguments:
         - `batch_size`: (Optional) Number of batches for vectorized computation.
     """
-    del model
     if kwargs.get("batch_size") is not None:
         batch_size = kwargs.get("batch_size")
     else:
         batch_size = len(parameters.seed)
     h_q = np.zeros((batch_size, 2, 2), dtype=complex)
-    h_q[:, 0, 0] = constants.two_level_system_a
-    h_q[:, 1, 1] = constants.two_level_system_b
-    h_q[:, 0, 1] = constants.two_level_system_c + 1j * constants.two_level_system_d
-    h_q[:, 1, 0] = constants.two_level_system_c - 1j * constants.two_level_system_d
+    h_q[:, 0, 0] = model.constants.two_level_system_a
+    h_q[:, 1, 1] = model.constants.two_level_system_b
+    h_q[:, 0, 1] = (
+        model.constants.two_level_system_c + 1j * model.constants.two_level_system_d
+    )
+    h_q[:, 1, 0] = (
+        model.constants.two_level_system_c - 1j * model.constants.two_level_system_d
+    )
     return h_q
 
 
@@ -188,7 +191,7 @@ def nearest_neighbor_lattice_h_q_jit(
     return out
 
 
-def nearest_neighbor_lattice_h_q(model, constants, parameters, **kwargs):
+def nearest_neighbor_lattice_h_q(model, parameters, **kwargs):
     """
     Quantum Hamiltonian for a nearest-neighbor lattice.
 
@@ -204,9 +207,9 @@ def nearest_neighbor_lattice_h_q(model, constants, parameters, **kwargs):
         batch_size = kwargs.get("batch_size")
     else:
         batch_size = len(parameters.seed)
-    num_sites = constants.num_quantum_states
-    hopping_energy = constants.nearest_neighbor_lattice_hopping_energy
-    periodic_boundary = constants.nearest_neighbor_lattice_periodic_boundary
+    num_sites = model.constants.num_quantum_states
+    hopping_energy = model.constants.nearest_neighbor_lattice_hopping_energy
+    periodic_boundary = model.constants.nearest_neighbor_lattice_periodic_boundary
     if hasattr(model, "h_q_mat"):
         if model.h_q_mat is not None:
             if len(model.h_q_mat) == batch_size:
@@ -243,7 +246,7 @@ def diagonal_linear_h_qc_jit(
     return h_qc
 
 
-def diagonal_linear_h_qc(model, constants, parameters, **kwargs):
+def diagonal_linear_h_qc(model, parameters, **kwargs):
     """
     Diagonal linear quantum-classical coupling Hamiltonian.
 
@@ -260,22 +263,22 @@ def diagonal_linear_h_qc(model, constants, parameters, **kwargs):
         - `z`: complex-valued classical coordinates.
         - `batch_size`: (Optional) Number of batches for vectorized computation.
     """
-    del model, parameters
+    del parameters
     z = kwargs["z"]
     if kwargs.get("batch_size") is not None:
         batch_size = kwargs.get("batch_size")
         assert len(z) == batch_size
     else:
         batch_size = len(z)
-    num_sites = constants.num_quantum_states
-    num_classical_coordinates = constants.num_classical_coordinates
-    gamma = constants.diagonal_linear_coupling
+    num_sites = model.constants.num_quantum_states
+    num_classical_coordinates = model.constants.num_classical_coordinates
+    gamma = model.constants.diagonal_linear_coupling
     return diagonal_linear_h_qc_jit(
         batch_size, num_sites, num_classical_coordinates, z, gamma
     )
 
 
-def diagonal_linear_dh_qc_dzc(model, constants, parameters, **kwargs):
+def diagonal_linear_dh_qc_dzc(model, parameters, **kwargs):
     """
     Gradient of the diagonal linear quantum-classical coupling Hamiltonian.
 
@@ -304,9 +307,9 @@ def diagonal_linear_dh_qc_dzc(model, constants, parameters, **kwargs):
         or recalculate
     ):
 
-        num_states = constants.num_quantum_states
-        num_classical_coordinates = constants.num_classical_coordinates
-        gamma = constants.diagonal_linear_coupling
+        num_states = model.constants.num_quantum_states
+        num_classical_coordinates = model.constants.num_classical_coordinates
+        gamma = model.constants.diagonal_linear_coupling
         dh_qc_dzc = np.zeros(
             (num_classical_coordinates, num_states, num_states), dtype=complex
         )
@@ -327,7 +330,7 @@ def diagonal_linear_dh_qc_dzc(model, constants, parameters, **kwargs):
     return model.dh_qc_dzc_inds, model.dh_qc_dzc_mels, model.dh_qc_dzc_shape
 
 
-def harmonic_oscillator_hop_function(model, constants, parameters, **kwargs):
+def harmonic_oscillator_hop_function(model, parameters, **kwargs):
     """
     Perform a hopping operation for the harmonic oscillator.
 
@@ -340,7 +343,7 @@ def harmonic_oscillator_hop_function(model, constants, parameters, **kwargs):
         - `delta_z`: Change in classical coordinates.
         - `ev_diff`: Energy difference for the hopping operation.
     """
-    del model, parameters
+    del parameters
     z = kwargs["z"]
     delta_z = kwargs["delta_z"]
     ev_diff = kwargs["ev_diff"]
@@ -349,17 +352,17 @@ def harmonic_oscillator_hop_function(model, constants, parameters, **kwargs):
     zc = np.conj(z)
     a_const = (1 / 4) * (
         (
-            (constants.harmonic_oscillator_frequency**2)
-            / constants.classical_coordinate_weight
+            (model.constants.harmonic_oscillator_frequency**2)
+            / model.constants.classical_coordinate_weight
         )
-        - constants.classical_coordinate_weight
+        - model.constants.classical_coordinate_weight
     )
     b_const = (1 / 4) * (
         (
-            (constants.harmonic_oscillator_frequency**2)
-            / constants.classical_coordinate_weight
+            (model.constants.harmonic_oscillator_frequency**2)
+            / model.constants.classical_coordinate_weight
         )
-        + constants.classical_coordinate_weight
+        + model.constants.classical_coordinate_weight
     )
     akj_z = np.sum(
         2 * delta_zc * delta_z * b_const - a_const * (delta_z**2 + delta_zc**2)
@@ -385,9 +388,7 @@ def harmonic_oscillator_hop_function(model, constants, parameters, **kwargs):
     return z, hopped
 
 
-def harmonic_oscillator_boltzmann_init_classical(
-    model, constants, parameters, **kwargs
-):
+def harmonic_oscillator_boltzmann_init_classical(model, parameters, **kwargs):
     """
     Initialize classical coordinates according to Boltzmann statistics for the harmonic oscillator.
 
@@ -400,12 +401,14 @@ def harmonic_oscillator_boltzmann_init_classical(
     Keyword Arguments:
         - `seed`: Array of random seeds for initialization.
     """
-    del model, parameters
+    del parameters
     seed = kwargs.get("seed", None)
-    kBT = constants.kBT
-    w = constants.harmonic_oscillator_frequency
-    m = constants.classical_coordinate_mass
-    out = np.zeros((len(seed), constants.num_classical_coordinates), dtype=complex)
+    kBT = model.constants.kBT
+    w = model.constants.harmonic_oscillator_frequency
+    m = model.constants.classical_coordinate_mass
+    out = np.zeros(
+        (len(seed), model.constants.num_classical_coordinates), dtype=complex
+    )
     for s, seed_value in enumerate(seed):
         np.random.seed(seed_value)
         # Calculate the standard deviations for q and p.
@@ -413,18 +416,18 @@ def harmonic_oscillator_boltzmann_init_classical(
         std_p = np.sqrt(m * kBT)
         # Generate random q and p values.
         q = np.random.normal(
-            loc=0, scale=std_q, size=constants.num_classical_coordinates
+            loc=0, scale=std_q, size=model.constants.num_classical_coordinates
         )
         p = np.random.normal(
-            loc=0, scale=std_p, size=constants.num_classical_coordinates
+            loc=0, scale=std_p, size=model.constants.num_classical_coordinates
         )
         # Calculate the complex-valued classical coordinate.
-        z = qp_to_z(q, p, constants)
+        z = qp_to_z(q, p, model.constants)
         out[s] = z
     return out
 
 
-def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kwargs):
+def harmonic_oscillator_wigner_init_classical(model, parameters, **kwargs):
     """
     Initialize classical coordinates according to the Wigner distribution of the ground state of a harmonic oscillator.
 
@@ -437,25 +440,32 @@ def harmonic_oscillator_wigner_init_classical(model, constants, parameters, **kw
     Keyword Arguments:
         - `seed`: Array of random seeds for initialization.
     """
-    del model, parameters
+    del parameters
     seed = kwargs.get("seed", None)
-    m = constants.classical_coordinate_mass
-    w = constants.harmonic_oscillator_frequency
-    kBT = constants.kBT
-    out = np.zeros((len(seed), constants.num_classical_coordinates), dtype=complex)
+    m = model.constants.classical_coordinate_mass
+    w = model.constants.harmonic_oscillator_frequency
+    kBT = model.constants.kBT
+    out = np.zeros(
+        (len(seed), model.constants.num_classical_coordinates), dtype=complex
+    )
     for s, seed_value in enumerate(seed):
         np.random.seed(seed_value)
+
         # Calculate the standard deviations for q and p.
-        std_q = np.sqrt(1 / (2 * w * m * np.tanh(w / (2 * kBT))))
-        std_p = np.sqrt((m * w) / (2 * np.tanh(w / (2 * kBT))))
+        if kBT > 0:
+            std_q = np.sqrt(1 / (2 * w * m * np.tanh(w / (2 * (kBT)))))
+            std_p = np.sqrt((m * w) / (2 * np.tanh(w / (2 * (kBT)))))
+        else:
+            std_q = np.sqrt(1 / (2 * w * m))
+            std_p = np.sqrt((m * w) / (2))
         # Generate random q and p values.
         q = np.random.normal(
-            loc=0, scale=std_q, size=constants.num_classical_coordinates
+            loc=0, scale=std_q, size=model.constants.num_classical_coordinates
         )
         p = np.random.normal(
-            loc=0, scale=std_p, size=constants.num_classical_coordinates
+            loc=0, scale=std_p, size=model.constants.num_classical_coordinates
         )
         # Calculate the complex-valued classical coordinate.
-        z = qp_to_z(q, p, constants)
+        z = qp_to_z(q, p, model.constants)
         out[s] = z
     return out

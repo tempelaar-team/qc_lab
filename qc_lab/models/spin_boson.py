@@ -28,6 +28,7 @@ class SpinBoson(Model):
         self.dh_qc_dzc_inds = None
         self.dh_qc_dzc_mels = None
         self.dh_qc_dzc_shape = None
+        self.linear_h_qc = True
 
     def initialize_constants_model(self):
         """
@@ -84,17 +85,18 @@ class SpinBoson(Model):
         )
         self.constants.two_level_system_d = 0
 
-    init_classical = ingredients.harmonic_oscillator_boltzmann_init_classical
-    hop_function = ingredients.harmonic_oscillator_hop_function
-    h_c = ingredients.harmonic_oscillator_h_c
-    h_q = ingredients.two_level_system_h_q
-    h_qc = ingredients.diagonal_linear_h_qc
-    dh_qc_dzc = ingredients.diagonal_linear_dh_qc_dzc
-    dh_c_dzc = ingredients.harmonic_oscillator_dh_c_dzc
-    linear_h_qc = True
-    initialization_functions = [
-        initialize_constants_model,
-        initialize_constants_h_c,
-        initialize_constants_h_qc,
-        initialize_constants_h_q,
-    ]
+    initialization_functions = {
+        "initialize_constants_model": initialize_constants_model,
+        "initialize_constants_h_c": initialize_constants_h_c,
+        "initialize_constants_h_qc": initialize_constants_h_qc,
+        "initialize_constants_h_q": initialize_constants_h_q,
+    }
+    ingredients = {
+        "h_q": ingredients.two_level_system_h_q,
+        "h_qc": ingredients.diagonal_linear_h_qc,
+        "h_c": ingredients.harmonic_oscillator_h_c,
+        "dh_qc_dzc": ingredients.diagonal_linear_dh_qc_dzc,
+        "dh_c_dzc": ingredients.harmonic_oscillator_dh_c_dzc,
+        "init_classical": ingredients.harmonic_oscillator_boltzmann_init_classical,
+        "hop_function": ingredients.harmonic_oscillator_hop_function,
+    }

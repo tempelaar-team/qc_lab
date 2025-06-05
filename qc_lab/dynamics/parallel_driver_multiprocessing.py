@@ -15,6 +15,8 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
     """
     Parallel driver for the dynamics core using the python library multiprocessing.
     """
+    # first initialize the model constants
+    sim.model.initialize_constants()
     if seeds is None:
         offset = 0
         if data is not None:
