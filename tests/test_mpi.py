@@ -49,5 +49,5 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 if rank == 0:
     print(data.data_dict["seed"])
-    data.save_as_h5("mpi_example.h5")
+    data.save_as_h5("./tests/mpi_example.h5")
 
