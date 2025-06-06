@@ -39,19 +39,19 @@ def test_drivers_spinboson():
     data_serial = serial_driver(sim)
     print('Running parallel multiprocessing driver...')
     data_parallel_multiprocessing = parallel_driver_multiprocessing(sim)
-    # cmd = ["mpirun", "-n", "4", sys.executable, "./tests/test_mpi.py"]
-    # print('Running parallel mpi driver...')
-    # subprocess.run(cmd)
-    # if not(os.path.exists("./tests/mpi_example.h5")):
-    #     raise FileNotFoundError("MPI output file not found. Ensure the MPI driver ran successfully.")
-    # else:
-    #     data_parallel_mpi = Data().load_from_h5("./tests/mpi_example.h5")
-    #     os.remove("./tests/mpi_example.h5")
+    cmd = ["mpirun", "-n", "4", sys.executable, "./tests/test_mpi.py"]
+    print('Running parallel mpi driver...')
+    subprocess.run(cmd)
+    if not(os.path.exists("./tests/mpi_example.h5")):
+        raise FileNotFoundError("MPI output file not found. Ensure the MPI driver ran successfully.")
+    else:
+        data_parallel_mpi = Data().load_from_h5("./tests/mpi_example.h5")
+        os.remove("./tests/mpi_example.h5")
     print('Comparing results...')
     for key, val in data_serial.data_dict.items():
         if isinstance(val, np.ndarray):
             assert np.allclose(val, data_parallel_multiprocessing.data_dict[key])
-            # assert np.allclose(val, data_parallel_mpi.data_dict[key])
+            assert np.allclose(val, data_parallel_mpi.data_dict[key])
     print('parallel and serial resultsd match!')
     return
 

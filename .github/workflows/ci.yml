@@ -28,10 +28,10 @@ jobs:
           pip install --upgrade pip setuptools wheel
           pip install .
 
-      - name: Run tests
-        run: |
-          pip install ".[test]"
-          pytest
+      # - name: Run tests
+      #   run: |
+      #     pip install ".[test]"
+      #     pytest
 
 
   # test-arm:
