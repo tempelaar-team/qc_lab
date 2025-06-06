@@ -10,6 +10,8 @@ def test_drivers_spinboson():
     from qc_lab.models import SpinBoson # import model class
     from qc_lab.algorithms import MeanField # import algorithm class
     from qc_lab.dynamics import serial_driver, parallel_driver_multiprocessing # import dynamics driver
+    import subprocess
+    import sys
 
     sim = Simulation()
     sim.settings.num_trajs = 200
@@ -19,6 +21,7 @@ def test_drivers_spinboson():
 
     sim.model = SpinBoson({
         'V':0.5,
+        
         'E':0.5,
         'A':100,
         'W':0.1,
@@ -33,8 +36,10 @@ def test_drivers_spinboson():
     sim.state.wf_db[0] += 1.0
 
     data_serial = serial_driver(sim)
-    data_parallel = parallel_driver_multiprocessing(sim)
+    data_parallel_multiprocessing = parallel_driver_multiprocessing(sim)
+    cmd = ["mpirun", "-n", "4", sys.executable, ""]
+    data_parallel_mpi = parallel_driver_mpi(sim)
     for key, val in data_serial.data_dict.items():
         if isinstance(val, np.ndarray):
-            assert np.allclose(val, data_parallel.data_dict[key])
+            assert np.allclose(val, data_parallel_multiprocessing.data_dict[key])
     return
