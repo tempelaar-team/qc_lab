@@ -28,26 +28,21 @@ class Algorithm:
         self.update_recipe = copy.copy(self.update_recipe)
         self.output_recipe = copy.copy(self.output_recipe)
         self.output_variables = copy.copy(self.output_variables)
-        self.test_recipe = copy.copy(self.test_recipe)
 
     def update_algorithm_settings(self):
         """
         Update algorithm settings. This method should be overridden by subclasses.
         """
 
-    initialization_recipe = {}
-    update_recipe = {}
-    output_recipe = {}
-    output_variables = {}
-    test_recipe = []
+    initialization_recipe = []
+    update_recipe = []
+    output_recipe = []
+    output_variables = []
 
     def execute_recipe(self, sim, parameter, state, recipe):
         """
         Executes the given recipe for the simulation.
         """
-        steps = np.array([int(i) for i in recipe.keys()])
-        order = np.argsort(steps)
-        for ind in order:
-            func = recipe[str(steps[ind])]
+        for func in recipe:
             parameter, state = func(sim.algorithm, sim, parameter, state)
         return parameter, state

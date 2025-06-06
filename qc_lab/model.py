@@ -22,18 +22,26 @@ class Model:
             setattr(self.constants, key, val)
         self.constants._init_complete = True
         self.parameters = Vector()
-        self.initialize_constants()
         self.initialization_functions = copy.deepcopy(self.initialization_functions)
         self.ingredients = copy.deepcopy(self.ingredients)
+
+    def get(self, ingredient_name):
+        """
+        Get the ingredient by its name.
+        """
+        for ingredient in self.ingredients:
+            if ingredient[0] == ingredient_name:
+                return ingredient[1], True
+        return None, False
 
     def initialize_constants(self):
         """
         Initialize the constants for the model and ingredients.
         """
-        for _, func in self.initialization_functions.items():
+        for func in self.initialization_functions:
             # Here, self is needed because the initialization functions are
             # defined in the subclass.
             func(self)
 
-    initialization_functions = {}
-    ingredients = {}
+    initialization_functions = []
+    ingredients = []
