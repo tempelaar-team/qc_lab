@@ -28,12 +28,12 @@ class MeanField(Algorithm):
     def _update_h_quantum(self, sim, parameters, state):
         return tasks.update_h_quantum(self, sim, parameters, state, z=state.z)
 
-    initialization_recipe = {
-        "0": tasks.assign_norm_factor_mf,
-        "1": _assign_to_parameters,
-        "2": _initialize_z,
-        "3": _update_h_quantum,
-    }
+    initialization_recipe = [
+        tasks.assign_norm_factor_mf,
+        _assign_to_parameters,
+        _initialize_z,
+        _update_h_quantum,
+    ]
 
     def _update_z_rk4(self, sim, parameters, state):
         return tasks.update_z_rk4(
@@ -47,11 +47,11 @@ class MeanField(Algorithm):
             use_gauge_field_force=False,
         )
 
-    update_recipe = {
-        "0": _update_h_quantum,
-        "1": _update_z_rk4,
-        "2": tasks.update_wf_db_rk4,
-    }
+    update_recipe = [
+        _update_h_quantum,
+        _update_z_rk4,
+        tasks.update_wf_db_rk4,
+    ]
 
     def _update_quantum_energy(self, sim, parameters, state):
         return tasks.update_quantum_energy(self, sim, parameters, state, wf=state.wf_db)
@@ -59,11 +59,11 @@ class MeanField(Algorithm):
     def _update_classical_energy(self, sim, parameters, state):
         return tasks.update_classical_energy(self, sim, parameters, state, z=state.z)
 
-    output_recipe = {
-        "0": tasks.update_dm_db_mf,
-        "1": _update_quantum_energy,
-        "2": _update_classical_energy,
-    }
+    output_recipe = [
+        tasks.update_dm_db_mf,
+        _update_quantum_energy,
+        _update_classical_energy,
+    ]
     output_variables = [
         "dm_db",
         "classical_energy",
