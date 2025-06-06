@@ -134,16 +134,12 @@ def numerical_boltzmann_mcmc_init_classical(model, parameters, **kwargs):
         for s, seed_s in enumerate(burn_in_seeds):
             last_sample = np.copy(sample)
             last_z = np.diag(last_sample)
-            last_e = h_c(
-                model, parameters, z=last_z, batch_size=len(last_z)
-            )
+            last_e = h_c(model, parameters, z=last_z, batch_size=len(last_z))
             proposed_sample, rand = _gen_sample_gaussian(
                 model.constants, z0=last_sample, seed=seed_s, separable=True
             )
             new_z = np.diag(proposed_sample)
-            new_e = h_c(
-                model, parameters, z=new_z, batch_size=len(new_z)
-            )
+            new_e = h_c(model, parameters, z=new_z, batch_size=len(new_z))
             thresh = np.minimum(
                 np.ones(model.constants.num_classical_coordinates),
                 np.exp(-(new_e - last_e) / model.constants.kBT),
@@ -152,16 +148,12 @@ def numerical_boltzmann_mcmc_init_classical(model, parameters, **kwargs):
         for s, seed_s in enumerate(sample_seeds):
             last_sample = np.copy(sample)
             last_z = np.diag(last_sample)
-            last_e = h_c(
-                model, parameters, z=last_z, batch_size=len(last_z)
-            )
+            last_e = h_c(model, parameters, z=last_z, batch_size=len(last_z))
             proposed_sample, rand = _gen_sample_gaussian(
                 model.constants, z0=last_sample, seed=seed_s, separable=True
             )
             new_z = np.diag(proposed_sample)
-            new_e = h_c(
-                model, parameters, z=new_z, batch_size=len(new_z)
-            )
+            new_e = h_c(model, parameters, z=new_z, batch_size=len(new_z))
             thresh = np.minimum(
                 np.ones(model.constants.num_classical_coordinates),
                 np.exp(-(new_e - last_e) / model.constants.kBT),
@@ -172,9 +164,7 @@ def numerical_boltzmann_mcmc_init_classical(model, parameters, **kwargs):
 
     for s, seed_s in enumerate(burn_in_seeds):
         last_sample = np.copy(sample)
-        last_e = h_c(
-            model, parameters, z=last_sample, batch_size=len(last_sample)
-        )
+        last_e = h_c(model, parameters, z=last_sample, batch_size=len(last_sample))
         proposed_sample, rand = _gen_sample_gaussian(
             model.constants, z0=last_sample, seed=seed_s, separable=False
         )
@@ -189,9 +179,7 @@ def numerical_boltzmann_mcmc_init_classical(model, parameters, **kwargs):
             sample = proposed_sample
     for s, seed_s in enumerate(sample_seeds):
         last_sample = np.copy(sample)
-        last_e = h_c(
-            model, parameters, z=last_sample, batch_size=len(last_sample)
-        )
+        last_e = h_c(model, parameters, z=last_sample, batch_size=len(last_sample))
         proposed_sample, rand = _gen_sample_gaussian(
             model.constants, z0=last_sample, seed=seed_s, separable=False
         )
@@ -218,9 +206,7 @@ def initialize_z(algorithm, sim, parameters, state, **kwargs):
     seed = kwargs["seed"]
     init_classical, has_init_classical = sim.model.get("init_classical")
     if has_init_classical:
-        state.z = init_classical(
-            sim.model, parameters, seed=seed
-        )
+        state.z = init_classical(sim.model, parameters, seed=seed)
         return parameters, state
     state.z = numerical_boltzmann_mcmc_init_classical(sim.model, parameters, seed=seed)
     return parameters, state
@@ -440,9 +426,7 @@ def update_quantum_classical_forces(algorithm, sim, parameters, state, **kwargs)
     )
     gauge_field_force, has_gauge_field_force = sim.model.get("gauge_field_force")
     if has_gauge_field_force and use_gauge_field_force:
-        state.quantum_classical_forces += gauge_field_force(
-            parameters, z=z, wf=wf
-        )
+        state.quantum_classical_forces += gauge_field_force(parameters, z=z, wf=wf)
     return parameters, state
 
 
@@ -598,6 +582,18 @@ def update_wf_db_rk4(algorithm, sim, parameters, state, **kwargs):
     return parameters, state
 
 
+def update_t(algorithm, sim, parameters, state, **kwargs):
+    """
+    Update the time in the state object.
+
+    Required constants:
+        - None.
+    """
+    time_axis = sim.settings.tdat
+    state.t = time_axis[sim.t_ind]*np.ones(sim.settings.batch_size)
+    return parameters, state
+
+
 def update_dm_db_mf(algorithm, sim, parameters, state, **kwargs):
     """
     Update the density matrix in the mean-field approximation.
@@ -620,9 +616,7 @@ def update_classical_energy(algorithm, sim, parameters, state, **kwargs):
     """
     z = kwargs["z"]
     h_c, _ = sim.model.get("h_c")
-    state.classical_energy = np.real(
-        h_c(sim.model, parameters, z=z, batch_size=len(z))
-    )
+    state.classical_energy = np.real(h_c(sim.model, parameters, z=z, batch_size=len(z)))
     return parameters, state
 
 

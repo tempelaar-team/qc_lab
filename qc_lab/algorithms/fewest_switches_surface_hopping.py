@@ -23,7 +23,7 @@ class FewestSwitchesSurfaceHopping(Algorithm):
 
     def _initialize_z(self, sim, parameters, state):
         return tasks.initialize_z(self, sim, parameters, state, seed=state.seed)
-
+    
     def _update_h_quantum(self, sim, parameters, state):
         return tasks.update_h_quantum(self, sim, parameters, state, z=state.z)
 
@@ -180,11 +180,13 @@ class FewestSwitchesSurfaceHopping(Algorithm):
         )
 
     output_recipe = [
+        tasks.update_t,
         tasks.update_dm_db_fssh,
         _update_quantum_energy_fssh,
         _update_classical_energy_fssh,
     ]
     output_variables = [
+        "t",
         "quantum_energy",
         "classical_energy",
         "dm_db",
