@@ -28,7 +28,6 @@ class Algorithm:
         self.update_recipe = copy.copy(self.update_recipe)
         self.output_recipe = copy.copy(self.output_recipe)
         self.output_variables = copy.copy(self.output_variables)
-        self.test_recipe = copy.copy(self.test_recipe)
 
     def update_algorithm_settings(self):
         """
