@@ -1384,8 +1384,6 @@ def update_active_surface_fssh(algorithm, sim, parameters, state, **kwargs):
         np.sum((cumulative_probs > rand_branch[:, np.newaxis]).astype(int), axis=1) > 0
     )[0]
     if len(traj_hop_ind) > 0:
-        inds, mels, _ = state.dh_qc_dzc
-        eigvecs_flat = state.eigvecs
         eigvals_flat = state.eigvals
         z = np.copy(state.z)
         act_surf_flat = state.act_surf
@@ -1394,80 +1392,9 @@ def update_active_surface_fssh(algorithm, sim, parameters, state, **kwargs):
                 (cumulative_probs[traj_ind] > rand_branch[traj_ind]).astype(int)
             )
             init_state_ind = act_surf_ind_flat[traj_ind]
-            # evec_k = eigvecs_flat[traj_ind][:, j]
-            # evec_j = eigvecs_flat[traj_ind][:, k]
             eval_init_state = eigvals_flat[traj_ind][init_state_ind]
             eval_final_state = eigvals_flat[traj_ind][final_state_ind]
             ev_diff = eval_final_state - eval_init_state
-            # inds_traj_ind = (
-            #     inds[0][inds[0] == traj_ind],
-            #     inds[1][inds[0] == traj_ind],
-            #     inds[2][inds[0] == traj_ind],
-            #     inds[3][inds[0] == traj_ind],
-            # )
-            # mels_traj_ind = mels[inds[0] == traj_ind]
-            # dkj_z = np.zeros(
-            #     (sim.model.constants.num_classical_coordinates), dtype=complex
-            # )
-            # dkj_zc = np.zeros(
-            #     (sim.model.constants.num_classical_coordinates), dtype=complex
-            # )
-            # np.add.at(
-            #     dkj_z,
-            #     (inds_traj_ind[1]),
-            #     np.conj(evec_k)[inds_traj_ind[2]]
-            #     * mels_traj_ind
-            #     * evec_j[inds_traj_ind[3]]
-            #     / ev_diff,
-            # )
-            # np.add.at(
-            #     dkj_zc,
-            #     (inds_traj_ind[1]),
-            #     np.conj(evec_k)[inds_traj_ind[3]]
-            #     * np.conj(mels_traj_ind)
-            #     * evec_j[inds_traj_ind[2]]
-            #     / ev_diff,
-            # )
-            # dkj_p = (
-            #     1.0j
-            #     * np.sqrt(
-            #         1
-            #         / (
-            #             2
-            #             * sim.model.constants.classical_coordinate_weight
-            #             * sim.model.constants.classical_coordinate_mass
-            #         )
-            #     )
-            #     * (dkj_z - dkj_zc)
-            # )
-            # dkj_q = np.sqrt(
-            #     sim.model.constants.classical_coordinate_weight
-            #     * sim.model.constants.classical_coordinate_mass
-            #     / 2
-            # ) * (dkj_z + dkj_zc)
-
-            # max_pos_q = np.argmax(np.abs(dkj_q))
-            # max_pos_p = np.argmax(np.abs(dkj_p))
-            # # Check for complex nonadiabatic couplings.
-            # if (
-            #     np.abs(dkj_q[max_pos_q]) > 1e-8
-            #     and np.abs(np.sin(np.angle(dkj_q[max_pos_q]))) > 1e-2
-            # ):
-            #     warnings.warn(
-            #         "dkj_q Nonadiabatic coupling is complex, needs gauge fixing!",
-            #         UserWarning,
-            #     )
-            # if (
-            #     np.abs(dkj_p[max_pos_p]) > 1e-8
-            #     and np.abs(np.sin(np.angle(dkj_p[max_pos_p]))) > 1e-2
-            # ):
-            #     warnings.warn(
-            #         "dkj_p Nonadiabatic coupling is complex, needs gauge fixing!",
-            #         UserWarning,
-            #     )
-            # delta_z = dkj_zc
-            # Perform hopping using the model's hop function
-            # or the default numerical hop function
             delta_z = calc_delta_z_fssh(
                 algorithm,
                 sim,
@@ -1479,8 +1406,6 @@ def update_active_surface_fssh(algorithm, sim, parameters, state, **kwargs):
             )
             hopped = False
             z_out = None
-            # if hasattr(sim.model, "hop_function"):
-            # if sim.model.hop_function is not None:
             hop_function, has_hop_function = sim.model.get("hop_function")
             if has_hop_function:
                 z_out, hopped = hop_function(
@@ -1490,7 +1415,6 @@ def update_active_surface_fssh(algorithm, sim, parameters, state, **kwargs):
                     delta_z=delta_z,
                     ev_diff=ev_diff,
                 )
-            # if not hasattr(sim.model, "hop_function") or sim.model.hop_function is None:
             if not has_hop_function:
                 z_out, hopped = numerical_fssh_hop(
                     sim.model,
