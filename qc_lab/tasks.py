@@ -1484,6 +1484,7 @@ def update_active_surface_fssh(algorithm, sim, parameters, state, **kwargs):
             hop_function, has_hop_function = sim.model.get("hop_function")
             if has_hop_function:
                 z_out, hopped = hop_function(
+                    sim.model,
                     parameters,
                     z=z[traj_ind],
                     delta_z=delta_z,
