@@ -17,7 +17,7 @@ class MeanField(Algorithm):
         self.default_settings = {}
         super().__init__(self.default_settings, settings)
 
-    def _assign_to_parameters(self, sim, parameters, state):
+    def _assign_seeds_to_parameters(self, sim, parameters, state):
         return tasks.assign_to_parameters(
             self, sim, parameters, state, name="seed", val=state.seed
         )
@@ -30,7 +30,7 @@ class MeanField(Algorithm):
 
     initialization_recipe = [
         tasks.assign_norm_factor_mf,
-        _assign_to_parameters,
+        _assign_seeds_to_parameters,
         _initialize_z,
         _update_h_quantum,
     ]
@@ -60,11 +60,13 @@ class MeanField(Algorithm):
         return tasks.update_classical_energy(self, sim, parameters, state, z=state.z)
 
     output_recipe = [
+        tasks.update_t,
         tasks.update_dm_db_mf,
         _update_quantum_energy,
         _update_classical_energy,
     ]
     output_variables = [
+        "t",
         "dm_db",
         "classical_energy",
         "quantum_energy",
