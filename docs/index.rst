@@ -40,16 +40,6 @@ This alpha release of QC Lab can be installed from source by downloading the rep
 from inside its topmost directory (where the `setup.py` file is located).
 
 
-Nested Documentation
---------------------
-This documentation is organized into several sections to help you navigate through the features and functionalities of QC Lab.
-
-.. toctree::
-   :maxdepth: 2
-
-   nested_docs/index
-
-
 User Guide
 ----------
 

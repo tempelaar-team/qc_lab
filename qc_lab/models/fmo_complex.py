@@ -27,26 +27,29 @@ class FMOComplex(Model):
         self.dh_qc_dzc_inds = None
         self.dh_qc_dzc_mels = None
         self.dh_qc_dzc_shape = None
-        self.linear_h_qc = True
 
     def initialize_constants_model(self):
         """
         Initialize the model-specific constants.
         """
         self.constants.num_quantum_states = 7
-        A = self.constants.get("A", self.default_constants.get("A"))
-        W = self.constants.get("W", self.default_constants.get("W"))
+        num_bosons = self.constants.get("A", self.default_constants.get("A"))
+        char_freq = self.constants.get("W", self.default_constants.get("W"))
         boson_mass = self.constants.get(
             "boson_mass", self.default_constants.get("boson_mass")
         )
 
         self.constants.w = (
-            W
-            * np.tan(((np.arange(A) + 1) - 0.5) * np.pi / (2 * A))[np.newaxis, :]
-            * np.ones((self.constants.num_quantum_states, A))
+            char_freq
+            * np.tan(((np.arange(num_bosons) + 1) - 0.5) * np.pi / (2 * num_bosons))[
+                np.newaxis, :
+            ]
+            * np.ones((self.constants.num_quantum_states, num_bosons))
         ).flatten()
-        self.constants.num_classical_coordinates = self.constants.num_quantum_states * A
-
+        self.constants.num_classical_coordinates = (
+            self.constants.num_quantum_states
+            * self.constants.get("A", self.default_constants.get("A"))
+        )
         self.constants.classical_coordinate_weight = self.constants.w
         self.constants.classical_coordinate_mass = boson_mass * np.ones(
             self.constants.num_classical_coordinates
@@ -62,7 +65,7 @@ class FMOComplex(Model):
         """
         Initialize the constants for the quantum-classical coupling Hamiltonian.
         """
-        A = self.constants.get("A", self.default_constants.get("A"))
+        num_bosons = self.constants.get("A", self.default_constants.get("A"))
         l_reorg = self.constants.get("l_reorg", self.default_constants.get("l_reorg"))
         m = self.constants.classical_coordinate_mass
         h = self.constants.classical_coordinate_weight
@@ -74,16 +77,18 @@ class FMOComplex(Model):
             )
         )
         for n in range(self.constants.num_quantum_states):
-            self.constants.diagonal_linear_coupling[n, n * A : (n + 1) * A] = (
-                w * np.sqrt(2 * l_reorg / A) * (1 / np.sqrt(2 * m * h))
-            )[n * A : (n + 1) * A]
+            self.constants.diagonal_linear_coupling[
+                n, n * num_bosons : (n + 1) * num_bosons
+            ] = (w * np.sqrt(2 * l_reorg / num_bosons) * (1 / np.sqrt(2 * m * h)))[
+                n * num_bosons : (n + 1) * num_bosons
+            ]
 
     def initialize_constants_h_q(self):
         """
         Initialize the constants for the quantum Hamiltonian.
         """
 
-    def h_q(self, parameters, **kwargs):
+    def h_q(self, constants, parameters, **kwargs):
         if kwargs.get("batch_size") is not None:
             batch_size = kwargs.get("batch_size")
         else:
@@ -123,18 +128,16 @@ class FMOComplex(Model):
         )
         return out
 
+    init_classical = ingredients.harmonic_oscillator_boltzmann_init_classical
+    hop_function = ingredients.harmonic_oscillator_hop_function
+    h_c = ingredients.harmonic_oscillator_h_c
+    h_qc = ingredients.diagonal_linear_h_qc
+    dh_qc_dzc = ingredients.diagonal_linear_dh_qc_dzc
+    dh_c_dzc = ingredients.harmonic_oscillator_dh_c_dzc
+    linear_h_qc = True
     initialization_functions = [
         initialize_constants_model,
         initialize_constants_h_c,
         initialize_constants_h_qc,
         initialize_constants_h_q,
-    ]
-    ingredients = [
-        ("h_q", h_q),
-        ("h_qc", ingredients.diagonal_linear_h_qc),
-        ("h_c", ingredients.harmonic_oscillator_h_c),
-        ("dh_qc_dzc", ingredients.diagonal_linear_dh_qc_dzc),
-        ("dh_c_dzc", ingredients.harmonic_oscillator_dh_c_dzc),
-        ("init_classical", ingredients.harmonic_oscillator_boltzmann_init_classical),
-        ("hop_function", ingredients.harmonic_oscillator_hop_function),
     ]

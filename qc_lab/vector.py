@@ -2,6 +2,7 @@
 This file defines the Vector class.
 """
 
+import warnings
 import numpy as np
 
 
