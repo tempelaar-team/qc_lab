@@ -42,7 +42,7 @@ This alpha release of QC Lab can be installed from source by downloading the rep
 
    pip install -e ./
 
-from inside its topmost directory (where the `setup.py` file is located).
+from inside its topmost directory (where the `pyproject.toml` file is located).
 
 
 

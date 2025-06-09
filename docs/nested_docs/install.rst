@@ -68,7 +68,7 @@ Navigate into the QC Lab source directory and install via pip:
 
 This command will:
 
-- Read the `setup.py` in the source directory.
+- Read the `pyproject.toml` in the source directory.
 - Install QC Lab and any required dependencies into your active Python environment.
 
 If you wish to install in “editable” (development) mode so that changes in the source tree are immediately available, run:
