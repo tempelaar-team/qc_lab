@@ -71,10 +71,12 @@ the quantum and classical energies (`quantum_energy` and `classical_energy`), an
 .. image:: populations.png
     :alt: Population dynamics.
     :align: center
+    :width: 80%
 
 .. image:: energies.png
     :alt: Change in energy.
     :align: center
+    :width: 80%
 
 .. raw:: html
 

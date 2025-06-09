@@ -26,9 +26,6 @@ Welcome to the QC Lab documentation! Use the buttons below to navigate to the se
      </button>
    </div>
 
-.. note::
-
-   Adjust the file names in the `onclick="location.href='...'` part to match your actual output filenames or Sphinx document names (e.g., `install.html` → `install/index.html` if using a nested toctree).
 
 .. toctree::
    :maxdepth: 1
