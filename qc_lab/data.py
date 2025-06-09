@@ -56,8 +56,6 @@ class Data:
             new_data.data_dict["norm_factor"] + self.data_dict["norm_factor"]
         )
         for key, val in new_data.data_dict.items():
-            if val is None:
-                print(key, val)
             if key == "seed":
                 self.data_dict[key] = np.concatenate(
                     (self.data_dict[key], val.flatten()), axis=0
