@@ -11,8 +11,10 @@ class Data:
     The data object handles the collection of data from the dynamics driver.
     """
 
-    def __init__(self):
-        self.data_dict = {"seed": np.array([], dtype=int), "norm_factor": 0}
+    def __init__(self, seeds=None):
+        if seeds is None:
+            seeds = np.array([], dtype=int)
+        self.data_dict = {"seed": seeds, "norm_factor": 0}
 
     def add_to_output_total_arrays(self, sim, state, t_ind):
         """
