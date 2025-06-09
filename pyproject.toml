@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qc_lab"
+version = "0.1.0a3"
+description = "QC Lab: a python package for quantum-classical modeling."
+readme = "README.rst"
+requires-python = ">=3.9,<3.14"
+license = { file = "LICENSE" }
+authors = [ { name="Tempelaar Team", email="roel.tempelaar@northwestern.edu" } ]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "Programming Language :: Python :: 3",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Linux :: Linux",
+    "License :: OSI Approved :: Apache Software License",
+]
+dependencies = [
+    "numpy>=1.22,<=1.26",
+    "tqdm",
+    "h5py",
+    "numba>=0.58,<=0.60",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+test = ["pytest", "mpi4py"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests", "tests.*"]
+
