@@ -17,13 +17,31 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
     """
     # first initialize the model constants
     sim.model.initialize_constants()
+    # if seeds is None:
+    #     offset = 0
+    #     if data is not None:
+    #         if len(data.data_dict["seed"]) > 0:
+    #             offset = np.max(data.data_dict["seed"]) + 1
+    #     else:
+    #         data = Data()
+    #     seeds = offset + np.arange(sim.settings.num_trajs, dtype=int)
+    #     num_trajs = sim.settings.num_trajs
+    # else:
+    #     num_trajs = len(seeds)
+    #     warnings.warn(
+    #         "Setting sim.settings.num_trajs to the number of provided seeds.",
+    #         UserWarning,
+    #     )
+    #     sim.settings.num_trajs = num_trajs
+    #     if data is None:
+    #         data = Data()
+    if data is None:
+        data = Data()
     if seeds is None:
-        offset = 0
-        if data is not None:
-            if len(data.data_dict["seed"]) > 0:
-                offset = np.max(data.data_dict["seed"]) + 1
+        if len(data.data_dict["seed"]) > 0:
+            offset = np.max(data.data_dict["seed"]) + 1
         else:
-            data = Data()
+            offset = 0
         seeds = offset + np.arange(sim.settings.num_trajs, dtype=int)
         num_trajs = sim.settings.num_trajs
     else:
@@ -33,8 +51,6 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
             UserWarning,
         )
         sim.settings.num_trajs = num_trajs
-        if data is None:
-            data = Data()
     if num_tasks is None:
         size = multiprocessing.cpu_count()
     else:
@@ -55,7 +71,7 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
             *initialize_vector_objects(
                 sim, batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)
             ),
-            Data(),
+            Data(batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)),
         )
         for n in range(num_sims)
     ]
@@ -65,5 +81,5 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
         results = pool.starmap(dynamics.dynamics, input_data)
     for result in results:
         data.add_data(result)
-    data.data_dict["seed"] = seeds
+    #data.data_dict["seed"] = seeds
     return data
