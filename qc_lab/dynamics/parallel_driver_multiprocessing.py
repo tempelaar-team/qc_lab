@@ -33,6 +33,8 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
             UserWarning,
         )
         sim.settings.num_trajs = num_trajs
+        if data is None:
+            data = Data()
     if num_tasks is None:
         size = multiprocessing.cpu_count()
     else:

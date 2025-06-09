@@ -40,6 +40,8 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
             UserWarning,
         )
         sim.settings.num_trajs = num_trajs
+        if data is None:
+            data = Data()
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     if num_tasks is None:
