@@ -62,16 +62,6 @@ class FewestSwitchesSurfaceHopping(Algorithm):
             name="eigvecs_previous",
         )
 
-    def _assign_eigvals_to_state(self, sim, parameters, state):
-        return tasks.assign_to_state(
-            self,
-            sim,
-            parameters,
-            state,
-            val=state.eigvecs,
-            name="eigvals_previous",
-        )
-
     def _basis_transform_vec(self, sim, parameters, state):
         return tasks.basis_transform_vec(
             self,
@@ -100,7 +90,6 @@ class FewestSwitchesSurfaceHopping(Algorithm):
         _diagonalize_matrix,
         _gauge_fix_eigs_init,
         _assign_eigvecs_to_state,
-        _assign_eigvals_to_state,
         _basis_transform_vec,
         tasks.initialize_random_values_fssh,
         tasks.initialize_active_surface,
@@ -150,7 +139,6 @@ class FewestSwitchesSurfaceHopping(Algorithm):
 
     update_recipe = [
         _assign_eigvecs_to_state,
-        _assign_eigvals_to_state,
         _update_z_rk4,
         _update_wf_db_eigs,
         _update_h_quantum,
@@ -174,17 +162,13 @@ class FewestSwitchesSurfaceHopping(Algorithm):
             self, sim, parameters, state, z=state.z
         )
 
-    def _update_classical_energy_fssh(self, sim, parameters, state):
-        return tasks.update_classical_energy_fssh(
-            self, sim, parameters, state, z=state.z
-        )
-
     output_recipe = [
         tasks.update_t,
         tasks.update_dm_db_fssh,
         _update_quantum_energy_fssh,
         _update_classical_energy_fssh,
     ]
+    
     output_variables = [
         "t",
         "quantum_energy",
