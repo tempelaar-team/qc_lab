@@ -22,7 +22,7 @@ class Data:
 
         Args:
             sim: The simulation object containing settings and parameters.
-            full_state: The full state object containing the current simulation state.
+            state: The state object containing the current simulation state.
             t_ind: The current time index in the simulation.
         """
         # Check if the norm_factor is zero, if it is, save it from the state object.
