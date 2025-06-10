@@ -469,3 +469,50 @@ def harmonic_oscillator_wigner_init_classical(model, parameters, **kwargs):
         z = qp_to_z(q, p, model.constants)
         out[s] = z
     return out
+
+
+def harmonic_oscillator_coherent_state_wigner_init_classical(
+    model, parameters, **kwargs
+):
+    """
+    Initialize classical coordinates according to the Wigner distribution of a coherent state of a harmonic oscillator.
+
+    exp(a * b^{\dagger} - a^* * b)
+
+    where `a` is the complex displacement parameter of the coherent state.
+
+    Required Constants:
+        - `coherent_state_displacement`: Array of complex displacement parameter for the coherent state.
+        - `classical_coordinate_weight`: Array of weights for classical coordinates.
+        - `harmonic_oscillator_frequency`: Array of harmonic oscillator frequencies.
+        - `classical_coordinate_mass`: Array of masses for classical coordinates.
+
+    Keyword Arguments:
+        - `seed`: Array of random seeds for initialization.
+    """
+    del parameters
+    seed = kwargs.get("seed", None)
+    a = model.constants.coherent_state_displacement
+    m = model.constants.classical_coordinate_mass
+    w = model.constants.harmonic_oscillator_frequency
+    out = np.zeros(
+        (len(seed), model.constants.num_classical_coordinates), dtype=complex
+    )
+    for s, seed_value in enumerate(seed):
+        np.random.seed(seed_value)
+        # Calculate the standard deviations for q and p.
+        std_q = np.sqrt(1 / (2 * w * m))
+        std_p = np.sqrt((m * w) / (2))
+        mu_q = np.sqrt(2 / (m * w)) * np.real(a)
+        mu_p = np.sqrt(2 / (m * w)) * np.imag(a)
+        # Generate random q and p values.
+        q = np.random.normal(
+            loc=mu_q, scale=std_q, size=model.constants.num_classical_coordinates
+        )
+        p = np.random.normal(
+            loc=mu_p, scale=std_p, size=model.constants.num_classical_coordinates
+        )
+        # Calculate the complex-valued classical coordinate.
+        z = qp_to_z(q, p, model.constants)
+        out[s] = z
+    return out
