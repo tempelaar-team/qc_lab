@@ -27,7 +27,7 @@ class Model:
 
     def get(self, ingredient_name):
         """
-        Get the ingredient by its name.
+        Get the ingredient by its name. Returns the first instance of the ingredient.
         """
         for ingredient in self.ingredients:
             if ingredient[0] == ingredient_name:
