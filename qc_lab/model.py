@@ -29,7 +29,7 @@ class Model:
         """
         Get the ingredient by its name. Returns the first instance of the ingredient.
         """
-        for ingredient in self.ingredients:
+        for ingredient in self.ingredients[::-1]:
             if ingredient[0] == ingredient_name:
                 return ingredient[1], True
         return None, False
