@@ -1,0 +1,49 @@
+name: Build & Publish to TestPyPI
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build twine
+
+      - name: Build sdist & wheel
+        run: python -m build
+
+      - name: Validate metadata (twine check)
+        run: python -m twine check dist/*
+
+      # Publish to TestPyPI via OIDC (no username/password)
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@v1.10.1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true   # don't fail if version already uploaded
+
+      # Sanity check: try installing from TestPyPI in a clean venv
+      - name: Verify install from TestPyPI
+        run: |
+          python -m venv /tmp/venv
+          . /tmp/venv/bin/activate
+          python -m pip install --upgrade pip
+          # Replace "qc-lab" with your distribution name as on TestPyPI
+          python -m pip install -i https://test.pypi.org/simple/ qc-lab
+          python -c "import qc_lab, sys; print('qc_lab version:', getattr(qc_lab, '__version__', 'unknown')); print('python', sys.version)"
