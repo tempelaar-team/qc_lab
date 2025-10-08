@@ -1,3 +1,7 @@
+.. meta::
+   :http-equiv=refresh: 0; url=interactive_docs/index.html
+
+
 QC Lab: A package for quantum-classical modeling
 ================================================
 
@@ -35,9 +39,19 @@ Installing qc_lab
 
 This alpha release of QC Lab can be installed from source by downloading the repository and executing.::
 
-   pip install -e ./
+   pip install ./
 
-from inside its topmost directory (where the `setup.py` file is located).
+from inside its topmost directory (where the `pyproject.toml` file is located).
+
+
+Interactive Documentation
+--------------------
+This documentation is organized into several sections to help you navigate through the features and functionalities of QC Lab.
+
+.. toctree::
+   :maxdepth: 2
+
+   interactive_docs/index
 
 
 User Guide

@@ -1,0 +1,2 @@
+DISABLE_NUMBA = False
+DISABLE_H5PY = False

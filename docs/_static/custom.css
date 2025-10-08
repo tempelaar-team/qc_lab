@@ -5,3 +5,67 @@
   .bd-page-width {
     max-width: 95%;  /* default is 88rem */
   }
+
+  /* _static/custom.css */
+
+/* remove the “reserved” space when collapsed */
+.admonition.dropdown:not(.open) .admonition-content {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+/* tighten up the title line */
+/* .admonition.dropdown > .admonition-title {
+  padding: 0.2em 0 !important;
+  font-weight: bold;
+} */
+
+
+/* 1) Make our Graphviz nodes look like sd-button primary buttons */
+.sd-graph-button polygon,
+.sd-graph-button rect,
+.sd-graph-button ellipse {
+  /* rounded corners (~ border-radius) */
+  rx: 0.5em !important;
+  ry: 0.5em !important;
+
+  /* use the primary color and no stroke */
+  fill: var(--sd-color-primary) !important;       /* bg color */
+  stroke: none !important;
+
+  /* subtle shadow like :shadow: */
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  
+  /* smooth color transition */
+  transition: fill 0.2s ease, transform 0.2s ease;
+}
+
+/* 2) Button text styling */
+.sd-graph-button text {
+  fill: var(--sd-color-primary-text) !important; /* text color */
+  font-weight: 600;
+  font-size: 1em;
+}
+
+/* 3) Hover (highlight) state */
+.sd-graph-button:hover polygon {
+  fill: var(--sd-color-primary-highlight) !important;
+  transform: translateY(-2px);
+  cursor: pointer;
+}
+
+.graphviz-center {
+  text-align: center;
+}
+.graphviz-center object {
+  display: inline-block;
+  margin: auto;
+  background-color: transparent !important;
+}
+
+.graphviz img {
+  background-color: transparent !important;
+  
+}

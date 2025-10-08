@@ -1,7 +1,8 @@
 """
 This is an example of how to use the parallel_driver_mpi function in QC Lab.
 
-This script can either be executed by a scheduler like SLURM or can be called in terminal by running
+This script can either be executed by a scheduler like SLURM or can be called in
+terminal by running
 
 mpirun -n num_tasks python mpi_example.py
 
@@ -25,14 +26,14 @@ sim = Simulation()
 sim.settings.num_trajs = 400
 sim.settings.batch_size = 100
 sim.settings.tmax = 10
-sim.settings.dt = 0.001
+sim.settings.dt_update = 0.001
 
 # instantiate a model
 sim.model = SpinBoson()
 # instantiate an algorithm
 sim.algorithm = MeanField()
 # define an initial diabatic wavefunction
-sim.state.wf_db = np.array([1, 0], dtype=complex)
+sim.initial_state.wf_db = np.array([1, 0], dtype=complex)
 
 data = parallel_driver_mpi(sim)
 

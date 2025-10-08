@@ -20,8 +20,8 @@ Settings
    * - `fssh_deterministic (bool)`
      - If `True` the algorithm uses a deterministic representation of the initial state by propagating all possible initial active surfaces. If `False`, it samples the initial active surface according to the adiabatic populations.
      - `False`
-   * - `gauge_fixing (int=0,1,2)`
-     - The level of gauge fixing to employ on the eigenvectors at each timestep. (0: adjust only the sign, 1: adjust the sign and phase using the overlap with the previous timestep, 2: adjust the sign and phase by calculating the derivative couplings.)
+   * - `gauge_fixing (string)`
+     - The type of gauge fixing to employ on the eigenvectors at each timestep. ("sign_overlap": adjust only the sign, "phase_overlap": adjust the sign and phase using the overlap with the previous timestep, "phase_der_couple": adjust the sign and phase by calculating the derivative couplings.)
      - 0
 
 Initial State
@@ -71,3 +71,6 @@ The following example demonstrates how to run a mean-field simulation for a spin
     sim.algorithm = FewestSwitchesSurfaceHopping()
     sim.state.wf_db= np.array([1, 0], dtype=complex)
     data = serial_driver(sim)
+
+
+

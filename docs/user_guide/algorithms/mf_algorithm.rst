@@ -4,6 +4,19 @@ Mean-Field Dynamics
 
 The `qc_lab.algorithms.MeanField` class implements the mean-field (Ehrenfest) dynamics algorithm according to `Tully 1998 <https://doi.org/10.1039/A801824C>`_.
 
+Required Model Ingredients
+------------------------------------------------
+
+model.h_q 
+
+
+model.h_qc
+
+model.h_c
+
+
+
+
 Settings
 --------
 
