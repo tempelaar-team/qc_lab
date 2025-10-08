@@ -176,7 +176,7 @@ def h_qc_diagonal_linear(model, parameters, **kwargs):
     """
     Diagonal linear quantum-classical Hamiltonian.
 
-    :math:`H_{nm} = \\delta_{nm}\sum_{j} \gamma_{nj} (z_{j} + z_{j}^*)`
+    :math:`H_{nm} = \\delta_{nm}\\sum_{j} \\gamma_{nj} (z_{j} + z_{j}^*)`
 
     Keyword Args
     ------------
