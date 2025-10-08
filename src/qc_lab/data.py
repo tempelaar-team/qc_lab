@@ -6,6 +6,9 @@ import logging
 import numpy as np
 from qc_lab.utils import DISABLE_H5PY
 
+if not DISABLE_H5PY:
+    import h5py
+
 logger = logging.getLogger(__name__)
 
 
@@ -133,9 +136,10 @@ class Data:
             self.data_dict = {key: loaded[key] for key in loaded.files if key != "log"}
             self.log = str(loaded.get("log", ""))
             return self
-        with h5py.File(filename, "r") as h5file:
-            self._recursive_load(h5file, "/", self.data_dict)
-            self.log = h5file.attrs["log"]
+        else:
+            with h5py.File(filename, "r") as h5file:
+                self._recursive_load(h5file, "/", self.data_dict)
+                self.log = h5file.attrs["log"]
         return self
 
     def _recursive_save(self, h5file, path, dict):
