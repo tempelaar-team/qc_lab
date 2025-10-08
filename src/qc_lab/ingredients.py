@@ -10,7 +10,7 @@ def h_c_harmonic(model, parameters, **kwargs):
     """
     Harmonic oscillator classical Hamiltonian function.
 
-    :math:`H_c = \\frac{1}{2}\sum_{n} \\left( \\frac{p_n^2}{m_n} + m_n \omega_n^2 q_n^2 \\right)`
+    :math:`H_c = \\frac{1}{2}\\sum_{n} \\left( \\frac{p_n^2}{m_n} + m_n \\omega_n^2 q_n^2 \\right)`
 
     Keyword Args
     ------------
@@ -37,7 +37,7 @@ def h_c_free(model, parameters, **kwargs):
     """
     Free particle classical Hamiltonian function.
 
-    :math:`H_c = \sum_{n} \\left( \\frac{p_n^2}{2m_n} \\right)`
+    :math:`H_c = \\sum_{n} \\left( \\frac{p_n^2}{2m_n} \\right)`
 
     Keyword Args
     ------------
@@ -103,7 +103,7 @@ def h_q_two_level(model, parameters, **kwargs):
     """
     Quantum Hamiltonian for a two-level system.
 
-    :math:`H_{nm} = \delta_{nm}\mathrm{two\_level\_nn}+(1-\delta_{nm})(\mathrm{two\_level\_nm\_re} + i \mathrm{two\_level\_nm\_im})`
+    :math:`H_{nm} = \\delta_{nm}\\mathrm{two\\_level\\_nn}+(1-\\delta_{nm})(\\mathrm{two\\_level\\_nm\\_re} + i \\mathrm{two\\_level\\_nm\\_im})`
 
     Keyword Args
     ------------
@@ -139,7 +139,7 @@ def h_q_nearest_neighbor(model, parameters, **kwargs):
     """
     Quantum Hamiltonian for a nearest-neighbor lattice.
 
-    :math:`H_{nm} = -t (\delta_{n,m+1} + \delta_{n,m-1})`
+    :math:`H_{nm} = -t (\\delta_{n,m+1} + \\delta_{n,m-1})`
 
     Keyword Args
     ------------
@@ -176,7 +176,7 @@ def h_qc_diagonal_linear(model, parameters, **kwargs):
     """
     Diagonal linear quantum-classical Hamiltonian.
 
-    :math:`H_{nm} = \delta_{nm}\sum_{j} \gamma_{nj} (z_{j} + z_{j}^*)`
+    :math:`H_{nm} = \\delta_{nm}\sum_{j} \gamma_{nj} (z_{j} + z_{j}^*)`
 
     Keyword Args
     ------------
@@ -199,7 +199,7 @@ def dh_qc_dzc_diagonal_linear(model, parameters, **kwargs):
     Gradient of the diagonal linear quantum-classical coupling Hamiltonian
     in sparse format.
 
-    :math:`[\partial_{z} H_{qc}]_{ijkl} = \delta_{kl}\gamma_{kj}`
+    :math:`[\\partial_{z} H_{qc}]_{ijkl} = \\delta_{kl}\\gamma_{kj}`
 
     Keyword Args
     ------------
@@ -467,7 +467,7 @@ def init_classical_wigner_coherent_state(model, parameters, **kwargs):
     Initialize classical coordinates according to the Wigner distribution of a coherent
     state of a harmonic oscillator.
 
-    :math:`\\vert a\\rangle = \exp(a\hat{b}^{\dagger} - a^{*}\hat{b})\\vert 0\\rangle`
+    :math:`\\vert a\\rangle = \\exp(a\\hat{b}^{\\dagger} - a^{*}\\hat{b})\\vert 0\\rangle`
 
     where :math:`a` is the complex displacement parameter of the coherent state.
 
