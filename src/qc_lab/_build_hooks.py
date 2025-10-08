@@ -27,23 +27,8 @@ if DISABLE_H5PY:
 def _write_config(target: str) -> None:
     os.makedirs(os.path.dirname(target), exist_ok=True)
     with open(target, "w") as f:
-        f.write(
-            "\n".join(
-                [
-                    "import os as _os",
-                    "",
-                    "def _env_flag(name: str, default: bool) -> bool:",
-                    "    value = _os.environ.get(name)",
-                    "    if value is None:",
-                    "        return default",
-                    '    return value not in {"0", "false", "False"}',
-                    "",
-                    f'DISABLE_NUMBA = _env_flag("QC_LAB_DISABLE_NUMBA", {DISABLE_NUMBA})',
-                    f'DISABLE_H5PY = _env_flag("QC_LAB_DISABLE_H5PY", {DISABLE_H5PY})',
-                    "",
-                ]
-            )
-        )
+        f.write(f"DISABLE_NUMBA = {DISABLE_NUMBA}\n")
+        f.write(f"DISABLE_H5PY = {DISABLE_H5PY}\n")
 
 
 class develop(_develop):
