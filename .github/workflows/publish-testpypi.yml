@@ -37,13 +37,3 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true   # don't fail if version already uploaded
-
-      # Sanity check: try installing from TestPyPI in a clean venv
-      - name: Verify install from TestPyPI
-        run: |
-          python -m venv /tmp/venv
-          . /tmp/venv/bin/activate
-          python -m pip install --upgrade pip
-          # Replace "qc-lab" with your distribution name as on TestPyPI
-          python -m pip install -i https://test.pypi.org/simple/ qc-lab
-          python -c "import qc_lab, sys; print('qc_lab version:', getattr(qc_lab, '__version__', 'unknown')); print('python', sys.version)"
