@@ -186,7 +186,7 @@ def h_qc_diagonal_linear(model, parameters, **kwargs):
     Required Constants
     ------------------
     ``diagonal_linear_coupling`` : ndarray
-        Coupling constants :math:`\gamma`.
+        Coupling constants :math:`\\gamma`.
     """
     del parameters
     z = kwargs["z"]
@@ -209,7 +209,7 @@ def dh_qc_dzc_diagonal_linear(model, parameters, **kwargs):
     Required Constants
     ------------------
     ``diagonal_linear_coupling`` : ndarray
-        Coupling constants :math:`\gamma`.
+        Coupling constants :math:`\\gamma`.
     """
     z = kwargs["z"]
     batch_size = len(z)
