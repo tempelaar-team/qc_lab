@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=64,<75", "wheel", "build"]
+requires = ["setuptools>=64", "wheel", "build"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "qc_lab"
-version = "0.3.0a4"
+version = "0.3.0a5"
 description = "QC Lab: a python package for quantum-classical modeling."
 readme = "README.rst"
 requires-python = ">=3.6"

@@ -4,7 +4,19 @@ This module contains utility helpers for optional jit compilation and in-memory 
 
 import logging
 from io import StringIO
-from ._config import DISABLE_NUMBA
+
+DISABLE_NUMBA = False
+try:
+    import numba
+except ImportError:
+    DISABLE_NUMBA = True
+
+DISABLE_H5PY = False
+try:
+    import h5py
+except ImportError:
+    DISABLE_H5PY = True
+
 
 logger = logging.getLogger(__name__)
 
@@ -91,4 +103,6 @@ __all__ = [
     "njit",
     "configure_memory_logger",
     "get_log_output",
+    "DISABLE_NUMBA",
+    "DISABLE_H5PY",
 ]

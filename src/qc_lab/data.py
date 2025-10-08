@@ -4,10 +4,7 @@ This module contains the Data class.
 
 import logging
 import numpy as np
-from qc_lab._config import DISABLE_H5PY
-
-if not DISABLE_H5PY:
-    import h5py
+from qc_lab.utils import DISABLE_H5PY
 
 logger = logging.getLogger(__name__)
 
