@@ -39,7 +39,3 @@ docs = [
     "sphinxcontrib-mermaid",
     "graphviz",
 ]
-
-[tool.setuptools.cmdclass]
-develop = "qc_lab._build_hooks.develop"
-build_py = "qc_lab._build_hooks.build_py"
