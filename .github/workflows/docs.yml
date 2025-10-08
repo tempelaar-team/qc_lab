@@ -1,3 +1,4 @@
+
 name: Docs
 
 on:
@@ -25,17 +26,24 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install sphinx
-        pip install pydata-sphinx-theme
-        pip install -e .
-
+        # pip install sphinx
+        # pip install pydata-sphinx-theme
+        # pip install sphinx-design
+        # pip install sphinx-togglebutton
+        # pip install sphinxcontrib-mermaid
+        # pip install graphviz
+        pip install .[docs]
+    - name: Install additional dependencies
+      run: |
+        sudo apt-get install -y graphviz
     - name: Build documentation
       id: build
       run: |
         cd docs
         make clean
         make html
-
+        ls _build/html
+        ls _build/html/_images/
     # - name: Upload artifacts
     #   uses: actions/upload-artifact@v4
     #   with:

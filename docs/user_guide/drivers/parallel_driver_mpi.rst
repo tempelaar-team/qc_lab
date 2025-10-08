@@ -11,6 +11,17 @@ in parallel using the `mpi4py` library. This driver is suitable for use in clust
 and is compatible with different schedulers like SLURM. Unlike the multiprocessing driver, the MPI driver
 requires a script to be run using the `mpiexec` or `mpirun` command.
 
+.. note::
+
+    This driver introduces some complexity due to compatibilities and the need for MPI to be set up correctly. For that reason, 
+    we exclude `mpi4py` from the default installation of QC Lab. To install it and use this driver, you can run:
+    
+    .. code-block:: bash
+
+        pip install mpi4py
+
+
+
 Function Signature
 ------------------
 

@@ -32,17 +32,17 @@ referred to as "tasks".
     print(MeanField.update_recipe)
 
     # the output recipe
-    print(MeanField.output_recipe)
+    print(MeanField.collect_recipe)
 
 As the name implies, the `initialization_recipe` initializes all the variables required for the algorithm. The `update_recipe`
-updates the variables at each time step, and the `output_recipe` is used to output the results of the algorithm.
+updates the variables at each time step, and the `collect_recipe` is used to output the results of the algorithm.
 
 In addition to the recipes, a list of variable names is needed to specify which variables the algorithm will store in the Data object. 
 
 .. code-block:: python
 
     # the variables that the algorithm will store
-    print(MeanField.output_variables)
+    print(MeanField.collect_variables)
 
 
 Adding output obvservables
@@ -63,7 +63,7 @@ where :math:`\vert \psi(t)\rangle` is the diabatic wavefunction at time :math:`t
 
 .. code-block:: python
 
-    def update_response_function(sim, parameters, state, **kwargs):
+    def update_response_function(sim, state, parameters, **kwargs):
         # First get the diabatic wavefunction.
         wf_db = state.wf_db
         # If we are at the first timestep we can store the diabatic wavefunction in the parameters object
@@ -71,7 +71,7 @@ where :math:`\vert \psi(t)\rangle` is the diabatic wavefunction at time :math:`t
             parameters.wf_db_0 = np.copy(wf_db)
         # Next calculate the response function and store it in the state object.
         state.response_function = np.sum(np.conj(parameters.wf_db_0) * wf_db, axis=-1)
-        return parameters, state
+        return state, parameters
 
 
 
@@ -79,13 +79,13 @@ Next we can add this task to the output recipe.
 
 .. code-block:: python
 
-    MeanField.output_recipe.append(update_response_function)
+    MeanField.collect_recipe.append(update_response_function)
 
-Finally we can add the relevant variable name to the output_variables list.
+Finally we can add the relevant variable name to the collect_variables list.
 
 .. code-block:: python
 
-    MeanField.output_variables.append('response_function')
+    MeanField.collect_variables.append('response_function')
 
 
 We can then run a simulation and calculate the corresponding spectral function,
@@ -105,7 +105,7 @@ We can then run a simulation and calculate the corresponding spectral function,
     sim.settings.num_trajs = 1000
     sim.settings.batch_size = 250
     sim.settings.tmax = 50
-    sim.settings.dt = 0.01
+    sim.settings.dt_update = 0.01
 
     # instantiate a model 
     sim.model = SpinBoson({'l_reorg': 0.2})
@@ -126,7 +126,7 @@ We can then run a simulation and calculate the corresponding spectral function,
     # plot the data.
     print('calculated quantities:', data.data_dic.keys())
     response_function = data.data_dict['response_function']
-    time = sim.settings.tdat_output
+    time = sim.settings.t_collect
     plt.plot(time, np.real(response_function), label='R(t)')
     plt.xlabel('time')
     plt.ylabel('response function')
@@ -147,7 +147,7 @@ will only have a well-defined meaning in regimes with no nonadiabatic coupling.
 
 .. code-block:: python
 
-    def update_adiabatic_populations(sim, parameters, state, **kwargs):
+    def update_adiabatic_populations(sim, state, parameters, **kwargs):
         # First get the Hamiltonian and calculate its eigenvalues and eigenvectors.
         H = state.h_quantum # this is the quantum plus quantum-classical Hamiltonian.
         # Next obtain its eigenvalues and eigenvectors.
@@ -158,20 +158,20 @@ will only have a well-defined meaning in regimes with no nonadiabatic coupling.
         pops_adb = np.abs(wf_adb)**2
         # Store the populations in the state object.
         state.pops_adb = pops_adb
-        return parameters, state
+        return state, parameters
 
 Next we can add this task to the output recipe.
 
 .. code-block:: python
 
-    MeanField.output_recipe.append(update_adiabatic_populations)
+    MeanField.collect_recipe.append(update_adiabatic_populations)
 
 
-Finally we can add the relevant variable name to the output_variables list.
+Finally we can add the relevant variable name to the collect_variables list.
 
 .. code-block:: python
 
-    MeanField.output_variables.append('pops_adb')
+    MeanField.collect_variables.append('pops_adb')
 
 
 We can then run a simulation and plot the populations. Note that since the spin-boson model is always in a coupling regime these populations will not have a well-defined meaning.
@@ -191,7 +191,7 @@ We can then run a simulation and plot the populations. Note that since the spin-
     sim.settings.num_trajs = 100
     sim.settings.batch_size = 100
     sim.settings.tmax = 25
-    sim.settings.dt = 0.01
+    sim.settings.dt_update = 0.01
 
     # Instantiate a model.
     sim.model = SpinBoson()
@@ -215,7 +215,7 @@ We can then run a simulation and plot the populations. Note that since the spin-
     quantum_energy = data.data_dict['quantum_energy']
     populations = np.real(np.einsum('tii->ti', data.data_dict['dm_db']))
     adiabatic_populations = np.real(data.data_dict['pops_adb'])
-    time = sim.settings.tdat_output
+    time = sim.settings.t_collect
     plt.plot(time, adiabatic_populations[:,0], label='adiabatic state 0')
     plt.plot(time, adiabatic_populations[:,1], label='adiabatic state 1')
     plt.xlabel('time')

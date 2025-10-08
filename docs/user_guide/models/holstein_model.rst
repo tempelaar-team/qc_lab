@@ -13,7 +13,7 @@ The quantum Hamiltonian of the Holstein model is a nearest-neighbor tight-bindin
     
     \hat{H}_{\mathrm{q}} = -J\sum_{\langle i,j\rangle}^{N}\hat{c}^{\dagger}_{i}\hat{c}_{j}
 
-where :math:`\langle i,j\rangle` denotes nearest-neighbor sites with or without periodic boundaries determined by the parameter `periodic_boundary=True`.
+where :math:`\langle i,j\rangle` denotes nearest-neighbor sites with or without periodic boundaries determined by the parameter `periodic=True`.
 
 The quantum-classical Hamiltonian is the Holstein coupling with dimensionless electron-phonon coupling :math:`g` and phonon frequency :math:`\omega`
 
@@ -64,9 +64,9 @@ The following table lists all of the constants required by the `HolsteinLatticeM
    * - `phonon_mass` :math:`(m)`
      - Phonon mass
      - 1
-   * - `periodic_boundary`
+   * - `periodic`
      - Periodic boundary condition
-     - `True``
+     - `True`
 
      
 Example
