@@ -1,7 +1,7 @@
 .. _cite:
 
-===============================
-How to Cite QC Lab
-===============================
+====================
+Citing QC Lab
+====================
 
-Please watch out for a publication describing QC Lab in the near future. 
+A suitable citation for QC Lab is forthcoming.

@@ -1,21 +1,18 @@
 .. _index:
 
-
 User Guide
 ==========
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: User Guide
 
     install
-    quickstart/quickstart
-    drivers/drivers 
+    ingredient
+    task
+    model
+    algorithm
     simulation
-    models/models 
-    algorithms/algorithms 
-    data_object
-    model_dev
-    variable_object
-    defaults
-    algorithm_dev
+    driver
+    data
+    cite

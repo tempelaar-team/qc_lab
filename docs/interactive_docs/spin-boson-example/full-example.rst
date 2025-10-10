@@ -1,5 +1,6 @@
 .. _full-example:
 
+
 Putting it all together.
 ==========================
 
@@ -12,11 +13,11 @@ This is what the final code looks like:
 
     import numpy as np
     import matplotlib.pyplot as plt
-    from qc_lab import Simulation
-    from qc_lab.models import SpinBoson
-    from qc_lab.algorithms import FewestSwitchesSurfaceHopping
-    from qc_lab.dynamics import serial_driver
-    from qc_lab.ingredients import vectorize_ingredient
+    from qclab import Simulation
+    from qclab.models import SpinBoson
+    from qclab.algorithms import FewestSwitchesSurfaceHopping
+    from qclab.dynamics import serial_driver
+    from qclab.functions import vectorize_ingredient
 
     def update_z_reverse_frustrated_fssh(sim, state, parameters):
         """
@@ -40,7 +41,7 @@ This is what the final code looks like:
         # Next we'll get the Required constants from the constants object.
         m = model.constants.classical_coordinate_mass
         h = model.constants.classical_coordinate_weight
-        g = model.constants.w * np.sqrt(2 * model.constants.l_reorg / model.constants.A)
+        g = model.constants.harmonic_frequency * np.sqrt(2 * model.constants.l_reorg / model.constants.A)
         # Now we can construct the empty Hamiltonian matrix as a 2x2 complex array.
         h_qc = np.zeros((2, 2), dtype=complex)
         # Then we can populate the off-diagonal elements of the Hamiltonian matrix.
@@ -61,15 +62,15 @@ This is what the final code looks like:
     # Attach the FSSH algorithm.
     sim.algorithm = FewestSwitchesSurfaceHopping()
     # Insert the function for reversing velocities as a task into the update recipe.
-    sim.algorithm.update_recipe.insert(10, update_z_reverse_frustrated_fssh)
+    sim.algorithm.update_recipe.append(update_z_reverse_frustrated_fssh)
     # Initialize the diabatic wavevector. 
     # Here, the first vector element refers to the upper state and the second
     # element refers to the lower state.
-    sim.state.wf_db = np.array([1, 0], dtype=complex)
+    sim.initial_state.wf_db = np.array([1, 0], dtype=complex)
 
     # Run the simulation.
     data = serial_driver(sim)
-   
+
     # Pull out the time.
     t = data.data_dict["t"]
     # Get populations from the diagonal of the density matrix.
@@ -78,6 +79,8 @@ This is what the final code looks like:
     plt.xlabel('Time [arb. units]')
     plt.ylabel('Excited state population')
     plt.ylim([0.4,1.01])
+    plt.legend(frameon=False)
+    plt.savefig("full_code_output.png")
     plt.show()
 
 

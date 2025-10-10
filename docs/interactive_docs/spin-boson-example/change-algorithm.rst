@@ -3,12 +3,12 @@
 I want to use FSSH instead.
 ===========================
 
-Sure! Following the last example you can simply swap out `sim.algorithm` to use `FewestSwitchesSurfaceHopping`.
+Sure! Following the last example you can simply swap out ``sim.algorithm`` to use ``FewestSwitchesSurfaceHopping``.
 
 .. code-block:: python
 
 
-    from qc_lab.algorithms import FewestSwitchesSurfaceHopping
+    from qclab.algorithms import FewestSwitchesSurfaceHopping
 
     sim.algorithm = FewestSwitchesSurfaceHopping()
 
@@ -21,7 +21,7 @@ The output has changed once more:
     :width: 50%
 
 
-You can learn about algorithms in the `Algorithms documentation <../../user_guide/algorithms/algorithms.html>`_.
+You can learn about algorithms in the `Algorithms <../../user_guide/algorithms/algorithms.html>`_ documentation.
 
 
 .. note::

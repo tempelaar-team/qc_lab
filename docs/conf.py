@@ -15,7 +15,8 @@ project = "QC Lab"
 year = datetime.now().year
 copyright = f"2025-{year}, Tempelaar Team"
 author = "Tempelaar Team"
-
+# html_title = "QC Lab Documentation"
+# html_short_title = "QC Lab Docs"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -44,19 +45,33 @@ html_theme = "pydata_sphinx_theme"  # "bizstyle"#
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_theme_options = {
+    "secondary_sidebar_items": ["page-toc", "edit-this-page"],
+    # "show_toc_level": 2,   # show h2/h3 (your subsections)
+    # "secondary_sidebar_items": [],  # remove all right-sidebar widgets
     "body_max_width": "100%",  # Remove maximum width constraint
-    "github_url": "https://github.com/tempelaar-team/qc_lab",
+    "github_url": "https://github.com/tempelaar-team/qclab",
     "collapse_navigation": True,
     "show_nav_level": 2,
-    "secondary_sidebar_items": ["page-toc", "sourcelink"],
+    # "secondary_sidebar_items": ["page-toc", "sourcelink"],
     "external_links_new_tab": True,
     "logo": {
+        "logo_only": True,
         "image_light": "_static/images/logo-light.png",
         "image_dark": "_static/images/logo-dark.png",
     },
+    "show_toc_level": 3,  # show h2/h3 in right sidebar
 }
 
 html_sidebars = {
     "**": ["sidebar-nav-bs.html", "sidebar-ethical-ads.html"],
-    "software_reference/ingredients/ingredients": [],
-}
+    # "software_reference/ingredients/ingredients": [],
+    # or for a whole folder
+    "interactive_docs/index": [],
+    # "interactive_docs/spin-boson-example/*": [],
+} 
+
+# Remove the right sidebar (“On this page”, buttons, etc.)
+# html_theme_options = {
+#     "secondary_sidebar_items": [],  # remove all right-sidebar widgets
+# }
+

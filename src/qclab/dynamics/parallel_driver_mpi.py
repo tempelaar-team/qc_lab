@@ -1,0 +1,129 @@
+"""
+This module contains the parallel MPI driver.
+"""
+
+import logging
+import copy
+import numpy as np
+import qclab.dynamics as dynamics
+from qclab.utils import get_log_output
+from qclab import Variable, Data
+
+logger = logging.getLogger(__name__)
+
+
+def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
+    """
+    Parallel driver for the dynamics core using the mpi4py library.
+
+    .. rubric:: Args
+    sim: Simulation
+        The simulation object containing the model, algorithm, initial state, and settings.
+    seeds: ndarray, optional
+        An array of integer seeds for the trajectories. If None, seeds will be
+        generated automatically.
+    data: Data, optional
+        A Data object for collecting output data. If None, a new Data object
+        will be created.
+    num_tasks: int, optional
+        The number of tasks to use for parallel processing. If None, the
+        number of available tasks will be used.
+
+    .. rubric:: Returns
+    data: Data
+        The updated Data object containing collected output data.
+    """
+    # First initialize the model constants.
+    sim.model.initialize_constants()
+    try:
+        from mpi4py import MPI
+    except ImportError:
+        raise ImportError(
+            "The package mpi4py is required for the parallel_driver_mpi driver."
+        ) from None
+    except Exception as e:
+        raise RuntimeError(f"An error occurred when importing mpi4py: {e}") from None
+    if seeds is None:
+        offset = 0
+        if data is not None:
+            if len(data.data_dict["seed"]) > 0:
+                offset = np.max(data.data_dict["seed"]) + 1
+        else:
+            data = Data()
+        seeds = offset + np.arange(sim.settings.num_trajs, dtype=int)
+        num_trajs = sim.settings.num_trajs
+    else:
+        num_trajs = len(seeds)
+        logger.warning(
+            "Setting sim.settings.num_trajs to the number of provided seeds."
+        )
+        sim.settings.num_trajs = num_trajs
+        if data is None:
+            data = Data()
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    if num_tasks is None:
+        size = comm.Get_size()
+    else:
+        size = num_tasks
+    # Determine the number of simulations required to execute the total number
+    # of trajectories.
+    if num_trajs % sim.settings.batch_size == 0:
+        num_sims = num_trajs // sim.settings.batch_size
+    else:
+        num_sims = num_trajs // sim.settings.batch_size + 1
+    batch_seeds_list = (
+        np.zeros((num_sims * sim.settings.batch_size), dtype=int) + np.nan
+    )
+    batch_seeds_list[:num_trajs] = seeds
+    batch_seeds_list = batch_seeds_list.reshape((num_sims, sim.settings.batch_size))
+    # Split the simulations into chunks for each MPI process.
+    chunk_inds = np.linspace(0, num_sims, size + 1, dtype=int)
+    start = chunk_inds[rank]
+    end = chunk_inds[rank + 1]
+    chunk_size = end - start
+    # Create the input data for each local simulation.
+    sim.initialize_timesteps()
+    local_input_data = [
+        (
+            copy.deepcopy(sim),
+            Variable(
+                {
+                    "seed": batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(
+                        int
+                    )
+                }
+            ),
+            Variable(),
+            Data(batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)),
+        )
+        for n in np.arange(num_sims)[start:end]
+    ]
+    # Set the batch size for each local simulation.
+    for i in range(chunk_size):
+        local_input_data[i][0].settings.batch_size = len(local_input_data[i][1].seed)
+    # Execute the local simulations.
+    local_results = [dynamics.run_dynamics(*x) for x in local_input_data]
+    comm.Barrier()
+    # Collect results sequentially on rank 0.
+    tag_data, tag_done = 1, 2
+    if rank == 0:
+        for result in local_results:
+            data.add_data(result)
+        remaining = size - 1
+        status = MPI.Status()
+        while remaining:
+            msg = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status)
+            if status.Get_tag() == tag_done:
+                remaining -= 1
+            else:
+                data.add_data(msg)
+    else:
+        for result in local_results:
+            comm.send(result, dest=0, tag=tag_data)
+        comm.send(None, dest=0, tag=tag_done)
+    # Collect logs from all ranks and attach combined output on root rank.
+    gathered_logs = comm.gather(get_log_output(), root=0)
+    if rank == 0:
+        data.log = "".join(log for log in gathered_logs if log)
+    return data

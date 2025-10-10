@@ -4,15 +4,13 @@ QC Lab: A package for quantum-classical modeling
 
 **QC Lab** is a Python package designed for implementing and executing quantum-classical (QC) dynamics simulations.
 It offers an environment for developing physical models and QC algorithms which enables algorithms and models to be combined arbitrarily.
-QC Lab comes with a variety of already implemented models and algorithms which we hope encourage new researchers to explore the field of q
-uantum-classical dynamics. Users that implement their own models and algorithms will have the opportunity to contribute them to QC Lab to form a 
-growing library of quantum-classical dynamics tools.
+QC Lab comes with a variety of already implemented models and algorithms which we hope will encourage new researchers to explore the field of quantum-classical dynamics. Users that implement their own models and algorithms will have the opportunity to contribute them to QC Lab to form a growing library of quantum-classical dynamics tools.
 
 
 **QC Lab** is developed and maintained by the Tempelaar Team in the Chemistry Department of Northwestern University in Evanston, Illinois, USA.
 
 
-The documentation for QC Lab can be found at https://tempelaar-team.github.io/qc_lab/.
+The documentation for QC Lab can be found at https://tempelaar-team.github.io/qclab/.
 
 
 Capabilities
@@ -35,15 +33,23 @@ Model Systems
 * Fenna-Matthews-Olson (FMO) complex [6, 7]
 
 
-Installing qc_lab
+Installing qclab
 -----------------
 
-This alpha release of QC Lab can be installed from source by downloading the repository and executing::
+QC Lab can be installed from the Python Package Index (PyPI) by executing::
+
+   pip install qclab
+
+To install QC Lab without h5py or numba support, execute::
+
+   pip install qclab --no-deps
+   pip install numpy tqdm
+
+QC Lab can be installed from source by downloading the repository and executing::
 
    pip install ./
 
 from inside its topmost directory (where the `pyproject.toml` file is located).
-
 
 
 Bibliography

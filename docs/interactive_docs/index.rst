@@ -1,8 +1,11 @@
-.. _index:
+.. _interactive-docs-index:
 
-================================
-QC Lab Interactive Documentation
-================================
+
+==========
+Quick Menu
+==========
+
+
 
 Welcome to the QC Lab documentation! Use the buttons below to navigate to the section you need.
 
@@ -32,7 +35,7 @@ Welcome to the QC Lab documentation! Use the buttons below to navigate to the se
     :shadow:
     :align: center
 
-    I want a comprehensive manual.
+    I want to check out the user guide.
 
 .. button-link:: ../user_guide/cite.html
     :color: primary
@@ -41,12 +44,14 @@ Welcome to the QC Lab documentation! Use the buttons below to navigate to the se
 
     I want to cite QC Lab.
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
 
-   install
-   spin-boson-example/spin-boson
-   overview/overview
-   ../user_guide/index
-   cite
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Quick Menu
+    :hidden:
+
+    ../user_guide/install
+    spin-boson-example/spin-boson
+    overview/overview
+    ../user_guide/cite

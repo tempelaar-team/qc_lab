@@ -7,7 +7,7 @@ I want to change the reorganization energy.
 
 Changing the reorganization energy is easy! 
 
-Using the same simulation object from the previous example, we can modify the `l_reorg` constant in `sim.model.constants`.
+Using the same simulation object from the previous example, we can modify the ``l_reorg`` constant in ``sim.model.constants``.
 
 
 
@@ -25,7 +25,9 @@ The output changes to (dash shows previous result):
     :width: 50%
 
 
-For a complete list of model constants and their descriptions, please refer to the `Spin-Boson Model documentation <../../user_guide/models/spin_boson_model.html>`_.
+For a complete list of model constants, please refer to the `Spin-Boson Model <spinboson_model>`_ documentation.
+
+
 
 
 

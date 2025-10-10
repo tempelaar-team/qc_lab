@@ -3,11 +3,11 @@ requires = ["setuptools>=64,<75", "wheel", "build"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "qc_lab"
-version = "0.3.0a6"
+name = "qclab"
+version = "0.3.0a7"
 description = "QC Lab: a python package for quantum-classical modeling."
 readme = "README.rst"
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 license = { file = "LICENSE" }
 authors = [{ name = "Tempelaar Team", email = "roel.tempelaar@northwestern.edu" }]
 classifiers = [
@@ -38,4 +38,5 @@ docs = [
     "sphinx-togglebutton",
     "sphinxcontrib-mermaid",
     "graphviz",
+    "sphinx-autodoc-typehints",
 ]

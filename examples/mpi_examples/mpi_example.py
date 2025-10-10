@@ -14,10 +14,10 @@ In this example num_tasks is determined automatically by the mpi driver.
 import numpy as np
 import matplotlib.pyplot as plt
 from mpi4py import MPI
-from qc_lab import Simulation
-from qc_lab.models import SpinBoson
-from qc_lab.algorithms import MeanField
-from qc_lab.dynamics import parallel_driver_mpi
+from qclab import Simulation
+from qclab.models import SpinBoson
+from qclab.algorithms import MeanField
+from qclab.dynamics import parallel_driver_mpi
 
 # instantiate a simulation
 sim = Simulation()

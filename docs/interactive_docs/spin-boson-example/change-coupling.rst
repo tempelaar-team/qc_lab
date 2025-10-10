@@ -1,8 +1,8 @@
 .. _change-coupling:
 
 
-I want to change the coupling term.
-================================
+I want to switch to off-diagonal coupling.
+==========================================
 
 
 Changing the coupling term is straightforward! We'll make a new ingredient that couples the boson coordinates to the off-diagonal
@@ -14,7 +14,7 @@ QC Lab's built-in vectorization decorator to automatically vectorize it.
 
 .. code-block:: python
 
-    from qc_lab.ingredients import vectorize_ingredient
+    from qclab.ingredients import vectorize_ingredient
 
     @vectorize_ingredient
     def h_qc(model, parameters, **kwargs):
@@ -26,7 +26,7 @@ QC Lab's built-in vectorization decorator to automatically vectorize it.
         # Next we'll get the Required constants from the constants object.
         m = model.constants.classical_coordinate_mass
         h = model.constants.classical_coordinate_weight
-        g = model.constants.w * np.sqrt(2 * model.constants.l_reorg / model.constants.A)
+        g = model.constants.harmonic_frequency * np.sqrt(2 * model.constants.l_reorg / model.constants.A)
         # Now we can construct the empty Hamiltonian matrix as a 2x2 complex array.
         h_qc = np.zeros((2, 2), dtype=complex)
         # Then we can populate the off-diagonal elements of the Hamiltonian matrix.

@@ -34,11 +34,11 @@ This construction is depicted diagramatically below, click on any component to l
         ];
 
         sim   [label="Simulation Object", URL="../../user_guide/simulation.html"];
-        model [label="Model Object",      URL="../../user_guide/models/models.html"];
-        algo  [label="Algorithm Object",  URL="../../user_guide/algorithms/algorithms.html"];
-        driver[label="Dynamics Driver",   URL="../../user_guide/drivers/drivers.html"];
-        data  [label="Data Object",       URL="../../user_guide/data_object.html"];
-        ingredients [label="Ingredients", URL="../../user_guide/ingredients.html"];
+        model [label="Model Object",      URL="../../user_guide/model.html"];
+        algo  [label="Algorithm Object",  URL="../../user_guide/algorithm.html"];
+        driver[label="Dynamics Driver",   URL="../../user_guide/driver.html"];
+        data  [label="Data Object",       URL="../../user_guide/data.html"];
+        ingredients [label="Ingredients", URL="../../user_guide/ingredient.html"];
         tasks [label="Tasks", URL="../../user_guide/tasks.html"];
 
         ingredients -> model [color="#f38c3c"];

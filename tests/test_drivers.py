@@ -7,10 +7,10 @@ import pytest
 
 def test_drivers_spinboson():
     import numpy as np
-    from qc_lab import Simulation  # import simulation class
-    from qc_lab.models import SpinBoson  # import model class
-    from qc_lab.algorithms import MeanField  # import algorithm class
-    from qc_lab.dynamics import (
+    from qclab import Simulation  # import simulation class
+    from qclab.models import SpinBoson  # import model class
+    from qclab.algorithms import MeanField  # import algorithm class
+    from qclab.dynamics import (
         serial_driver,
         parallel_driver_multiprocessing,
     )  # import dynamics driver
@@ -61,11 +61,11 @@ def test_drivers_spinboson_mpi():
     mpirun -n 4 pytest -m mpi -s tests/test_drivers.py
     """
     import numpy as np
-    from qc_lab import Simulation  # import simulation class
-    from qc_lab.models import SpinBoson  # import model class
-    from qc_lab.algorithms import MeanField  # import algorithm class
+    from qclab import Simulation  # import simulation class
+    from qclab.models import SpinBoson  # import model class
+    from qclab.algorithms import MeanField  # import algorithm class
     from mpi4py import MPI  # import MPI for parallel processing
-    from qc_lab.dynamics import (
+    from qclab.dynamics import (
         serial_driver,
         parallel_driver_mpi,
     )  # import dynamics driver
@@ -116,10 +116,10 @@ def test_incommensurate_batch_size_serial():
     is not an integer multiple of the batch size.
     """
     import numpy as np
-    from qc_lab import Simulation  # import simulation class
-    from qc_lab.models import SpinBoson  # import model class
-    from qc_lab.algorithms import MeanField  # import algorithm class
-    from qc_lab.dynamics import serial_driver  # import dynamics driver
+    from qclab import Simulation  # import simulation class
+    from qclab.models import SpinBoson  # import model class
+    from qclab.algorithms import MeanField  # import algorithm class
+    from qclab.dynamics import serial_driver  # import dynamics driver
 
     sim = Simulation()
     sim.settings.progress_bar = False
@@ -165,10 +165,10 @@ def test_incommensurate_batch_size_multiprocessing():
     is not an integer multiple of the batch size.
     """
     import numpy as np
-    from qc_lab import Simulation  # import simulation class
-    from qc_lab.models import SpinBoson  # import model class
-    from qc_lab.algorithms import MeanField  # import algorithm class
-    from qc_lab.dynamics import (
+    from qclab import Simulation  # import simulation class
+    from qclab.models import SpinBoson  # import model class
+    from qclab.algorithms import MeanField  # import algorithm class
+    from qclab.dynamics import (
         parallel_driver_multiprocessing,
     )  # import dynamics driver
 

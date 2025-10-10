@@ -1,0 +1,17 @@
+numpy
+tqdm
+h5py
+numba
+
+[docs]
+sphinx
+pydata-sphinx-theme
+sphinx-design
+sphinx-togglebutton
+sphinxcontrib-mermaid
+graphviz
+sphinx-autodoc-typehints
+
+[tests]
+pytest
+mpi4py
