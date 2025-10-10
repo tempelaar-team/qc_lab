@@ -39,7 +39,7 @@ This construction is depicted diagramatically below, click on any component to l
         driver[label="Dynamics Driver",   URL="../../user_guide/driver.html"];
         data  [label="Data Object",       URL="../../user_guide/data.html"];
         ingredients [label="Ingredients", URL="../../user_guide/ingredient.html"];
-        tasks [label="Tasks", URL="../../user_guide/tasks.html"];
+        tasks [label="Tasks", URL="../../user_guide/task.html"];
 
         ingredients -> model [color="#f38c3c"];
         tasks -> algo [color="#f38c3c"];
