@@ -896,6 +896,7 @@ def update_hop_vals_fssh(sim, state, parameters, **kwargs):
         )
         if has_rescaling_direction_fssh:
             delta_z = rescaling_direction_fssh(
+                sim.model,
                 parameters,
                 z=z[traj_ind],
                 init_state_ind=init_state_ind,
