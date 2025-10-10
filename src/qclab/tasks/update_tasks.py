@@ -241,8 +241,8 @@ def update_quantum_classical_forces(sim, state, parameters, **kwargs):
         Name of the gradient of the quantum-classical Hamiltonian in the state object.
     quantum_classical_forces_name : str, default: "quantum_classical_forces"
         Name under which to store the quantum-classical forces in the state object.
-    adb_state_ind_name: str, default: "act_surf_ind"
-        Name in the state object of the adiabatic state index for which to obtain the gauge field force.
+    state_ind_name : str, default: "act_surf_ind"
+        Name in the state object of the state index for which to obtain the gauge field force.
         Required if ``algorithm.settings.use_gauge_field_force`` is ``True``.
     wf_changed : bool, default: True
         If ``True``, the wavefunction has changed since the last time the forces were calculated.
@@ -259,7 +259,7 @@ def update_quantum_classical_forces(sim, state, parameters, **kwargs):
     quantum_classical_forces_name = kwargs.get(
         "quantum_classical_forces_name", "quantum_classical_forces"
     )
-    adb_state_ind_name = kwargs.get("adb_state_ind_name", "act_surf_ind")
+    state_ind_name = kwargs.get("state_ind_name", "act_surf_ind")
     wf_changed = kwargs.get("wf_changed", True)
 
     z = getattr(state, z_name)
@@ -292,7 +292,7 @@ def update_quantum_classical_forces(sim, state, parameters, **kwargs):
         ).reshape(np.shape(z))
     if sim.algorithm.settings.get("use_gauge_field_force"):
         state, parameters = add_gauge_field_force_fssh(
-            sim, state, parameters, z=kwargs["z"], adb_state_ind_name=adb_state_ind_name
+            sim, state, parameters, z=kwargs["z"], state_ind_name=state_ind_name
         )
     return state, parameters
 

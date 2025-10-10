@@ -570,3 +570,62 @@ def init_classical_wigner_coherent_state(model, parameters, **kwargs):
         z = functions.qp_to_z(q, p, m, h)
         out[s] = z
     return out
+
+
+def rescaling_direction_random(model, parameters, **kwargs):
+    """
+    Random rescaling direction function.
+
+    This function returns a random array for the rescaling direction. 
+    It is only included for documentation purposes.
+
+    Note that this is not a vectorized ingredient, as it is only called on
+    the per-trajectory level.
+
+    .. rubric:: Keyword Args
+    z_traj : ndarray
+        Current classical coordinate in the trajectory being rescaled.
+    init_state_ind : int
+        Index of the initial quantum state.
+    final_state_ind : int
+        Index of the final quantum state.
+
+    .. rubric:: Required Constants
+    None
+
+    .. rubric:: Returns
+    delta_z : ndarray
+        Direction in which to rescale coordinates.
+    """
+    del parameters
+    z_traj = kwargs["z_traj"]
+    init_state_ind = kwargs["init_state_ind"]
+    final_state_ind = kwargs["final_state_ind"]
+    return np.random.normal(size=z_traj.shape)
+   
+
+def gauge_field_force_zero(model, parameters, **kwargs):
+    """
+    Gauge field force function.
+
+    This function returns a zero array for the gauge field force.
+    It is only included for documentation purposes.
+
+    .. rubric:: Keyword Args
+    z : ndarray
+        Current classical coordinate.
+    state_ind : int
+        Index of the state for which the gauge field force is calculated.
+    
+
+    .. rubric:: Required Constants
+    None
+
+    .. rubric:: Returns
+    gauge_force : ndarray
+        Gauge field force.
+    """
+    del parameters
+    z = kwargs["z"]
+    state_ind = kwargs["state_ind"]
+    return np.zeros_like(z)
