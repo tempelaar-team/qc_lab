@@ -292,7 +292,7 @@ def update_quantum_classical_forces(sim, state, parameters, **kwargs):
         ).reshape(np.shape(z))
     if sim.algorithm.settings.get("use_gauge_field_force"):
         state, parameters = add_gauge_field_force_fssh(
-            sim, state, parameters, z=kwargs["z"], state_ind_name=state_ind_name
+            sim, state, parameters, z=z, state_ind_name=state_ind_name
         )
     return state, parameters
 
