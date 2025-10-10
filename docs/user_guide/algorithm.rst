@@ -130,6 +130,21 @@ Mean Field Example
 
 As an example of a complete algorithm we include the source code for the mean-field algorithm below. This algorithm is defined in the ``qclab.algorithms.MeanField`` module and uses tasks from the ``qclab.tasks`` module to populate its recipes.
 
+.. list-table:: FSSH Collected Observables
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Key
+     - Description
+   * - ``quantum_energy``
+     - The quantum energy of the system.
+   * - ``classical_energy``
+     - The classical energy of the system.
+   * - ``dm_db``
+     - The diabatic density matrix of the quantum subsystem.
+   * - ``t``
+     - The time points of the simulation.
+
 .. dropdown:: View full source
    :icon: code
 
@@ -142,6 +157,22 @@ Surface Hopping Example
 -------------------------------
 
 As an additional example of a complete algorithm we include the source code for the fewest-switches surface hopping algorithm below. This algorithm is defined in the ``qclab.algorithms.FewestSwitchesSurfaceHopping`` module and uses tasks from the ``qclab.tasks`` module to populate its recipes.
+
+.. list-table:: FSSH Collected Observables
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Key
+     - Description
+   * - ``quantum_energy``
+     - The quantum energy of the system.
+   * - ``classical_energy``
+     - The classical energy of the system.
+   * - ``dm_db``
+     - The diabatic density matrix of the quantum subsystem.
+   * - ``t``
+     - The time points of the simulation.
+
 
 .. dropdown:: View full source
    :icon: code
