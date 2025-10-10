@@ -83,8 +83,8 @@ def test_save_load_no_h5py():
     )
     sim.initial_state.wf_db[0] += 1.0
     data_serial = serial_driver(sim)
-    data_serial.save("test_data.npz", DISABLE_H5PY=True)
-    loaded_data = Data().load("test_data.npz", DISABLE_H5PY=True)
+    data_serial.save("test_data.npz", disable_h5py=True)
+    loaded_data = Data().load("test_data.npz", disable_h5py=True)
     print("Comparing results...")
     for key, val in data_serial.data_dict.items():
         if isinstance(val, np.ndarray):
