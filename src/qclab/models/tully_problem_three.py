@@ -14,7 +14,7 @@ class TullyProblemThree(Model):
     Tully's third problem: an extended coupling with reflection.
 
     Reference publication:
-    Tully. J. Chem. Phys. 93, 2, 1061-1071. (1990); https://doi.org/10.1063/1.459170
+    Tully. J. Chem. Phys. 93, 1061 (1990); https://doi.org/10.1063/1.459170
     """
 
     def __init__(self, constants=None):
@@ -45,7 +45,7 @@ class TullyProblemThree(Model):
 
     def h_qc(self, parameters, **kwargs):
         """
-        Quantum-Classical Hamiltonian for Tully's third problem.
+        Quantum-classical Hamiltonian for Tully's third problem.
         """
         z = kwargs["z"]
         batch_size = len(z)

@@ -134,7 +134,7 @@ def update_z_rk4_k4_sum(
     z_0, k1, k2, k3, classical_forces, quantum_classical_forces, dt_update
 ):
     """
-    Low-level function to calculate the fourth and final step for the RK4 update.
+    Low-level function to calculate the fourth (and final) step for the RK4 update.
 
     .. rubric:: Args
     z_0 : ndarray
@@ -460,7 +460,7 @@ def gen_sample_gaussian(constants, z0=None, seed=None, separable=True):
     separable : bool, default: True
         Whether to generate a different random number for each classical coordinate.
 
-    .. rubric:: Required constants
+    .. rubric:: Model Constants
     mcmc_std : float, default: 1.0
         Standard deviation of the Gaussian distribution.
 
@@ -506,7 +506,7 @@ def calc_sparse_inner_product(inds, mels, shape, vec_l_conj, vec_r, out=None):
         Right vector for the inner product.
     out : ndarray | None
         Preallocated output array. If ``None``, a new array is created.
-        
+
     .. rubric:: Returns
     out : ndarray
         Result of the inner product with shape ``(batch_size, num_classical_coordinates)``.
@@ -542,11 +542,9 @@ def calc_sparse_inner_product(inds, mels, shape, vec_l_conj, vec_r, out=None):
 def analytic_der_couple_phase(sim, dh_qc_dzc, eigvals, eigvecs):
     """
     Calculates the phase change needed to fix the gauge using analytical derivative
-    couplings.
-
-    i.e. calculates the phase-factors :math:`u^{q}_{i}` and :math:`u^{p}_{i}` such that
-    :math:`d_{ij}^{q}u_{i}^{q*}u_{j}^{q}` and :math:`d_{ij}^{p}u_{i}^{p*}u_{j}^{p}` are
-    real-valued.
+    couplings, i.e., calculates the phase-factors :math:`u^{q}_{i}` and :math:`u^{p}_{i}`
+    such that :math:`d_{ij}^{q}u_{i}^{q*}u_{j}^{q}` and :math:`d_{ij}^{p}u_{i}^{p*}u_{j}^{p}`
+    are real-valued.
 
     It does this by calculating the derivative couplings analytically. In the event of
     degenerate eigenvalues, an error is logged and a small offset is added to the energy
@@ -563,7 +561,7 @@ def analytic_der_couple_phase(sim, dh_qc_dzc, eigvals, eigvecs):
     eigvecs : ndarray
         Eigenvectors of the quantum subsystem.
 
-    .. rubric:: 
+    .. rubric::
     der_couple_q_phase : ndarray
         Phase factor for derivative couplings obtained by differentiating
         w.r.t. the position coordinate.
@@ -788,7 +786,7 @@ def numerical_fssh_hop(model, parameters, **kwargs):
         Difference in eigenvalues between the initial and final states, ``e_final - e_initial``.
 
 
-    .. rubric:: Required constants
+    .. rubric:: Model Constants
     numerical_fssh_hop_gamma_range : float, default: 5.0
         Initial range (negative to positive) of gamma values to search over.
     numerical_fssh_hop_max_iter : int, default: 20

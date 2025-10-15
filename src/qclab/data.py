@@ -32,14 +32,14 @@ class Data:
         .. rubric:: Args
         sim: Simulation
             The simulation object containing settings and parameters.
-        state: Variable
-            The state object containing the current simulation state.
+        state: dict
+            The dictionary containing the current simulation state.
         t_ind: int
             The current time index in the simulation.
         """
         # Check if the norm_factor is zero. If it is, save it from the state object.
         if self.data_dict["norm_factor"] == 0:
-            if not hasattr(state, "norm_factor"):
+            if "norm_factor" not in state:
                 logger.critical(
                     "The state object does not have a norm_factor attribute. "
                     "This is required to normalize the data."
@@ -48,10 +48,10 @@ class Data:
                     "The state object does not have a norm_factor attribute."
                 )
             logger.info(
-                "Setting norm_factor to %s from state object.", state.norm_factor
+                "Setting norm_factor to %s from state object.", state["norm_factor"]
             )
-            self.data_dict["norm_factor"] = state.norm_factor
-        for key, val in state.output_dict.items():
+            self.data_dict["norm_factor"] = state["norm_factor"]
+        for key, val in state["output_dict"].items():
             if not key in self.data_dict:
                 # If the key is not in the data_dict, initialize it with zeros.
                 self.data_dict[key] = np.zeros(
@@ -133,7 +133,9 @@ class Data:
         new_data = Data()
         if disable_h5py:
             loaded = np.load(filename, allow_pickle=True)
-            new_data.data_dict = {key: loaded[key] for key in loaded.files if key != "log"}
+            new_data.data_dict = {
+                key: loaded[key] for key in loaded.files if key != "log"
+            }
             new_data.log = str(loaded.get("log", ""))
             self.add_data(new_data)
             return self

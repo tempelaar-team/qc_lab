@@ -17,8 +17,10 @@ class FMOComplex(Model):
     At 300 K, kBT = 0.025852 eV = 208.521 cm^-1. Any quantity in wavenumbers
     is made unitless by dividing by kBT.
 
+    One unit of time is given by \hbar/kBT = 25.4595 fs.
+
     Reference publication:
-    Geva et al. J. Chem. Phys. 154, 204109 (2021); https://doi.org/10.1063/5.0051101
+    Mulvihill et al. J. Chem. Phys. 154, 204109 (2021); https://doi.org/10.1063/5.0051101
     """
 
     def __init__(self, constants=None):
@@ -95,7 +97,7 @@ class FMOComplex(Model):
             )
             * INVCM_TO_300K
         )
-        # To reduce numerical errors we can offset the diagonal elements by
+        # To reduce numerical errors we offset the diagonal elements by
         # their minimum value.
         matrix_elements = matrix_elements - np.min(
             np.diag(matrix_elements)

@@ -97,11 +97,24 @@ def get_log_output() -> str:
     return _log_stream.getvalue()
 
 
+def reset_log_output() -> None:
+    """
+    Clear all collected log messages.
+
+    Resets the in-memory log stream so that subsequent calls to
+    :func:`get_log_output` return only the messages emitted after this
+    function is called.
+    """
+    _log_stream.seek(0)
+    _log_stream.truncate(0)
+
+
 __all__ = [
     "jit",
     "njit",
     "configure_memory_logger",
     "get_log_output",
+    "reset_log_output",
     "DISABLE_NUMBA",
     "DISABLE_H5PY",
 ]

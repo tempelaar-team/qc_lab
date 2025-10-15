@@ -30,7 +30,45 @@ extensions = [
     "sphinx_togglebutton",
     "sphinxcontrib.mermaid",
     "sphinx.ext.graphviz",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
 ]
+
+
+
+
+
+autosummary_generate = True  # build autosummary pages
+
+napoleon_google_docstring = True
+napoleon_numpy_docstring = True
+napoleon_custom_sections = [
+    ("Requires", "params_style"),
+    ("Reads", "params_style"),
+    ("Writes", "params_style"),
+    ("Shapes and dtypes", "params_style"),
+]
+
+# Map your favorite short type names to canonical refs (optional)
+napoleon_type_aliases = {
+    "ndarray": "numpy.ndarray",
+    "ArrayLike": "numpy.typing.ArrayLike",
+    "complex128": "numpy.complex128",
+}
+
+
+# Optional: link out to NumPy docs for types
+intersphinx_mapping = {
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "python": ("https://docs.python.org/3", None),
+}
+
+
+
+
+
+autodoc_typehints = "both"
+
 # graphviz_output_format = "svg"
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]

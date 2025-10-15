@@ -13,7 +13,7 @@ class TullyProblemTwo(Model):
     Tully's second problem: a dual avoided crossing.
 
     Reference publication:
-    Tully. J. Chem. Phys. 93, 2, 1061-1071. (1990); https://doi.org/10.1063/1.459170
+    Tully. J. Chem. Phys. 93, 1061 (1990); https://doi.org/10.1063/1.459170
     """
 
     def __init__(self, constants=None):
@@ -46,7 +46,7 @@ class TullyProblemTwo(Model):
 
     def h_qc(self, parameters, **kwargs):
         """
-        Quantum-Classical Hamiltonian for Tully's second problem.
+        Quantum-classical Hamiltonian for Tully's second problem.
         """
         z = kwargs["z"]
         batch_size = len(z)
@@ -74,7 +74,8 @@ class TullyProblemTwo(Model):
 
     def dh_qc_dzc(self, parameters, **kwargs):
         """
-        Quantum-Classical Hamiltonian for Tully's second problem.
+        Gradient w.r.t. to the conjugate z coordinate of the quantum-classical Hamiltonian
+        for Tully's second problem.
         """
         z = kwargs["z"]
         batch_size = len(z)

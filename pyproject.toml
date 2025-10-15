@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qclab"
-version = "0.3.1a0"
+version = "0.3.1a1"
 description = "QC Lab: a python package for quantum-classical modeling."
 readme = "README.rst"
 requires-python = ">=3.8"
@@ -39,4 +39,5 @@ docs = [
     "sphinxcontrib-mermaid",
     "graphviz",
     "sphinx-autodoc-typehints",
+    "sphinxcontrib-napoleon"
 ]

@@ -5,7 +5,6 @@ This module contains the Simulation class.
 import logging
 import numpy as np
 from qclab.constants import Constants
-from qclab.variable import Variable
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +36,8 @@ class Simulation:
         # Set the initial algorithm and model to None.
         self.algorithm = None
         self.model = None
-        # Initialize a Variable object to hold the initial state.
-        self.initial_state = Variable()
+        # Initialize a dictionary to hold the initial state.
+        self.initial_state = {}
 
     def initialize_timesteps(self):
         """

@@ -13,7 +13,7 @@ class HolsteinLattice(Model):
     electron-phonon coupling with a single optical mode.
 
     Reference publication:
-    Krotz. J. Chem. Phys. 154, 224101 (2021); https://doi.org/10.1063/5.0053177
+    Krotz et al. J. Chem. Phys. 154, 224101 (2021); https://doi.org/10.1063/5.0053177
     """
 
     def __init__(self, constants=None):
@@ -86,7 +86,7 @@ class HolsteinLatticeReciprocalSpace(Model):
     electron-phonon coupling with a single optical mode implemented in reciprocal space.
 
     Reference publication:
-    Krotz. J. Chem. Phys. 154, 224101 (2021); https://doi.org/10.1063/5.0053177
+    Krotz et al. J. Chem. Phys. 154, 224101 (2021); https://doi.org/10.1063/5.0053177
     """
 
     def __init__(self, constants=None):

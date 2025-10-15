@@ -1,5 +1,5 @@
 """
-This module contains the parallel driver.
+This module contains the parallel driver using the multiprocessing library.
 """
 
 import multiprocessing
@@ -7,8 +7,8 @@ import logging
 import copy
 import numpy as np
 import qclab.dynamics as dynamics
-from qclab.utils import get_log_output
-from qclab import Variable, Data
+from qclab.utils import get_log_output, reset_log_output
+from qclab import Data
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +34,8 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
     data: Data
         The updated Data object containing collected output data.
     """
+    # Clear any in-memory log output from previous runs.
+    reset_log_output()
     # First initialize the model constants.
     sim.model.initialize_constants()
     if data is None:
@@ -56,49 +58,48 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
         size = multiprocessing.cpu_count()
     else:
         size = num_tasks
-    logger.info("Using %s CPU cores for parallel processing.", size)
-    # Determine the number of simulations required to execute the total number
+    logger.info("Using %s tasks for parallel processing.", size)
+    # Determine the number of batches required to execute the total number
     # of trajectories.
     if num_trajs % sim.settings.batch_size == 0:
-        num_sims = num_trajs // sim.settings.batch_size
+        num_batches = num_trajs // sim.settings.batch_size
     else:
-        num_sims = num_trajs // sim.settings.batch_size + 1
+        num_batches = num_trajs // sim.settings.batch_size + 1
     logger.info(
-        "Running %s simulations with %s seeds in each batch.",
-        num_sims,
+        "Running %s batches with %s seeds in each batch.",
+        num_batches,
         sim.settings.batch_size,
     )
     batch_seeds_list = (
-        np.zeros((num_sims * sim.settings.batch_size), dtype=int) + np.nan
+        np.zeros((num_batches * sim.settings.batch_size), dtype=int) + np.nan
     )
     batch_seeds_list[:num_trajs] = seeds
-    batch_seeds_list = batch_seeds_list.reshape((num_sims, sim.settings.batch_size))
+    batch_seeds_list = batch_seeds_list.reshape((num_batches, sim.settings.batch_size))
+    # Create the input data for each local simulation.
     sim.initialize_timesteps()
-    input_data = [
+    local_input_data = [
         (
             copy.deepcopy(sim),
-            Variable(
-                {
-                    "seed": batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(
-                        int
-                    )
-                }
-            ),
-            Variable(),
+            {"seed": batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)}, 
+            {},
             Data(batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)),
         )
-        for n in range(num_sims)
+        for n in range(num_batches)
     ]
-    for i in range(num_sims):
+    for i in range(num_batches):
         # Determine the batch size from the seeds in the state object.
-        input_data[i][0].settings.batch_size = len(input_data[i][1].seed)
+        local_input_data[i][0].settings.batch_size = len(local_input_data[i][1]["seed"])
         logger.info(
-            "Running simulation %s with seeds %s.", i + 1, input_data[i][1].seed
+            "Running batch %s with seeds %s.", i + 1, local_input_data[i][1]["seed"]
         )
+    logger.info("Starting dynamics calculation.")
     with multiprocessing.Pool(processes=size) as pool:
-        results = pool.starmap(dynamics.run_dynamics, input_data)
+        results = pool.starmap(dynamics.run_dynamics, local_input_data)
+    logger.info("Dynamics calculation completed.")
+    logger.info("Collecting results from all tasks.")
     for result in results:
         data.add_data(result)
+    logger.info("Simulation complete.")
     # Attach collected log output.
     data.log = get_log_output()
     return data

@@ -3,10 +3,10 @@
   }
 
   .bd-page-width {
-    max-width: 90%;  /* default is 88rem */
+    max-width: 88%;  /* default is 88rem */
   }
 /* Make the right sidebar wider */
-html { --pst-sidebar-secondary: 25rem; }   /* default is ~17rem */
+html { --pst-sidebar-secondary: 17rem; }   /* default is ~17rem */
   /* _static/custom.css */
 
 /* remove the “reserved” space when collapsed */

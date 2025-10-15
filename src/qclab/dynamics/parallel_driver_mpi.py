@@ -6,8 +6,8 @@ import logging
 import copy
 import numpy as np
 import qclab.dynamics as dynamics
-from qclab.utils import get_log_output
-from qclab import Variable, Data
+from qclab.utils import get_log_output, reset_log_output
+from qclab import Data
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +33,8 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
     data: Data
         The updated Data object containing collected output data.
     """
+    # Clear any in-memory log output from previous runs.
+    reset_log_output()
     # First initialize the model constants.
     sim.model.initialize_constants()
     try:
@@ -55,7 +57,8 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
     else:
         num_trajs = len(seeds)
         logger.warning(
-            "Setting sim.settings.num_trajs to the number of provided seeds."
+            "Setting sim.settings.num_trajs to the number of provided seeds: %s",
+            num_trajs,
         )
         sim.settings.num_trajs = num_trajs
         if data is None:
@@ -66,19 +69,25 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
         size = comm.Get_size()
     else:
         size = num_tasks
-    # Determine the number of simulations required to execute the total number
+    logger.info("Using %s tasks for parallel processing.", size)
+    # Determine the number of batches required to execute the total number
     # of trajectories.
     if num_trajs % sim.settings.batch_size == 0:
-        num_sims = num_trajs // sim.settings.batch_size
+        num_batches = num_trajs // sim.settings.batch_size
     else:
-        num_sims = num_trajs // sim.settings.batch_size + 1
+        num_batches = num_trajs // sim.settings.batch_size + 1
+    logger.info(
+        "Running %s batches with %s seeds in each batch.",
+        num_batches,
+        sim.settings.batch_size,
+    )
     batch_seeds_list = (
-        np.zeros((num_sims * sim.settings.batch_size), dtype=int) + np.nan
+        np.zeros((num_batches * sim.settings.batch_size), dtype=int) + np.nan
     )
     batch_seeds_list[:num_trajs] = seeds
-    batch_seeds_list = batch_seeds_list.reshape((num_sims, sim.settings.batch_size))
-    # Split the simulations into chunks for each MPI process.
-    chunk_inds = np.linspace(0, num_sims, size + 1, dtype=int)
+    batch_seeds_list = batch_seeds_list.reshape((num_batches, sim.settings.batch_size))
+    # Split the batches into chunks for each MPI process.
+    chunk_inds = np.linspace(0, num_batches, size + 1, dtype=int)
     start = chunk_inds[rank]
     end = chunk_inds[rank + 1]
     chunk_size = end - start
@@ -87,27 +96,29 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
     local_input_data = [
         (
             copy.deepcopy(sim),
-            Variable(
-                {
-                    "seed": batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(
-                        int
-                    )
-                }
-            ),
-            Variable(),
+            {"seed": batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)},
+            {},
             Data(batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)),
         )
-        for n in np.arange(num_sims)[start:end]
+        for n in np.arange(num_batches)[start:end]
     ]
-    # Set the batch size for each local simulation.
+    # Set the batch size for each local batch.
     for i in range(chunk_size):
-        local_input_data[i][0].settings.batch_size = len(local_input_data[i][1].seed)
-    # Execute the local simulations.
+        local_input_data[i][0].settings.batch_size = len(local_input_data[i][1]["seed"])
+        logger.info(
+            "Running batch %s with seeds %s.",
+            i + 1 + start,
+            local_input_data[i][1]["seed"],
+        )
+    # Execute the local batches.
+    logger.info("Starting dynamics calculation.")
     local_results = [dynamics.run_dynamics(*x) for x in local_input_data]
     comm.Barrier()
+    logger.info("Dynamics calculation completed.")
     # Collect results sequentially on rank 0.
     tag_data, tag_done = 1, 2
     if rank == 0:
+        logger.info("Collecting results from all tasks.")
         for result in local_results:
             data.add_data(result)
         remaining = size - 1
@@ -122,6 +133,7 @@ def parallel_driver_mpi(sim, seeds=None, data=None, num_tasks=None):
         for result in local_results:
             comm.send(result, dest=0, tag=tag_data)
         comm.send(None, dest=0, tag=tag_done)
+    logger.info("Simulation complete.")
     # Collect logs from all ranks and attach combined output on root rank.
     gathered_logs = comm.gather(get_log_output(), root=0)
     if rank == 0:

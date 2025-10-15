@@ -29,21 +29,29 @@ class MeanField(Algorithm):
         # Begin RK4 integration steps.
         partial(tasks.update_classical_forces, z_name="z"),
         tasks.update_quantum_classical_forces,
-        tasks.update_z_rk4_k1,
+        tasks.update_z_rk4_k123,
         partial(tasks.update_classical_forces, z_name="z_1"),
         partial(
             tasks.update_quantum_classical_forces,
             z_name="z_1",
             wf_changed=False,
         ),
-        tasks.update_z_rk4_k2,
+        partial(
+            tasks.update_z_rk4_k123, z_name="z", z_output_name="z_2", k_name="z_rk4_k2"
+        ),
         partial(tasks.update_classical_forces, z_name="z_2"),
         partial(
             tasks.update_quantum_classical_forces,
             z_name="z_2",
             wf_changed=False,
         ),
-        tasks.update_z_rk4_k3,
+        partial(
+            tasks.update_z_rk4_k123,
+            z_name="z",
+            z_output_name="z_3",
+            k_name="z_rk4_k3",
+            dt_factor=1.0,
+        ),
         partial(tasks.update_classical_forces, z_name="z_3"),
         partial(
             tasks.update_quantum_classical_forces,
