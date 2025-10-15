@@ -53,10 +53,10 @@ def test_vectorize_decorator():
 
     sim.model.ingredients.append(("h_q", h_q))
     sim.model.ingredients.append(("h_qc", h_qc))
-    sim.initial_state.wf_db = np.zeros(
+    sim.initial_state["wf_db"] = np.zeros(
         sim.model.constants.num_quantum_states, dtype=complex
     )
-    sim.initial_state.wf_db[0] = 1j
+    sim.initial_state["wf_db"][0] = 1j
     st = time.time()
     data = serial_driver(sim)
     et = time.time()
@@ -93,10 +93,10 @@ def test_make_sparse_decorator():
         return out
 
     sim.model.ingredients.append(("dh_qc_dzc", dh_qc_dzc))
-    sim.initial_state.wf_db = np.zeros(
+    sim.initial_state["wf_db"] = np.zeros(
         sim.model.constants.num_quantum_states, dtype=complex
     )
-    sim.initial_state.wf_db[0] = 1j
+    sim.initial_state["wf_db"][0] = 1j
     st = time.time()
     data = serial_driver(sim)
     et = time.time()
@@ -137,10 +137,10 @@ def test_sparse_and_vectorize_decorators():
         return out
 
     sim.model.ingredients.append(("dh_qc_dzc", dh_qc_dzc))
-    sim.initial_state.wf_db = np.zeros(
+    sim.initial_state["wf_db"] = np.zeros(
         sim.model.constants.num_quantum_states, dtype=complex
     )
-    sim.initial_state.wf_db[0] = 1j
+    sim.initial_state["wf_db"][0] = 1j
     st = time.time()
     data = serial_driver(sim)
     et = time.time()

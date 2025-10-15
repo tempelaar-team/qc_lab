@@ -36,10 +36,10 @@ def test_save_load_h5py():
         }
     )
     sim.algorithm = MeanField()
-    sim.initial_state.wf_db = np.zeros(
+    sim.initial_state["wf_db"] = np.zeros(
         (sim.model.constants.num_quantum_states), dtype=complex
     )
-    sim.initial_state.wf_db[0] += 1.0
+    sim.initial_state["wf_db"][0] += 1.0
     data_serial = serial_driver(sim)
     data_serial.save("test_data.h5")
     loaded_data = Data().load("test_data.h5")
@@ -78,10 +78,10 @@ def test_save_load_no_h5py():
         }
     )
     sim.algorithm = MeanField()
-    sim.initial_state.wf_db = np.zeros(
+    sim.initial_state["wf_db"] = np.zeros(
         (sim.model.constants.num_quantum_states), dtype=complex
     )
-    sim.initial_state.wf_db[0] += 1.0
+    sim.initial_state["wf_db"][0] += 1.0
     data_serial = serial_driver(sim)
     data_serial.save("test_data.npz", disable_h5py=True)
     loaded_data = Data().load("test_data.npz", disable_h5py=True)
@@ -124,10 +124,10 @@ def test_load_sum():
         }
     )
     sim.algorithm = MeanField()
-    sim.initial_state.wf_db = np.zeros(
+    sim.initial_state["wf_db"] = np.zeros(
         (sim.model.constants.num_quantum_states), dtype=complex
     )
-    sim.initial_state.wf_db[0] += 1.0
+    sim.initial_state["wf_db"][0] += 1.0
     data_serial = serial_driver(sim)
     data_serial.save("test_data.h5")
     new_data = Data().load("test_data.h5")

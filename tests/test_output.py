@@ -49,10 +49,10 @@ def test_output_serial():
             sim.model = model_class(model_settings[model_class.__name__])
             sim.model.initialize_constants()
             sim.algorithm = algorithm_class()
-            sim.initial_state.wf_db = np.zeros(
+            sim.initial_state["wf_db"] = np.zeros(
                 sim.model.constants.num_quantum_states, dtype=complex
             )
-            sim.initial_state.wf_db[0] = 1j
+            sim.initial_state["wf_db"][0] = 1j
             st = time.time()
             data = serial_driver(sim)
             et = time.time()
@@ -92,10 +92,10 @@ def test_output_multiprocessing():
             sim.model = model_class(model_settings[model_class.__name__])
             sim.model.initialize_constants()
             sim.algorithm = algorithm_class()
-            sim.initial_state.wf_db = np.zeros(
+            sim.initial_state["wf_db"] = np.zeros(
                 sim.model.constants.num_quantum_states, dtype=complex
             )
-            sim.initial_state.wf_db[0] = 1j
+            sim.initial_state["wf_db"][0] = 1j
             st = time.time()
             data = parallel_driver_multiprocessing(sim)
             et = time.time()
@@ -139,10 +139,10 @@ def test_output_different_h():
                 np.random.rand(sim.model.constants.num_classical_coordinates) + 1.0
             )
             sim.algorithm = algorithm_class()
-            sim.initial_state.wf_db = np.zeros(
+            sim.initial_state["wf_db"] = np.zeros(
                 sim.model.constants.num_quantum_states, dtype=complex
             )
-            sim.initial_state.wf_db[0] = 1j
+            sim.initial_state["wf_db"][0] = 1j
             st = time.time()
             data = serial_driver(sim)
             et = time.time()
@@ -185,7 +185,7 @@ def test_output_fssh_gauge_fixing():
                 sim.settings.batch_size, sim.model.constants.num_quantum_states
             )
         )
-        state.eigvecs = random_phases[:, np.newaxis, :] * state.eigvecs
+        state["eigvecs"] = random_phases[:, np.newaxis, :] * state["eigvecs"]
         return state, parameters
 
     my_FSSH.initialization_recipe.insert(6, add_random_phase)
@@ -206,10 +206,10 @@ def test_output_fssh_gauge_fixing():
             sim.model = model_class(model_settings[model_class.__name__])
             sim.model.initialize_constants()
             sim.algorithm = algorithm_class
-            sim.initial_state.wf_db = np.zeros(
+            sim.initial_state["wf_db"] = np.zeros(
                 sim.model.constants.num_quantum_states, dtype=complex
             )
-            sim.initial_state.wf_db[0] = 1j
+            sim.initial_state["wf_db"][0] = 1j
             st = time.time()
             data = serial_driver(sim)
             et = time.time()
@@ -251,10 +251,10 @@ def test_output_fssh_deterministic():
         sim.settings.batch_size *= sim.model.constants.num_quantum_states
         sim.settings.num_trajs *= sim.model.constants.num_quantum_states
         sim.algorithm = algorithm_class({"fssh_deterministic": True})
-        sim.initial_state.wf_db = np.zeros(
+        sim.initial_state["wf_db"] = np.zeros(
             sim.model.constants.num_quantum_states, dtype=complex
         )
-        sim.initial_state.wf_db[0] = 1j
+        sim.initial_state["wf_db"][0] = 1j
         st = time.time()
         data = serial_driver(sim)
         et = time.time()
@@ -297,10 +297,10 @@ def test_dh_qc_dzc_finite_differences():
             sim.model.ingredients.append(("dh_qc_dzc", None))
             sim.model.initialize_constants()
             sim.algorithm = algorithm_class()
-            sim.initial_state.wf_db = np.zeros(
+            sim.initial_state["wf_db"] = np.zeros(
                 sim.model.constants.num_quantum_states, dtype=complex
             )
-            sim.initial_state.wf_db[0] = 1j
+            sim.initial_state["wf_db"][0] = 1j
             st = time.time()
             data = serial_driver(sim)
             et = time.time()
@@ -345,10 +345,10 @@ def test_dh_c_dzc_finite_differences():
             sim.model.initialize_constants()
             sim.model.constants.dh_c_dzc_finite_difference_delta = 1e-9
             sim.algorithm = algorithm_class()
-            sim.initial_state.wf_db = np.zeros(
+            sim.initial_state["wf_db"] = np.zeros(
                 sim.model.constants.num_quantum_states, dtype=complex
             )
-            sim.initial_state.wf_db[0] = 1j
+            sim.initial_state["wf_db"][0] = 1j
             st = time.time()
             data = serial_driver(sim)
             et = time.time()

@@ -35,10 +35,10 @@ def test_drivers_spinboson():
     )
     sim.algorithm = MeanField()
     sim.model.initialize_constants()
-    sim.initial_state.wf_db = np.zeros(
+    sim.initial_state["wf_db"] = np.zeros(
         (sim.model.constants.num_quantum_states), dtype=complex
     )
-    sim.initial_state.wf_db[0] += 1.0
+    sim.initial_state["wf_db"][0] += 1.0
     print("Running serial driver...")
     data_serial = serial_driver(sim)
     print("Running parallel multiprocessing driver...")
@@ -90,10 +90,10 @@ def test_drivers_spinboson_mpi():
     )
     sim.algorithm = MeanField()
     sim.model.initialize_constants()
-    sim.initial_state.wf_db = np.zeros(
+    sim.initial_state["wf_db"] = np.zeros(
         (sim.model.constants.num_quantum_states), dtype=complex
     )
-    sim.initial_state.wf_db[0] += 1.0
+    sim.initial_state["wf_db"][0] += 1.0
 
     data_parallel_mpi = parallel_driver_mpi(sim)
     comm = MPI.COMM_WORLD
@@ -141,10 +141,10 @@ def test_incommensurate_batch_size_serial():
     )
     sim.algorithm = MeanField()
     sim.model.initialize_constants()
-    sim.initial_state.wf_db = np.zeros(
+    sim.initial_state["wf_db"] = np.zeros(
         (sim.model.constants.num_quantum_states), dtype=complex
     )
-    sim.initial_state.wf_db[0] += 1.0
+    sim.initial_state["wf_db"][0] += 1.0
     print("Running commensurate batch size serial driver...")
     data_serial = serial_driver(sim)
     sim.settings.batch_size = 30  # Change batch size to not divide num_trajs.
@@ -192,10 +192,10 @@ def test_incommensurate_batch_size_multiprocessing():
     )
     sim.algorithm = MeanField()
     sim.model.initialize_constants()
-    sim.initial_state.wf_db = np.zeros(
+    sim.initial_state["wf_db"] = np.zeros(
         (sim.model.constants.num_quantum_states), dtype=complex
     )
-    sim.initial_state.wf_db[0] += 1.0
+    sim.initial_state["wf_db"][0] += 1.0
     print("Running commensurate batch size parallel driver...")
     data_parallel = parallel_driver_multiprocessing(sim)
     sim.settings.batch_size = 30  # Change batch size to not divide num_trajs.
