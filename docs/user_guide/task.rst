@@ -63,7 +63,7 @@ Examples of these tasks are:
 
     def my_collect_task(sim, state, parameters, **kwargs):
         # Collect results into the output dictionary.
-        state.output_dict['new_attribute'] = state.new_attribute
+        state["output_dict"]['new_attribute'] = state.new_attribute
         return state, parameters
 
 These tasks can then be included in the appropriate recipe of an algorithm object (see :ref:`Algorithms <algorithm>`). Notice that none of these tasks have keyword arguments and so can be included directly in recipes without using ``partial``.

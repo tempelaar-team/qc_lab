@@ -67,7 +67,7 @@ intersphinx_mapping = {
 
 
 
-autodoc_typehints = "both"
+autodoc_typehints = "description"  # "signature" "both"
 
 # graphviz_output_format = "svg"
 templates_path = ["_templates"]

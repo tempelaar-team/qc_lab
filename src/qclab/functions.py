@@ -13,13 +13,14 @@ import qclab.numerical_constants as numerical_constants
 logger = logging.getLogger(__name__)
 
 
-def multiply_matrix_vector(mat, vec):
+def batch_matvec(mat, vec):
     """
-    Multiplies a matrix with a vector.
+    Multiplies a matrix with a vector where there is an initial set of indices.
 
     Assumes that the last two indices of ``mat`` are the matrix indices,
     and the last index of ``vec`` is the vector index. The other indices
-    must be broadcastable.
+    must be broadcastable. This rule is needed to ensure that the vector
+    is not interpreted as a single matrix.
 
     (..., i, j) x (..., j) -> (..., i)
 
@@ -63,8 +64,10 @@ def transform_vec(vec, basis, adb_to_db=False):
         Transformed matrix
     """
     if adb_to_db:
-        return multiply_matrix_vector(basis, vec)
-    return multiply_matrix_vector(np.swapaxes(np.conj(basis), -1, -2), vec)
+        out = batch_matvec(basis, vec)
+    else:
+        out = batch_matvec(np.swapaxes(np.conj(basis), -1, -2), vec)
+    return out
 
 
 def transform_mat(mat, basis, adb_to_db=False):
@@ -93,12 +96,14 @@ def transform_mat(mat, basis, adb_to_db=False):
         Transformed matrix
     """
     if adb_to_db:
-        return np.matmul(basis, np.matmul(mat, np.swapaxes(basis.conj(), -1, -2)))
-    return np.matmul(np.swapaxes(basis.conj(), -1, -2), np.matmul(mat, basis))
+        out = np.matmul(basis, np.matmul(mat, np.swapaxes(basis.conj(), -1, -2)))
+    else:
+        out = np.matmul(np.swapaxes(basis.conj(), -1, -2), np.matmul(mat, basis))
+    return out
 
 
 @njit
-def update_z_rk4_k123_sum(z_k, classical_forces, quantum_classical_forces, dt_update):
+def update_z_rk4_k123_sum(z_k, classical_force, quantum_classical_force, dt_update):
     """
     Low-level function to calculate the intermediate z coordinate and k values
     for RK4 update. Applies to steps 1-3.
@@ -106,10 +111,10 @@ def update_z_rk4_k123_sum(z_k, classical_forces, quantum_classical_forces, dt_up
     .. rubric:: Args
     z_k : ndarray
         Initial complex coordinate for that update step.
-    classical_forces : ndarray
-        Classical forces.
-    quantum_classical_forces : ndarray
-        Quantum-classical forces.
+    classical_force : ndarray
+        Classical force.
+    quantum_classical_force : ndarray
+        Quantum-classical force.
     dt_update : float
         Time step for the update.
 
@@ -124,14 +129,14 @@ def update_z_rk4_k123_sum(z_k, classical_forces, quantum_classical_forces, dt_up
     out = np.empty((batch_size, num_classical_coordinates), dtype=np.complex128)
     for i in range(z_k.shape[0]):
         for j in range(z_k.shape[1]):
-            k[i, j] = -1j * (classical_forces[i, j] + quantum_classical_forces[i, j])
+            k[i, j] = -1j * (classical_force[i, j] + quantum_classical_force[i, j])
             out[i, j] = z_k[i, j] + dt_update * k[i, j]
     return out, k
 
 
 @njit
 def update_z_rk4_k4_sum(
-    z_0, k1, k2, k3, classical_forces, quantum_classical_forces, dt_update
+    z_0, k1, k2, k3, classical_force, quantum_classical_force, dt_update
 ):
     """
     Low-level function to calculate the fourth (and final) step for the RK4 update.
@@ -145,10 +150,10 @@ def update_z_rk4_k4_sum(
         Second RK4 slope.
     k3 : ndarray
         Third RK4 slope.
-    classical_forces : ndarray
-        Classical forces.
-    quantum_classical_forces : ndarray
-        Quantum-classical forces.
+    classical_force : ndarray
+        Classical force.
+    quantum_classical_force : ndarray
+        Quantum-classical force.
     dt_update : float
         Time step for the update.
 
@@ -162,7 +167,7 @@ def update_z_rk4_k4_sum(
                 k1[i, j]
                 + 2.0 * k2[i, j]
                 + 2.0 * k3[i, j]
-                - 1j * (classical_forces[i, j] + quantum_classical_forces[i, j])
+                - 1j * (classical_force[i, j] + quantum_classical_force[i, j])
             )
     return z_0
 
@@ -436,7 +441,7 @@ def h_qc_diagonal_linear_jit(z, gamma):
     return h_qc
 
 
-def gen_sample_gaussian(constants, z0=None, seed=None, separable=True):
+def gen_sample_gaussian(constants, z_initial=None, seed=None, separable=True):
     """
     Generate a complex number sampled from a Gaussian distribution.
 
@@ -477,11 +482,15 @@ def gen_sample_gaussian(constants, z0=None, seed=None, separable=True):
         rand = np.random.rand(num_classical_coordinates)
     else:
         rand = np.random.rand()
-    if z0 is None:
-        z0 = np.zeros(num_classical_coordinates, dtype=complex)
+    if z_initial is None:
+        z_initial = np.zeros(num_classical_coordinates, dtype=complex)
     mcmc_std = constants.get("mcmc_std", 1.0)
-    z_re = np.random.normal(loc=z0.real, scale=mcmc_std, size=num_classical_coordinates)
-    z_im = np.random.normal(loc=z0.imag, scale=mcmc_std, size=num_classical_coordinates)
+    z_re = np.random.normal(
+        loc=z_initial.real, scale=mcmc_std, size=num_classical_coordinates
+    )
+    z_im = np.random.normal(
+        loc=z_initial.imag, scale=mcmc_std, size=num_classical_coordinates
+    )
     z = z_re + 1j * z_im
     return z, rand
 
@@ -562,10 +571,10 @@ def analytic_der_couple_phase(sim, dh_qc_dzc, eigvals, eigvecs):
         Eigenvectors of the quantum subsystem.
 
     .. rubric::
-    der_couple_q_phase : ndarray
+    der_couple_dq_phase : ndarray
         Phase factor for derivative couplings obtained by differentiating
         w.r.t. the position coordinate.
-    der_couple_p_phase : ndarray
+    der_couple_dp_phase : ndarray
         Phase factor for derivative couplings obtained by differentiating
         w.r.t. the momentum coordinate.
     """
@@ -575,14 +584,14 @@ def analytic_der_couple_phase(sim, dh_qc_dzc, eigvals, eigvecs):
     h = sim.model.constants.classical_coordinate_weight
     num_classical_coords = shape[1]
     num_quantum_states = shape[2]
-    der_couple_q_phase = np.ones(
+    der_couple_dq_phase = np.ones(
         (
             batch_size,
             num_quantum_states,
         ),
         dtype=complex,
     )
-    der_couple_p_phase = np.ones(
+    der_couple_dp_phase = np.ones(
         (
             batch_size,
             num_quantum_states,
@@ -601,14 +610,14 @@ def analytic_der_couple_phase(sim, dh_qc_dzc, eigvals, eigvecs):
             if np.any(np.abs(eigval_diff) < numerical_constants.SMALL):
                 plus[np.where(np.abs(eigval_diff) < numerical_constants.SMALL)] = 1
                 logger.error("Degenerate eigenvalues detected.")
-        der_couple_zc = np.zeros(
+        der_couple_dzc = np.zeros(
             (
                 batch_size,
                 num_classical_coords,
             ),
             dtype=complex,
         )
-        der_couple_z = np.zeros(
+        der_couple_dz = np.zeros(
             (
                 batch_size,
                 num_classical_coords,
@@ -616,7 +625,7 @@ def analytic_der_couple_phase(sim, dh_qc_dzc, eigvals, eigvecs):
             dtype=complex,
         )
         np.add.at(
-            der_couple_zc,
+            der_couple_dzc,
             (inds[0], inds[1]),
             np.conj(evec_i)[inds[0], inds[2]]
             * mels
@@ -624,73 +633,46 @@ def analytic_der_couple_phase(sim, dh_qc_dzc, eigvals, eigvecs):
             / ((eigval_diff + plus)[inds[0]]),
         )
         np.add.at(
-            der_couple_z,
+            der_couple_dz,
             (inds[0], inds[1]),
             np.conj(evec_i)[inds[0], inds[3]]
             * np.conj(mels)
             * evec_j[inds[0], inds[2]]
             / ((eigval_diff + plus)[inds[0]]),
         )
-        der_couple_q, der_couple_p = dzdzc_to_dqdp(
-            der_couple_z, der_couple_zc, m[np.newaxis, :], h[np.newaxis, :]
+        der_couple_dq, der_couple_dp = dzdzc_to_dqdp(
+            der_couple_dz, der_couple_dzc, m[np.newaxis, :], h[np.newaxis, :]
         )
-        der_couple_q_angle = np.angle(
-            der_couple_q[
-                np.arange(len(der_couple_q)),
-                np.argmax(np.abs(der_couple_q), axis=-1),
+        der_couple_dq_angle = np.angle(
+            der_couple_dq[
+                np.arange(len(der_couple_dq)),
+                np.argmax(np.abs(der_couple_dq), axis=-1),
             ]
         )
-        der_couple_p_angle = np.angle(
-            der_couple_p[
-                np.arange(len(der_couple_p)),
-                np.argmax(np.abs(der_couple_p), axis=-1),
+        der_couple_dp_angle = np.angle(
+            der_couple_dp[
+                np.arange(len(der_couple_dp)),
+                np.argmax(np.abs(der_couple_dp), axis=-1),
             ]
         )
-        der_couple_q_angle[
-            np.where(np.abs(der_couple_q_angle) < numerical_constants.SMALL)
+        der_couple_dq_angle[
+            np.where(np.abs(der_couple_dq_angle) < numerical_constants.SMALL)
         ] = 0
-        der_couple_p_angle[
-            np.where(np.abs(der_couple_p_angle) < numerical_constants.SMALL)
+        der_couple_dp_angle[
+            np.where(np.abs(der_couple_dp_angle) < numerical_constants.SMALL)
         ] = 0
-        der_couple_q_phase[..., i + 1 :] = (
-            np.exp(1j * der_couple_q_angle[..., np.newaxis])
-            * der_couple_q_phase[..., i + 1 :]
+        der_couple_dq_phase[..., i + 1 :] = (
+            np.exp(1j * der_couple_dq_angle[..., np.newaxis])
+            * der_couple_dq_phase[..., i + 1 :]
         )
-        der_couple_p_phase[..., i + 1 :] = (
-            np.exp(1j * der_couple_p_angle[..., np.newaxis])
-            * der_couple_p_phase[..., i + 1 :]
+        der_couple_dp_phase[..., i + 1 :] = (
+            np.exp(1j * der_couple_dp_angle[..., np.newaxis])
+            * der_couple_dp_phase[..., i + 1 :]
         )
-    return der_couple_q_phase, der_couple_p_phase
+    return der_couple_dq_phase, der_couple_dp_phase
 
 
-def wf_db_rk4(h_quantum, wf_db, dt_update):
-    """
-    Low-level function for quantum RK4 propagation.
-
-    .. rubric:: Args
-    h_quantum : ndarray
-        Quantum Hamiltonian.
-    wf_db : ndarray
-        Wavefunction.
-    dt_update : float
-        Time step for the update.
-
-    .. rubric:: Returns
-    wf_db : ndarray
-        Updated wavefunction.
-    """
-    k1 = -1j * multiply_matrix_vector(h_quantum, wf_db)
-    k2 = -1j * multiply_matrix_vector(h_quantum, (wf_db + 0.5 * dt_update * k1))
-    k3 = -1j * multiply_matrix_vector(h_quantum, (wf_db + 0.5 * dt_update * k2))
-    k4 = -1j * multiply_matrix_vector(h_quantum, (wf_db + dt_update * k3))
-    wf_db += dt_update * 0.16666666666666666 * k1
-    wf_db += dt_update * 0.3333333333333333 * k2
-    wf_db += dt_update * 0.3333333333333333 * k3
-    wf_db += dt_update * 0.16666666666666666 * k4
-    return wf_db
-
-
-def calc_delta_z_fssh(
+def calc_resc_dir_z_fssh(
     sim, eigval_diff, eigvec_init_state, eigvec_final_state, dh_qc_dzc_traj
 ):
     """
@@ -780,7 +762,7 @@ def numerical_fssh_hop(model, parameters, **kwargs):
     .. rubric:: Keyword Arguments
     z : ndarray
         Current complex coordinate.
-    delta_z : float
+    resc_dir_z : float
         Rescaling direction.
     eigval_diff : float
         Difference in eigenvalues between the initial and final states, ``e_final - e_initial``.
@@ -797,13 +779,13 @@ def numerical_fssh_hop(model, parameters, **kwargs):
         Energy threshold for convergence.
 
     .. rubric:: Returns
-    shift : ndarray
+    ndarray
         The shift to apply to the complex coordinate to conserve energy.
     hop_successful : bool
         Whether the hop was successful (i.e., energy conservation was achieved).
     """
     z = kwargs["z"]
-    delta_z = kwargs["delta_z"]
+    resc_dir_z = kwargs["resc_dir_z"]
     eigval_diff = kwargs["eigval_diff"]
     gamma_range = model.constants.get("numerical_fssh_hop_gamma_range", 5.0)
     max_iter = model.constants.get("numerical_fssh_hop_max_iter", 20)
@@ -826,7 +808,7 @@ def numerical_fssh_hop(model, parameters, **kwargs):
                     - h_c(
                         model,
                         parameters,
-                        z=np.array([z - 1j * gamma * delta_z]),
+                        z=np.array([z - 1j * gamma * resc_dir_z]),
                         batch_size=1,
                     )[0]
                     for gamma in gamma_list
@@ -839,4 +821,4 @@ def numerical_fssh_hop(model, parameters, **kwargs):
         num_iter += 1
     if min_energy > thresh:
         return np.zeros_like(z), False
-    return -1j * min_gamma * delta_z, True
+    return -1j * min_gamma * resc_dir_z, True

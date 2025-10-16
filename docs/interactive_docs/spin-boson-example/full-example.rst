@@ -66,7 +66,7 @@ This is what the final code looks like:
     # Initialize the diabatic wavevector. 
     # Here, the first vector element refers to the upper state and the second
     # element refers to the lower state.
-    sim.initial_state.wf_db = np.array([1, 0], dtype=complex)
+    sim.initial_state["wf_db"] = np.array([1, 0], dtype=complex)
 
     # Run the simulation.
     data = serial_driver(sim)

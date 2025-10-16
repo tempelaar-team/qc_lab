@@ -12,6 +12,7 @@ def test_save_load_h5py():
     from qclab.algorithms import MeanField
     from qclab.dynamics import serial_driver
     import os
+
     try:
         import h5py as _
     except ImportError:
@@ -50,6 +51,7 @@ def test_save_load_h5py():
     print("calculated and loaded results match!")
     os.remove("test_data.h5")
     return
+
 
 def test_save_load_no_h5py():
     import numpy as np
@@ -93,6 +95,7 @@ def test_save_load_no_h5py():
     os.remove("test_data.npz")
     return
 
+
 def test_load_sum():
     import numpy as np
     from qclab import Simulation, Data
@@ -100,6 +103,7 @@ def test_load_sum():
     from qclab.algorithms import MeanField
     from qclab.dynamics import serial_driver
     import os
+
     try:
         import h5py as _
     except ImportError:
@@ -132,7 +136,12 @@ def test_load_sum():
     data_serial.save("test_data.h5")
     new_data = Data().load("test_data.h5")
     new_data = new_data.load("test_data.h5")
-    assert np.all(new_data.data_dict["seed"] == np.concatenate((data_serial.data_dict["seed"], data_serial.data_dict["seed"])))
+    assert np.all(
+        new_data.data_dict["seed"]
+        == np.concatenate(
+            (data_serial.data_dict["seed"], data_serial.data_dict["seed"])
+        )
+    )
     print("Comparing results...")
     for key, val in data_serial.data_dict.items():
         if isinstance(val, np.ndarray):

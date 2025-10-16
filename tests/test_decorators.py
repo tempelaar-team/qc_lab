@@ -13,7 +13,8 @@ from qclab.algorithms import MeanField
 from qclab.functions import vectorize_ingredient, make_ingredient_sparse
 from qclab.dynamics import serial_driver
 from qclab.models import SpinBoson
-try: 
+
+try:
     from tests.reference_settings import model_sim_settings, model_settings
 except ImportError:
     from reference_settings import model_sim_settings, model_settings
@@ -27,7 +28,7 @@ def test_vectorize_decorator():
     where the quantum-classical and classical Hamiltonians are vectorized using
     the decorator. The results are compared against a reference calculation.
     """
-    print('Testing vectorization decorator')
+    print("Testing vectorization decorator")
     reference_folder = os.path.join(os.path.dirname(__file__), "reference/")
     sim = Simulation(model_sim_settings["SpinBoson"])
     sim.model = SpinBoson(model_settings["SpinBoson"])
@@ -61,9 +62,7 @@ def test_vectorize_decorator():
     data = serial_driver(sim)
     et = time.time()
     print(f"Finished in {et - st:.2f} seconds.")
-    data_correct = Data().load(
-        os.path.join(reference_folder, "SpinBoson_MeanField.h5")
-    )
+    data_correct = Data().load(os.path.join(reference_folder, "SpinBoson_MeanField.h5"))
     for key, val in data.data_dict.items():
         np.testing.assert_allclose(
             val, data_correct.data_dict[key], rtol=1e-5, atol=1e-8
@@ -78,7 +77,7 @@ def test_make_sparse_decorator():
     where the gradient of the quantum-classical Hamiltonian is made sparse using
     the decorator. The results are compared against a reference calculation.
     """
-    print('Testing sparsity decorator')
+    print("Testing sparsity decorator")
     reference_folder = os.path.join(os.path.dirname(__file__), "reference/")
     sim = Simulation(model_sim_settings["SpinBoson"])
     sim.model = SpinBoson(model_settings["SpinBoson"])
@@ -87,7 +86,9 @@ def test_make_sparse_decorator():
 
     @make_ingredient_sparse
     def dh_qc_dzc(model, parameters, **kwargs):
-        inds, mels, shape = ingredients.dh_qc_dzc_diagonal_linear(model, parameters, **kwargs)
+        inds, mels, shape = ingredients.dh_qc_dzc_diagonal_linear(
+            model, parameters, **kwargs
+        )
         out = np.zeros(shape, dtype=complex)
         np.add.at(out, inds, mels)
         return out
@@ -101,13 +102,12 @@ def test_make_sparse_decorator():
     data = serial_driver(sim)
     et = time.time()
     print(f"Finished in {et - st:.2f} seconds.")
-    data_correct = Data().load(
-        os.path.join(reference_folder, "SpinBoson_MeanField.h5")
-    )
+    data_correct = Data().load(os.path.join(reference_folder, "SpinBoson_MeanField.h5"))
     for key, val in data.data_dict.items():
         np.testing.assert_allclose(
             val, data_correct.data_dict[key], rtol=1e-5, atol=1e-8
         )
+
 
 def test_sparse_and_vectorize_decorators():
     """
@@ -118,7 +118,7 @@ def test_sparse_and_vectorize_decorators():
     the ``make_ingredient_sparse`` decorator and vectorized using the
     ``vectorize_ingredient`` decorator. The results are compared against a reference calculation.
     """
-    print('Testing sparsity and vectorization decorators')
+    print("Testing sparsity and vectorization decorators")
     reference_folder = os.path.join(os.path.dirname(__file__), "reference/")
     sim = Simulation(model_sim_settings["SpinBoson"])
     sim.model = SpinBoson(model_settings["SpinBoson"])
@@ -145,13 +145,11 @@ def test_sparse_and_vectorize_decorators():
     data = serial_driver(sim)
     et = time.time()
     print(f"Finished in {et - st:.2f} seconds.")
-    data_correct = Data().load(
-        os.path.join(reference_folder, "SpinBoson_MeanField.h5")
-    )
+    data_correct = Data().load(os.path.join(reference_folder, "SpinBoson_MeanField.h5"))
     for key, val in data.data_dict.items():
         np.testing.assert_allclose(
             val, data_correct.data_dict[key], rtol=1e-5, atol=1e-8
-        ) 
+        )
 
 
 if __name__ == "__main__":

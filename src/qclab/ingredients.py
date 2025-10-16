@@ -282,7 +282,7 @@ def hop_harmonic(model, parameters, **kwargs):
     .. rubric:: Keyword Args
     z : ndarray
         Current classical coordinate.
-    delta_z : ndarray
+    resc_dir_z : ndarray
         Rescaling direction of ``z``.
     eigval_diff : float
         Energy difference between final and initial states.
@@ -298,19 +298,22 @@ def hop_harmonic(model, parameters, **kwargs):
         Whether the hop has occurred.
     """
     z = kwargs["z"]
-    delta_z = kwargs["delta_z"]
+    resc_dir_z = kwargs["resc_dir_z"]
     eigval_diff = kwargs["eigval_diff"]
     w = model.constants.harmonic_frequency
     h = model.constants.classical_coordinate_weight
-    delta_zc = np.conj(delta_z)
+    resc_dir_zc = np.conj(resc_dir_z)
     a_const = 0.25 * (((w**2) / h) - h)
     b_const = 0.25 * (((w**2) / h) + h)
     # Here, akj_z, bkj_z, ckj_z are the coefficients of the quadratic equation
     # akj_z * gamma^2 - bkj_z * gamma + ckj_z = 0
     akj_z = np.sum(
-        2.0 * delta_zc * delta_z * b_const - a_const * (delta_z**2 + delta_zc**2)
+        2.0 * resc_dir_zc * resc_dir_z * b_const
+        - a_const * (resc_dir_z**2 + resc_dir_zc**2)
     )
-    bkj_z = 2.0 * np.sum(h * z.imag * delta_z.real - (w**2 / h) * z.real * delta_z.imag)
+    bkj_z = 2.0 * np.sum(
+        h * z.imag * resc_dir_z.real - (w**2 / h) * z.real * resc_dir_z.imag
+    )
     ckj_z = eigval_diff
     disc = bkj_z**2 - 4.0 * akj_z * ckj_z
     if disc >= 0:
@@ -322,7 +325,7 @@ def hop_harmonic(model, parameters, **kwargs):
             gamma = 0
         else:
             gamma = 0.5 * gamma / akj_z
-        shift = -1j * gamma * delta_z
+        shift = -1j * gamma * resc_dir_z
         return shift, True
     shift = np.zeros_like(z)
     return shift, False
@@ -350,7 +353,7 @@ def hop_free(model, parameters, **kwargs):
     .. rubric:: Keyword Args
     z : ndarray
         Current classical coordinate.
-    delta_z : ndarray
+    resc_dir_z : ndarray
         Rescaling direction.
     eigval_diff : float
         Energy difference between final and initial states.
@@ -365,12 +368,12 @@ def hop_free(model, parameters, **kwargs):
         Whether the hop has occurred.
     """
     z = kwargs["z"]
-    delta_z = kwargs["delta_z"]
+    resc_dir_z = kwargs["resc_dir_z"]
     eigval_diff = kwargs["eigval_diff"]
     h = model.constants.classical_coordinate_weight
     # Here, akj_z, bkj_z, ckj_z are the coefficients of the quadratic equation
     # akj_z * gamma^2 - bkj_z * gamma + ckj_z = 0
-    f = 1j * 2.0 * delta_z.real
+    f = 1j * 2.0 * resc_dir_z.real
     g = -2.0j * z.imag
     akj_z = np.sum(0.25 * h * f * f)
     bkj_z = -np.sum(0.5 * h * f * g)
@@ -385,7 +388,7 @@ def hop_free(model, parameters, **kwargs):
             gamma = 0
         else:
             gamma = 0.5 * gamma / akj_z
-        shift = -1j * gamma * delta_z
+        shift = -1j * gamma * resc_dir_z
         return shift, True
     shift = np.zeros_like(z)
     return shift, False
@@ -592,7 +595,7 @@ def rescaling_direction_random(model, parameters, **kwargs):
     None
 
     .. rubric:: Returns
-    delta_z : ndarray
+    resc_dir_z : ndarray
         Direction in which to rescale coordinates.
     """
     z_traj = kwargs["z_traj"]

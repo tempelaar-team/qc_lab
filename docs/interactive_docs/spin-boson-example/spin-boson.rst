@@ -6,6 +6,8 @@ Running a Spin-Boson Model
 
 Here's a simple example of how to run a spin-boson model with mean-field dynamics in QC Lab.
 
+A jupyter notebook version of this tutorial can be found `here <https://github.com/tempelaar-team/qclab/blob/main/examples/interactive_docs_example.ipynb>`_.
+
 
 First, we will need to import the necessary modules:
 
@@ -32,7 +34,7 @@ Next, we will set up the simulation object and equip it with the model and algor
     # Initialize the diabatic wavevector. 
     # Here, the first vector element refers to the upper state and the second
     # element refers to the lower state.
-    sim.initial_state.wf_db = np.array([1, 0], dtype=complex)
+    sim.initial_state["wf_db"] = np.array([1, 0], dtype=complex)
     
 
 This is bound to run the spin-boson model using default values for the model constants. 

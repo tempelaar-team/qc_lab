@@ -33,7 +33,7 @@ sim.model = SpinBoson()
 # instantiate an algorithm
 sim.algorithm = MeanField()
 # define an initial diabatic wavefunction
-sim.initial_state.wf_db = np.array([1, 0], dtype=complex)
+sim.initial_state["wf_db"] = np.array([1, 0], dtype=complex)
 
 data = parallel_driver_mpi(sim)
 
@@ -41,4 +41,4 @@ data = parallel_driver_mpi(sim)
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 if rank == 0:
-    print(data.data_dict["seed"])
+    print(data.log)

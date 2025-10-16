@@ -80,7 +80,7 @@ def parallel_driver_multiprocessing(sim, seeds=None, data=None, num_tasks=None):
     local_input_data = [
         (
             copy.deepcopy(sim),
-            {"seed": batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)}, 
+            {"seed": batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)},
             {},
             Data(batch_seeds_list[n][~np.isnan(batch_seeds_list[n])].astype(int)),
         )

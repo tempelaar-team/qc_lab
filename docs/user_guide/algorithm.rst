@@ -71,7 +71,7 @@ After instantiating an algorithm object, the user can populate its recipes by as
             tasks.initialize_variable_objects,
             tasks.initialize_norm_factor,
             tasks.initialize_z,
-            tasks.update_h_quantum,
+            tasks.update_h_q_tot,
     ]
     # Populate the update recipe.
     algorithm.update_recipe = [
@@ -118,7 +118,7 @@ By default, each variable object has an attribute ``output_dict`` which is an em
 
 .. code-block:: python
 
-    state.output_dict['dm_db'] = state.dm_db
+    state["output_dict"]['dm_db'] = state.dm_db
 
 then the output of the simulation will contain an entry with key ``'dm_db'`` and value equal to the contents of the attribute ``state.dm_db`` averaged over its batch dimension.
 
