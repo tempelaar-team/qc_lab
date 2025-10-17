@@ -1,4 +1,4 @@
-name: Install matrix (Windows/macOS/Linux)
+name: Install matrix (Windows/macOS/Linux) PyPI
 
 on:
   release:
