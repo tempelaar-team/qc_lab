@@ -34,7 +34,7 @@ Model Systems
 * Tully problems I, II, & III [8]
 
 
-Installing qclab
+Installing QC Lab
 -----------------
 
 QC Lab can be installed from the Python Package Index (PyPI) by executing::
