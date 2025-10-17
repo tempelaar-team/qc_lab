@@ -12,7 +12,7 @@ class SpinBoson(Model):
     Spin-Boson model class.
 
     Reference publication:
-    Tempelaar & Reichman. J. Chem. Phys. 148, 102309 (2018); https://doi.org/10.1063/1.5000843
+    Tempelaar & Reichman. J. Chem. Phys. 2018, 148 (10), 102309. https://doi.org/10.1063/1.5000843.
     """
 
     def __init__(self, constants=None):

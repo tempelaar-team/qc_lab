@@ -36,8 +36,8 @@ to install the remaining required dependencies manually.
 Installing from source
 ----------------------
 
-You can install QC Lab from source by downloading the repository and executing
-
+QC Lab can be installed from source by downloading the `latest release <https://github.com/tempelaar-team/qclab/releases>`_,
+unpacking it, and executing
 
 .. code-block:: bash
 

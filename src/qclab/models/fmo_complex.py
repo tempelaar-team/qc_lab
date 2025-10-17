@@ -20,7 +20,7 @@ class FMOComplex(Model):
     One unit of time is given by \\hbar/kBT = 25.4595 fs.
 
     Reference publication:
-    Mulvihill et al. J. Chem. Phys. 154, 204109 (2021); https://doi.org/10.1063/5.0051101
+    Mulvihill et al. J. Chem. Phys. 2021, 154 (20), 204109. https://doi.org/10.1063/5.0051101.
     """
 
     def __init__(self, constants=None):

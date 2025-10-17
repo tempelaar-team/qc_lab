@@ -13,7 +13,7 @@ class HolsteinLattice(Model):
     electron-phonon coupling with a single optical mode.
 
     Reference publication:
-    Krotz et al. J. Chem. Phys. 154, 224101 (2021); https://doi.org/10.1063/5.0053177
+    Krotz et al. J. Chem. Phys. 2021, 154 (22), 224101. https://doi.org/10.1063/5.0053177.
     """
 
     def __init__(self, constants=None):
