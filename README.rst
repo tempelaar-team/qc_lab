@@ -45,11 +45,15 @@ To install QC Lab without h5py or numba support, execute::
    pip install qclab --no-deps
    pip install numpy tqdm
 
+to install the remaining required dependencies manually.
+
 QC Lab can be installed from source by downloading the repository and executing::
 
    pip install ./
 
 from inside its topmost directory (where the `pyproject.toml` file is located).
+
+QC Lab doesn’t enforce third-party dependencies. If you hit resolver conflicts or install errors, the quickest fix is to install in a clean Python environment (via `venv` or `conda`). Alternatively, reconcile package versions in your existing environment until the requirements are satisfied.
 
 
 Bibliography

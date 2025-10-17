@@ -17,7 +17,7 @@ class FMOComplex(Model):
     At 300 K, kBT = 0.025852 eV = 208.521 cm^-1. Any quantity in wavenumbers
     is made unitless by dividing by kBT.
 
-    One unit of time is given by \hbar/kBT = 25.4595 fs.
+    One unit of time is given by \\hbar/kBT = 25.4595 fs.
 
     Reference publication:
     Mulvihill et al. J. Chem. Phys. 154, 204109 (2021); https://doi.org/10.1063/5.0051101

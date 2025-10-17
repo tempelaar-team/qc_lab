@@ -64,6 +64,8 @@ def test_drivers_spinboson_mpi():
     from qclab import Simulation  # import simulation class
     from qclab.models import SpinBoson  # import model class
     from qclab.algorithms import MeanField  # import algorithm class
+
+    pytest.importorskip("mpi4py")
     from mpi4py import MPI  # import MPI for parallel processing
     from qclab.dynamics import (
         serial_driver,
@@ -105,6 +107,11 @@ def test_drivers_spinboson_mpi():
         print("Comparing results...")
         for key, val in data_serial.data_dict.items():
             if isinstance(val, np.ndarray):
+                if key == "seed":
+                    # Need to sort seeds since batches are returned in different orders.
+                    data_parallel_mpi.data_dict[key] = np.sort(
+                        data_parallel_mpi.data_dict[key]
+                    )
                 assert np.allclose(val, data_parallel_mpi.data_dict[key])
         print("parallel and serial results match!")
     return

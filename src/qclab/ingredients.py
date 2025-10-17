@@ -10,7 +10,7 @@ def h_c_harmonic(model, parameters, **kwargs):
     """
     Harmonic oscillator classical Hamiltonian function.
 
-    :math:`H_{\mathrm{c}} = \\frac{1}{2}\\sum_{n} \\left( \\frac{p_n^2}{m_n} + m_n \\omega_n^2 q_n^2 \\right)`
+    :math:`H_{\\mathrm{c}} = \\frac{1}{2}\\sum_{n} \\left( \\frac{p_n^2}{m_n} + m_n \\omega_n^2 q_n^2 \\right)`
 
     .. rubric:: Keyword Args
     z : ndarray
@@ -39,7 +39,7 @@ def h_c_free(model, parameters, **kwargs):
     """
     Free particle classical Hamiltonian function.
 
-    :math:`H_{\mathrm{c}} = \\sum_{n} \\left( \\frac{p_n^2}{2m_n} \\right)`
+    :math:`H_{\\mathrm{c}} = \\sum_{n} \\left( \\frac{p_n^2}{2m_n} \\right)`
 
     .. rubric:: Keyword Args
     z : ndarray
@@ -276,8 +276,8 @@ def hop_harmonic(model, parameters, **kwargs):
 
     .. math::
 
-        H_{\mathrm{c}}(z) + \epsilon_{\mathrm{initial}} = H_{\mathrm{c}}(z + \mathrm{shift}) +
-        \epsilon_{\mathrm{final}}
+        H_{\\mathrm{c}}(z) + \epsilon_{\\mathrm{initial}} = H_{\\mathrm{c}}(z + \\mathrm{shift}) +
+        \epsilon_{\\mathrm{final}}
 
     .. rubric:: Keyword Args
     z : ndarray
@@ -347,8 +347,8 @@ def hop_free(model, parameters, **kwargs):
 
     .. math::
 
-        H_{\mathrm{c}}(z) + \epsilon_{\mathrm{initial}} = H_{\mathrm{c}}(z + \mathrm{shift}) +
-        \epsilon_{\mathrm{final}}
+        H_{\\mathrm{c}}(z) + \epsilon_{\\mathrm{initial}} = H_{\\mathrm{c}}(z + \\mathrm{shift}) +
+        \epsilon_{\\mathrm{final}}
 
     .. rubric:: Keyword Args
     z : ndarray
@@ -400,7 +400,7 @@ def init_classical_boltzmann_harmonic(model, parameters, **kwargs):
     classical coordinates to represent harmonic oscillators.
 
 
-    :math:`P(z) \\propto \\exp(-H_{\mathrm{c}}/k_{\mathrm{B}}T)`
+    :math:`P(z) \\propto \\exp(-H_{\\mathrm{c}}/k_{\\mathrm{B}}T)`
 
     .. rubric:: Keyword Args
     seed : ndarray, int
