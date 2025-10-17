@@ -206,9 +206,9 @@ def dqdp_to_dzc(dq, dp, m, h):
 @njit
 def dzdzc_to_dqdp(dz, dzc, m, h):
     """
-    Convert derivatives w.r.t. z and zc (``dz`` and ``dzc``) to derivatives w.r.t. q and p (``dq`` and ``dp``).
-    If only one of ``dz`` or ``dzc`` is provided, then ``dq`` and ``dp`` are calculated assuming that
-    :math:`dz = dzc^{*}`.
+    Convert derivatives w.r.t. z and zc (``dz`` and ``dzc``) to derivatives w.r.t.
+    q and p (``dq`` and ``dp``). If only one of ``dz`` or ``dzc`` is provided, then
+    ``dq`` and ``dp`` are calculated assuming that :math:`dz = dzc^{*}`.
 
     .. rubric:: Args
     dz : ndarray | None
@@ -343,7 +343,7 @@ def make_ingredient_sparse(ingredient):
 def vectorize_ingredient(ingredient):
     """
     Wrapper that vectorizes ingredient functions.
-    It assumes that any kwarg is an numpy.ndarray that is vectorized over its first
+    It assumes that any kwarg is an ndarray that is vectorized over its first
     index. Other kwargs are assumed to not be vectorized.
 
     .. rubric:: Args
@@ -384,7 +384,7 @@ def vectorize_ingredient(ingredient):
 def dh_c_dzc_harmonic_jit(z, h, w):
     """
     Derivative of the harmonic oscillator classical Hamiltonian function with respect to
-    the conjugate ``z`` coordinate.
+    the conjugate z coordinate.
 
     .. rubric:: Args
     z : ndarray
@@ -443,11 +443,12 @@ def h_qc_diagonal_linear_jit(z, gamma):
 
 def gen_sample_gaussian(constants, z_initial=None, seed=None, separable=True):
     """
-    Generate a complex number sampled from a Gaussian distribution.
+    Generates a complex number sampled from a Gaussian distribution.
 
-    If ``z0`` is provided, then a Gaussian distribution centered around ``z0`` is sampled.
-    If ``z0`` is not provided, then a Gaussian distribution centered around the
-    origin is sampled.
+    If ``z_initial`` is provided, then a Gaussian distribution centered around
+    ``z_initial`` is sampled.
+    If ``z_initial`` is not provided, then a Gaussian distribution centered around
+    the origin is sampled.
 
     If ``separable`` is ``True``, then a different random number is generated
     for each classical coordinate (i.e., each coordinate corresponds to
@@ -457,7 +458,7 @@ def gen_sample_gaussian(constants, z_initial=None, seed=None, separable=True):
     .. rubric:: Args
     constants : Constants
         Constants object.
-    z0 : ndarray | None, default: None
+    z_initial : ndarray | None, default: None
         Center of the Gaussian distribution. If ``None``, the distribution is
         centered around the origin.
     seed : int | None
@@ -681,7 +682,7 @@ def calc_resc_dir_z_fssh(
     This function is not vectorized over multiple trajectories and is intended to be
     only called when needed in that trajectory.
 
-    It calculates both the derivative coupling w.r.t. z and zc, and checks that they
+    It calculates both the derivative coupling w.r.t. z and z*, and checks that they
     are properly aligned to correspond with real-valued phase space derivative couplings.
     If they are not, an error is logged.
 
@@ -703,6 +704,7 @@ def calc_resc_dir_z_fssh(
     .. rubric:: Returns
     dkj_zc : ndarray
         Nonadiabatic coupling vector for rescaling the z coordinate.
+        Derivative is w.r.t. z*.
     """
     inds, mels, shape = dh_qc_dzc_traj
     num_classical_coordinates = shape[1]
@@ -725,16 +727,19 @@ def calc_resc_dir_z_fssh(
             * eigvec_final_state[inds[2]]
             / eigval_diff,
         )
-        re_part = dkj_zc + dkj_z
-        im_part = 1j * (dkj_zc - dkj_z)
-        if np.any(np.abs(re_part) > numerical_constants.SMALL) or np.any(
-            np.abs(im_part) > numerical_constants.SMALL
-        ):
+        # Determine the position of the maximum derivative coupling.
+        max_pos = np.argmax(np.abs(dkj_zc))
+        dkj_zc_max = dkj_zc[max_pos]
+        dkj_z_max = dkj_z[max_pos]
+        # Calculate the fraction of error in the real and imaginary parts.
+        # i.e. the deviation from dkj_zc = dkj_z*.
+        alignment_error = np.abs(dkj_zc_max - np.conj(dkj_z_max)) / np.abs(dkj_zc_max)
+        if alignment_error > numerical_constants.GAUGE_FIX_THRESHOLD:
             logger.warning(
-                "Derivative couplings are complex-valued. "
-                "Gauge fixing may be needed.\n %s\n %s",
-                re_part,
-                im_part,
+                "Derivative couplings are not properly aligned. "
+                "Gauge fixing may be needed.\n"
+                "Fraction of alignment error: %s",
+                alignment_error,
             )
 
     return dkj_zc
@@ -747,7 +752,8 @@ def numerical_fssh_hop(model, parameters, **kwargs):
 
     The algorithm is as follows:
     1. Calculate the initial energy using the Hamiltonian function at the current ``z``.
-    2. Define a grid from ``-gamma_range`` to ``+gamma_range`` with ``num_points`` points uniformly spaced.
+    2. Define a grid from ``-gamma_range`` to ``+gamma_range`` with ``num_points`` points
+       uniformly spaced.
     3. Calculate the energy at each point in the grid using the Hamiltonian function.
     4. Find the point in the grid that minimizes the difference between the energy
        difference and the calculated energy difference.

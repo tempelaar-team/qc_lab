@@ -276,8 +276,8 @@ def hop_harmonic(model, parameters, **kwargs):
 
     .. math::
 
-        H_{\\mathrm{c}}(z) + \epsilon_{\\mathrm{initial}} = H_{\\mathrm{c}}(z + \\mathrm{shift}) +
-        \epsilon_{\\mathrm{final}}
+        H_{\\mathrm{c}}(z) + \\epsilon_{\\mathrm{initial}} = H_{\\mathrm{c}}(z + \\mathrm{shift}) +
+        \\epsilon_{\\mathrm{final}}
 
     .. rubric:: Keyword Args
     z : ndarray
@@ -347,8 +347,8 @@ def hop_free(model, parameters, **kwargs):
 
     .. math::
 
-        H_{\\mathrm{c}}(z) + \epsilon_{\\mathrm{initial}} = H_{\\mathrm{c}}(z + \\mathrm{shift}) +
-        \epsilon_{\\mathrm{final}}
+        H_{\\mathrm{c}}(z) + \\epsilon_{\\mathrm{initial}} = H_{\\mathrm{c}}(z + \\mathrm{shift}) +
+        \\epsilon_{\\mathrm{final}}
 
     .. rubric:: Keyword Args
     z : ndarray

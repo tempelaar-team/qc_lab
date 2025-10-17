@@ -37,6 +37,22 @@ class Algorithm:
         """
         Carry out the given recipe for the simulation by running
         each task in the recipe.
+
+        .. rubric:: Args
+        sim: Simulation
+            The simulation object containing settings and parameters.
+        state: dict
+            The dictionary containing the current simulation state.
+        parameters: dict
+            The dictionary containing the current simulation parameters.
+        recipe: list
+            The list of functions to execute in order.
+
+        .. rubric:: Returns
+        state: dict
+            The updated simulation state after executing the recipe.
+        parameters: dict
+            The updated simulation parameters after executing the recipe.
         """
         for func in recipe:
             state, parameters = func(sim, state, parameters)
