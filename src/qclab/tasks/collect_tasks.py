@@ -18,7 +18,7 @@ def collect_t(sim, state, parameters, **kwargs):
     t_output_name : str, default : "t"
         Name of the time in the output dictionary.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state["output_dict"][t_output_name] : ndarray
         stores the current time in each trajectory.
     """
@@ -42,7 +42,7 @@ def collect_dm_db(sim, state, parameters, **kwargs):
     dm_db_output_name : str, default : "dm_db"
         Name of the diabatic density matrix in the output dictionary.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state["output_dict"][dm_db_output_name] : ndarray
         Stores the diabatic density matrix.
     """
@@ -66,7 +66,7 @@ def collect_classical_energy(sim, state, parameters, **kwargs):
     classical_energy_output_name : str, default : "classical_energy"
         Name of the classical energy in the output dictionary.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state["output_dict"][classical_energy_output_name] : ndarray
         stores the classical energy.
     """
@@ -92,7 +92,7 @@ def collect_quantum_energy(sim, state, parameters, **kwargs):
     quantum_energy_output_name : str, default : "quantum_energy"
         Name of the quantum energy in the output dictionary.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state["output_dict"][quantum_energy_output_name] : ndarray
         Stores the quantum energy.
     """

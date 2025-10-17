@@ -108,7 +108,7 @@ def update_classical_force(sim, state, parameters, **kwargs):
     classical_force_name : str, default: "classical_force"
         Name under which to store the classical force in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[classical_force_name] : ndarray
             Gradient of the classical Hamiltonian.
     """
@@ -142,7 +142,7 @@ def update_dh_qc_dzc_finite_differences(sim, state, parameters, **kwargs):
     dh_qc_dzc_name : str, default: "dh_qc_dzc"
         Name under which to store the gradient of the quantum-classical Hamiltonian in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[dh_qc_dzc_name] : tuple
         Gradient of the quantum-classical Hamiltonian.
     """
@@ -205,7 +205,7 @@ def update_dh_qc_dzc(sim, state, parameters, **kwargs):
     dh_qc_dzc_name : str, default: "dh_qc_dzc"
         Name under which to store the gradient of the quantum-classical Hamiltonian in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[dh_qc_dzc_name] : tuple
         Gradient of the quantum-classical Hamiltonian.
     """
@@ -254,7 +254,7 @@ def update_quantum_classical_force(sim, state, parameters, **kwargs):
     wf_changed : bool, default: True
         If ``True``, the wavefunction has changed since the last time the force were calculated.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[dh_qc_dzc_name] : tuple
         Gradient of the quantum-classical Hamiltonian.
     state[quantum_classical_force_name] : ndarray
@@ -314,7 +314,7 @@ def add_gauge_field_force(sim, state, parameters, **kwargs):
     quantum_classical_force_name : str, default: "quantum_classical_force"
         Name of the quantum-classical force in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[quantum_classical_force_name] : ndarray
         Quantum-classical force with gauge field force added.
     """
@@ -353,7 +353,7 @@ def diagonalize_matrix(sim, state, parameters, **kwargs):
     eigvecs_name : str
         Name of the eigenvectors in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[eigvals_name] : ndarray
         Eigenvalues of the matrix.
     state[eigvecs_name] : ndarray
@@ -405,7 +405,7 @@ def update_eigvecs_gauge(sim, state, parameters, **kwargs):
     dh_qc_dzc_name : str, default: "dh_qc_dzc"
         Name of the gradient of the quantum-classical Hamiltonian in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[output_eigvecs_name] : ndarray
         Gauge-fixed eigenvectors.
     """
@@ -497,7 +497,7 @@ def update_vector_basis(sim, state, parameters, **kwargs):
         If True, transforms from adiabatic to diabatic. If False, transforms from
         adiabatic to diabatic.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[output_vec_name] : ndarray
         Vector expressed in the new basis.
     """
@@ -525,7 +525,7 @@ def update_act_surf_wf(sim, state, parameters, **kwargs):
     eigvecs_name : str, default: "eigvecs"
         Name of the eigenvectors in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[act_surf_wf_name] : ndarray
         Wavefunction of the active surface.
     """
@@ -555,7 +555,7 @@ def update_wf_db_propagator(sim, state, parameters, **kwargs):
     eigvecs_name : str, default: "eigvecs"
         Name of the eigenvectors in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[wf_db_name] : ndarray
         Updated diabatic wavefunction.
     """
@@ -592,7 +592,7 @@ def update_wf_db_rk4(sim, state, parameters, **kwargs):
     h_q_tot_name : str, default: "h_q_tot"
         Name of the quantum Hamiltonian in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[wf_db_name] : ndarray
         Updated diabatic wavefunction.
     """
@@ -633,7 +633,7 @@ def update_hop_prob_fssh(sim, state, parameters, **kwargs):
     hop_prob_name : str, default: "hop_prob"
         Name under which to store the hopping probabilities in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[hop_prob_name] : ndarray
         Hopping probabilities between the active surface and all other surfaces.
     """
@@ -695,7 +695,7 @@ def update_hop_inds_fssh(sim, state, parameters, **kwargs):
     .. rubric:: Keyword Arguments
     None
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[hop_ind_name] : ndarray
         Indices of trajectories that hop.
     state[hop_dest_name] : ndarray
@@ -751,7 +751,7 @@ def update_z_shift_fssh(sim, state, parameters, **kwargs):
     z_shift_traj_name : str, default: "z_shift_traj"
         Name under which to store the shift in classical coordinates for this trajectory in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[hop_successful_traj_name] : bool
         Flag indicating if the hop was successful.
     state[z_shift_traj_name] : ndarray
@@ -835,7 +835,7 @@ def update_hop_vals_fssh(sim, state, parameters, **kwargs):
     z_shift_traj_name : str, default: "z_shift_traj"
         Name under which to store the shift in classical coordinates for the intermediate hopping trajectory in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[z_shift_name] : ndarray
         Shift in coordinates for each hopping trajectory.
     state[hop_successful_name] : ndarray
@@ -929,7 +929,7 @@ def update_z_hop(sim, state, parameters, **kwargs):
     z_name : str, default: "z"
         Name of classical coordinates in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[z_name] : ndarray
         Classical coordinates.
     """
@@ -964,7 +964,7 @@ def update_act_surf_hop(sim, state, parameters, **kwargs):
     act_surf_ind_name : str, default: "act_surf_ind"
         Name of the active surface index in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[act_surf_ind_name] : ndarray
         Active surface indices.
     state[act_surf_name] : ndarray
@@ -1011,7 +1011,7 @@ def update_h_q_tot(sim, state, parameters, **kwargs):
         Name of the total Hamiltonian of the quantum subsystem in the state object.
         (``h_q + h_qc``)
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[h_q_name] : ndarray
         Quantum Hamiltonian matrix.
     state[h_qc_name] : ndarray
@@ -1058,7 +1058,7 @@ def update_z_rk4_k123(sim, state, parameters, **kwargs):
         Factor to multiply the time step by. Typical values are 0.5 (for k1 and k2)
         and 1.0 (for k3).
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[z_k_name] : ndarray
         Output coordinates after half step.
     state[k_name] : ndarray
@@ -1111,7 +1111,7 @@ def update_z_rk4_k4(sim, state, parameters, **kwargs):
     quantum_classical_force_name : str, default: "quantum_classical_force"
         Name of the quantum-classical force in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[z_name] : ndarray
         Updated classical coordinates.
     """
@@ -1155,7 +1155,7 @@ def update_dm_db_wf(sim, state, parameters, **kwargs):
     dm_db_name : str, default: "dm_db"
         Name of the diabatic density matrix in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[dm_db_name] : ndarray
         Diabatic density matrix.
     """
@@ -1180,7 +1180,7 @@ def update_classical_energy(sim, state, parameters, **kwargs):
     classical_energy_name : str, default: "classical_energy"
         Name under which to store the classical energy in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[classical_energy_name] : ndarray
         Energy of the classical subsystem.
     """
@@ -1214,7 +1214,7 @@ def update_classical_energy_fssh(sim, state, parameters, **kwargs):
     branch_ind_name : str, default: "branch_ind"
         Name of the branch indices in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[classical_energy_name] : ndarray
         Energy of the classical subsystem.
     """
@@ -1272,7 +1272,7 @@ def update_quantum_energy_wf(sim, state, parameters, **kwargs):
     quantum_energy_name : str, default: "quantum_energy"
         Name under which to store the quantum energy in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[quantum_energy_name] : ndarray
         Quantum energy.
     """
@@ -1308,7 +1308,7 @@ def update_quantum_energy_act_surf(sim, state, parameters, **kwargs):
     dm_adb_0_name : str, default: "dm_adb_0"
         Name of the initial adiabatic density matrix in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[quantum_energy_name] : ndarray
         Quantum energy.
     """
@@ -1365,7 +1365,7 @@ def update_dm_db_fssh(sim, state, parameters, **kwargs):
     eigvecs_name : str, default: "eigvecs"
         Name of the eigenvectors in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[dm_db_name] : ndarray
         Diabatic density matrix.
     state[dm_adb_name] : ndarray

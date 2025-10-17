@@ -24,7 +24,7 @@ A generic ingredient has the form:
         # Return the computed ingredient.
         return ingredient
 
-where ``model`` is a Model object (see :ref:`Models <model>`) which contains all the constants of the model, ``parameters`` is a variable object (see :ref:`Variable Objects <variable_objects>`) containing time-dependent parameters of the simulation, and ``**kwargs`` are any additional keyword arguments that are specific to that ingredient type. 
+where ``model`` is a Model object (see :ref:`Models <model>`) which contains all the constants of the model, ``parameters`` is a dictionary containing time-dependent parameters of the simulation, and ``**kwargs`` are any additional keyword arguments that are specific to that ingredient type. 
 
 Ingredients in QC lab can come in different variations, for example the quantum Hamiltonian ingredient could describe a two-level system, a nearest-neighbor lattice, or a more complex Hamiltonian. The type and variety of an ingredient is specified in its name which follows the convention ``<ingredient_type>_<variety>``. For example, the quantum Hamiltonian ingredient for a two-level system is named ``h_q_two_level`` where ``h_q`` indicates that it is a quantum Hamiltonian ingredient and ``two_level`` indicates that it describes a two-level system. Likewise the classical Hamiltonian ingredient for a harmonic oscillator is named ``h_c_harmonic`` where ``h_c`` indicates that it is a classical Hamiltonian ingredient and ``harmonic`` indicates that it describes a harmonic oscillator.
 

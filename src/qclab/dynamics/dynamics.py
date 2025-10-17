@@ -13,10 +13,10 @@ def run_dynamics(sim, state, parameters, data):
     .. rubric:: Args
     sim: Simulation
         The simulation object containing the model, algorithm, and settings.
-    state: Variable
-        The state variable object containing the simulation seeds.
-    parameters: Variable
-        The parameters variable object containing any additional parameters.
+    state: dict
+        The state object containing the simulation seeds.
+    parameters: dict
+        The parameters object containing any additional parameters.
     data: Data
         The data object for collecting output data.
 

@@ -28,7 +28,7 @@ def initialize_variable_objects(sim, state, parameters, **kwargs):
     .. rubric:: Keyword Arguments
     None
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[name] : ndarray
         Initialized state variable with shape (batch_size, *original_shape).
         ``name`` is the name of the variable in ``sim.initial_state``.
@@ -69,7 +69,7 @@ def initialize_norm_factor(sim, state, parameters, **kwargs):
     norm_factor_name : str, default: "norm_factor"
         Name of the normalization factor in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[norm_factor_name] : int
         Normalization factor for trajectory averages.
     """
@@ -101,7 +101,7 @@ def initialize_branch_seeds(sim, state, parameters, **kwargs):
     branch_ind_name : str, default: "branch_ind"
         Name of the branch index array in ``state``.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[branch_ind_name] : ndarray
         Branch index for each trajectory.
     state[seed_name] : ndarray
@@ -170,7 +170,7 @@ def initialize_z_mcmc(sim, state, parameters, **kwargs):
     z_name : str
         Name of destination attribute in the ``state`` object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[z_name] : ndarray
         Initialized classical coordinates.
     """
@@ -305,7 +305,7 @@ def initialize_z(sim, state, parameters, **kwargs):
     z_name : str
         Name of classical coordinates in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[z_name] : ndarray
         initialized classical coordinates.
     """
@@ -335,7 +335,7 @@ def copy_in_state(sim, state, parameters, **kwargs):
     orig_name : str
         Name of the source in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[copy_name] : type of state[orig_name]
         Copy of ``state[orig_name]``.
     """
@@ -371,7 +371,7 @@ def initialize_active_surface(sim, state, parameters, **kwargs):
     wf_adb_name : str, default: "wf_adb"
         Name of the adiabatic wavefunction in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[act_surf_ind_0_name] : ndarray
         Initial active surface index.
     state[act_surf_ind_name] : ndarray
@@ -431,7 +431,7 @@ def initialize_random_values_fssh(sim, state, parameters, **kwargs):
     seed_name : str, default: "seed"
         Name of the seeds array in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[hop_prob_rand_vals_name] : ndarray
         Random numbers for hop decisions.
     state[init_act_surf_rand_vals_name] : ndarray
@@ -474,7 +474,7 @@ def initialize_dm_adb_0_fssh(sim, state, parameters, **kwargs):
     wf_adb_name : str, default: "wf_adb"
         Name of the adiabatic wavefunction in the state object.
 
-    .. rubric:: Variable Modifications
+    .. rubric:: Modifications
     state[dm_adb_0_name] : ndarray
         Initial adiabatic density matrix.
     """

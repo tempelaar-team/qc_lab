@@ -5,7 +5,7 @@ Tasks
 ==========================
 
 Tasks are functions that carry out the elementary operations of an algorithm by modifying a
-``state`` object and optionally a ``parameters`` object, which are instances of the ``qclab.Variable`` class (see :ref:`Variable Objects <variable_objects>`).
+``state`` object and optionally a ``parameters`` object, which are both dictionaries.
 Built-in tasks can be found in the ``qclab.tasks`` module and are documented on this page.
 
 A generic tasks has the form:
