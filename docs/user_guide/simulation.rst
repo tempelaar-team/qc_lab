@@ -27,8 +27,8 @@ A simulation object containing a default mean-field simulation of the spin-boson
     sim = Simulation()
     sim.model = SpinBoson()
     sim.algorithm = MeanField()
-    sim.initial_state = np.zeros((sim.model.constants.num_quantum_states,), dtype=complex)
-    sim.initial_state[0] = 1.0 + 0.0j 
+    sim.initial_state["wf_db"] = np.zeros((sim.model.constants.num_quantum_states,), dtype=complex)
+    sim.initial_state["wf_db"][0] = 1.0 + 0.0j
 
 where ``input_settings`` is a dictionary of settings that overwrite the default settings of the simulation described below.
 
