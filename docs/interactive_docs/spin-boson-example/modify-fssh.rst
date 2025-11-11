@@ -17,12 +17,11 @@ To this end, we write the following function:
         """
         # Get the indices of trajectories that were frustrated
         # (i.e., did not successfully hop but were eligible to hop).
-        frustrated_indices = state.hop_ind[~state.hop_successful]
-        # Reverse the velocities for these indices, in the complex classical coordinate 
+        frustrated_indices = state["hop_ind"][~state["hop_successful"]]
+        # Reverse the velocities for these indices, in the complex classical coordinate
         # formalism, this means conjugating the z coordinate.
-        state.z[frustrated_indices] = state.z[frustrated_indices].conj()
+        state["z"][frustrated_indices] = state["z"][frustrated_indices].conj()
         return state, parameters
-
 
 Now we can insert this function as a task into an instance of the FSSH algorithm object. To know where we should insert it, we can look 
 at the ``update_recipe`` of the FSSH algorithm object (see :ref:`fssh_source`).
