@@ -51,19 +51,19 @@ Examples of these tasks are:
 .. code-block:: python
 
     def my_initialization_task(sim, state, parameters, **kwargs):
-        # Create an attribute in the state object.
+        # Create an attribute in the state object with name "new_attribute_name".
         shape = (sim.settings.num_trajs, sim.model.constants.num_quantum_states)
-        state.new_attribute = np.zeros(shape, dtype=complex)
+        state["new_attribute_name"] = np.zeros(shape, dtype=complex)
         return state, parameters
 
     def my_update_task(sim, state, parameters, **kwargs):
         # Update an attribute in the state object.
-        state.new_attribute += 1j
+        state["new_attribute_name"] += 1j
         return state, parameters
 
     def my_collect_task(sim, state, parameters, **kwargs):
         # Collect results into the output dictionary.
-        state["output_dict"]['new_attribute'] = state.new_attribute
+        state["output_dict"]['new_attribute_name'] = state["new_attribute_name"]
         return state, parameters
 
 These tasks can then be included in the appropriate recipe of an algorithm object (see :ref:`Algorithms <algorithm>`). Notice that none of these tasks have keyword arguments and so can be included directly in recipes without using ``partial``.
