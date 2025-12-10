@@ -24,25 +24,23 @@ C_M_PER_S = 299792458
 # Planck constant [J*s].
 H_J_S = 6.62607015e-34
 
+# Conversion from Joules to inverse centimeters.
+# J_TO_INVCM = 1 / (100[cm/m] * c[m/s] * h[J*s])
+# A[J] * J_TO_INVCM = A[INVCM]
+J_TO_INVCM = 1 / (100 * C_M_PER_S * H_J_S)
+
 # Boltzmann constant [J/K].
-K_B_J_PER_K = 1.380649e-23
+KB_J_PER_K = 1.380649e-23
+
+# Boltzmann constant [invcm/K]
+KB_INVCM_PER_K = KB_J_PER_K * J_TO_INVCM
 
 # Reduced Planck constant [J*s].
 HBAR_J_S = H_J_S / (2 * np.pi)
 
-# Reference temperature [K].
-T_REF_K = 300
-
-# Thermal energy at the reference temperature [J].
-KBT_REF_J = K_B_J_PER_K * T_REF_K
-
-# h * c [J*m].
-HC_J_M = H_J_S * C_M_PER_S
+# Thermal energy [invcm] at a reference temperature of 300 [K].
+KBT_300K_INVCM = KB_INVCM_PER_K * 300
 
 # Conversion between inverse centimeters to reference energy.
-# kBT / invcm = (100 [cm/m]) * hc [J*m] / kBT [J]
-# A [INVCM] * INVCM_TO_KBT_REF = A [KBT_REF]
-INVCM_TO_KBT_REF = 100 * HC_J_M / KBT_REF_J
-
-# Alias to old name for backwards-compatibility.
-INVCM_TO_300K = INVCM_TO_KBT_REF
+# A [INVCM] * INVCM_TO_300K = A [300K]
+INVCM_TO_300K = 1 / KBT_300K_INVCM
