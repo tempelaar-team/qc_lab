@@ -677,9 +677,7 @@ def update_hop_prob_fssh(sim, state, parameters, **kwargs):
     # Check for singular values.
     if sim.settings.debug:
         if np.any(np.isnan(hop_prob)):
-            logger.warning(
-                "Singluar value encountered in hopping probabilities."
-            )
+            logger.warning("Singluar value encountered in hopping probabilities.")
     state[hop_prob_name] = hop_prob
     return state, parameters
 
