@@ -20,12 +20,14 @@ FINITE_DIFFERENCE_DELTA = 1e-6
 
 # Speed of light [m/s].
 C_M_PER_S = 299792458
-# Planck constant [J * s].
+
+# Planck constant [J*s].
 H_J_S = 6.62607015e-34
+
 # Boltzmann constant [J/K].
 K_B_J_PER_K = 1.380649e-23
 
-# Reduced Planck constant [J·s].
+# Reduced Planck constant [J*s].
 HBAR_J_S = H_J_S / (2 * np.pi)
 
 # Reference temperature [K].
@@ -38,8 +40,8 @@ KBT_REF_J = K_B_J_PER_K * T_REF_K
 HC_J_M = H_J_S * C_M_PER_S
 
 # Conversion between inverse centimeters to reference energy.
-# kBT / invcm = (100 [cm / m]) * hc[J*m] / kBT [J]
-# A[INVCM] * INVCM_TO_KBT_REF = A[KBT_REF]
+# kBT / invcm = (100 [cm/m]) * hc [J*m] / kBT [J]
+# A [INVCM] * INVCM_TO_KBT_REF = A [KBT_REF]
 INVCM_TO_KBT_REF = 100 * HC_J_M / KBT_REF_J
 
 # Alias to old name for backwards-compatibility.
