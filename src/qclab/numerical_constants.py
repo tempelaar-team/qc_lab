@@ -24,15 +24,15 @@ C_M_PER_S = 299792458
 # Planck constant [J*s].
 H_J_S = 6.62607015e-34
 
+# Boltzmann constant [J/K].
+KB_J_PER_K = 1.380649e-23
+
 # Conversion from Joules to inverse centimeters.
 # J_TO_INVCM = 1 / (100[cm/m] * c[m/s] * h[J*s])
 # A[J] * J_TO_INVCM = A[INVCM]
 J_TO_INVCM = 1 / (100 * C_M_PER_S * H_J_S)
 
-# Boltzmann constant [J/K].
-KB_J_PER_K = 1.380649e-23
-
-# Boltzmann constant [invcm/K]
+# Boltzmann constant [invcm/K].
 KB_INVCM_PER_K = KB_J_PER_K * J_TO_INVCM
 
 # Reduced Planck constant [J*s].
